@@ -1,0 +1,8 @@
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: oj-passport
+          uri: lb://oj-passport
+          predicates:
+            - Path=/api/passport/**

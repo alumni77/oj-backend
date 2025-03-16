@@ -1,0 +1,20 @@
+spring:
+  profiles:
+    include:
+  application:
+    name: oj-gateway
+  cloud:
+    nacos:
+      server-addr: 127.0.0.1:8848
+
+  # 数据库配置
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/hoj?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai
+    username: root
+    password: 123456
+
+
+# localhost/api/order
+server:
+  port: 7999
