@@ -6,3 +6,6 @@ spring:
           uri: lb://oj-passport
           predicates:
             - Path=/api/passport/**
+      discovery:
+        locator:
+          enabled: true

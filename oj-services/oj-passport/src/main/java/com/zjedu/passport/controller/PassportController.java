@@ -1,7 +1,9 @@
 package com.zjedu.passport.controller;
 
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import com.zjedu.annotation.AnonApi;
+import com.zjedu.common.result.CommonResult;
+import org.apache.poi.ss.formula.functions.T;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * @Author Zhong
@@ -10,9 +12,14 @@ import org.springframework.web.bind.annotation.RestController;
  */
 
 @RestController
-@RequestMapping("/api/passport")
 public class PassportController
 {
 
+    @GetMapping("/login")
+    @AnonApi
+    public CommonResult<T> login()
+    {
+        return CommonResult.successResponse("登录成功");
+    }
 
 }

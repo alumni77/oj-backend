@@ -44,10 +44,11 @@ server:
   address: 0.0.0.0
   port: 8000
   servlet:
+    context-path: /api/passport
     session:
       cookie:
         max-age: 2592000
-        path: /api
+        path: /api/passport
 
 # MybatisPlus 配置
 mybatis-plus:
@@ -57,3 +58,23 @@ mybatis-plus:
     cache-enabled: true
   global-config:
     banner: false
+
+# Swagger 配置
+# springdoc-openapi项目配置
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    tags-sorter: alpha
+    operations-sorter: alpha
+  api-docs:
+    path: /v3/api-docs
+  group-configs:
+    - group: 'default'
+      paths-to-match: '/**'
+      packages-to-scan: com.zjedu.passport.controller
+# knife4j的增强配置，不需要增强可以不配
+knife4j:
+  enable: true
+  setting:
+    language: zh_cn
+  production: false

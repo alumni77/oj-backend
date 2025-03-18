@@ -1,20 +1,28 @@
+server:
+  port: 7999
+
 spring:
   profiles:
-    include:
+    include: route
   application:
     name: oj-gateway
   cloud:
     nacos:
       server-addr: 127.0.0.1:8848
 
-  # 数据库配置
-  datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/hoj?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai
-    username: root
-    password: 123456
 
+springdoc:
+  default-flat-param-object: true
+# knife4j 网关聚合
+knife4j:
+  gateway:
+    enabled: true
+    # 指定服务发现的模式聚合微服务文档，并且是默认 default 分组
+    strategy: discover
+    discover:
+      enabled: true
+      # OpenAPI 3.0 规范
+      version: openapi3
+      excluded-services:
+        - oj-gateway
 
-# localhost/api/order
-server:
-  port: 7999
