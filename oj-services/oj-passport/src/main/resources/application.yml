@@ -53,11 +53,13 @@ server:
 # MybatisPlus 配置
 mybatis-plus:
   configuration:
-    map-underscore-to-camel-case: false
+    map-underscore-to-camel-case: true
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
     cache-enabled: true
   global-config:
     banner: false
+  mapper-locations: classpath*:com/zjedu/passport/mapper/xml/*.xml
+  type-aliases-package: com.zjedu.pojo
 
 # Swagger 配置
 # springdoc-openapi项目配置
@@ -78,3 +80,10 @@ knife4j:
   setting:
     language: zh_cn
   production: false
+
+oj:
+  jwt:
+    secret: SmMUX4cbYjmr5sMkTS7DaQ7NYhEBerWJtNPehhJ/1PxzEJOBEV6IbUYwV/PKb+uiooDtdgIBLxjzpV6Oq0OIyQ==
+    expire: 86500
+    check-refresh-expire: 43200
+    header: Authorization
