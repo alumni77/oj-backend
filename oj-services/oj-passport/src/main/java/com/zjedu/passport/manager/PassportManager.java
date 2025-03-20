@@ -1,6 +1,7 @@
 package com.zjedu.passport.manager;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.crypto.SecureUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -9,10 +10,14 @@ import com.zjedu.common.exception.StatusFailException;
 import com.zjedu.config.NacosSwitchConfig;
 import com.zjedu.config.WebConfig;
 import com.zjedu.passport.dao.user.UserInfoEntityService;
+import com.zjedu.passport.dao.user.UserRecordEntityService;
 import com.zjedu.passport.dao.user.UserRoleEntityService;
 import com.zjedu.pojo.dto.LoginDTO;
+import com.zjedu.pojo.dto.RegisterDTO;
 import com.zjedu.pojo.entity.user.Role;
 import com.zjedu.pojo.entity.user.UserInfo;
+import com.zjedu.pojo.entity.user.UserRecord;
+import com.zjedu.pojo.entity.user.UserRole;
 import com.zjedu.pojo.vo.RegisterCodeVO;
 import com.zjedu.pojo.vo.UserInfoVO;
 import com.zjedu.pojo.vo.UserRolesVO;
@@ -24,6 +29,7 @@ import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.util.stream.Collectors;
@@ -50,6 +56,9 @@ public class PassportManager
 
     @Resource
     private UserInfoEntityService userInfoEntityService;
+
+    @Resource
+    private UserRecordEntityService userRecordEntityService;
 
     @Resource
     private NacosSwitchConfig nacosSwitchConfig;
@@ -145,15 +154,16 @@ public class PassportManager
         username = username.trim();
 
         String lockKey = Constants.Email.REGISTER_EMAIL_LOCK.getValue() + username;
-        if(redisUtils.hasKey(lockKey))
+        if (redisUtils.hasKey(lockKey))
         {
-            throw new StatusFailException("对不起,您的操作频率过快,请在"+redisUtils.getExpire(lockKey)+"秒后再次获取验证码");
+            throw new StatusFailException("对不起,您的操作频率过快,请在" + redisUtils.getExpire(lockKey) + "秒后再次获取验证码");
         }
 
         QueryWrapper<UserInfo> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("username", username);
         UserInfo userInfo = userInfoEntityService.getOne(queryWrapper, false);
-        if (userInfo != null) {
+        if (userInfo != null)
+        {
             throw new StatusFailException("对不起！该用户名已被注册，请更换用户名！");
         }
 
@@ -170,5 +180,64 @@ public class PassportManager
         registerCodeVo.setExpire(10 * 60);
 
         return registerCodeVo;
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public void register(RegisterDTO registerDto) throws StatusAccessDeniedException, StatusFailException
+    {
+        WebConfig webConfig = nacosSwitchConfig.getWebConfig();
+        if (!webConfig.getRegister())
+        {
+            // 需要判断一下网站是否开启注册
+            throw new StatusAccessDeniedException("对不起！本站暂未开启注册功能！");
+        }
+        String codeKey = Constants.Email.REGISTER_KEY_PREFIX.getValue() + registerDto.getUsername();
+        if (!redisUtils.hasKey(codeKey))
+        {
+            throw new StatusFailException("验证码不存在或已过期");
+        }
+        if (!redisUtils.get(codeKey).equals(registerDto.getCode()))
+        {
+            //验证码判断
+            throw new StatusFailException("验证码不正确");
+        }
+        if (!StringUtils.hasText(registerDto.getPassword()))
+        {
+            throw new StatusFailException("密码不能为空");
+        }
+        if (registerDto.getPassword().length() < 6 || registerDto.getPassword().length() > 20)
+        {
+            throw new StatusFailException("密码长度应该为6~20位！");
+        }
+        if (!StringUtils.hasText(registerDto.getUsername()))
+        {
+            throw new StatusFailException("用户名不能为空");
+        }
+        if (registerDto.getUsername().length() > 20)
+        {
+            throw new StatusFailException("用户名长度不能超过20位!");
+        }
+
+        String uuid = IdUtil.simpleUUID();
+        //为新用户设置uuid
+        registerDto.setUuid(uuid);
+        // 将密码MD5加密写入数据库
+        registerDto.setPassword(SecureUtil.md5(registerDto.getPassword().trim()));
+        registerDto.setUsername(registerDto.getUsername().trim());
+
+        //往user_info表插入数据
+        boolean addUser = userInfoEntityService.addUser(registerDto);
+        //往user_role表插入数据
+        boolean addUserRole = userRoleEntityService.save(new UserRole().setRoleId(1002L).setUid(uuid));
+        //往user_record表插入数据
+        boolean addUserRecord = userRecordEntityService.save(new UserRecord().setUid(uuid));
+
+        if (addUser && addUserRole && addUserRecord)
+        {
+            redisUtils.del(registerDto.getUsername());
+        } else
+        {
+            throw new StatusFailException("注册失败，请稍后重新尝试！");
+        }
     }
 }

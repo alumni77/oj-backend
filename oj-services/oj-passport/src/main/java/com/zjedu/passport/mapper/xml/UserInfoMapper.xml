@@ -3,8 +3,8 @@
 <mapper namespace="com.zjedu.passport.mapper.UserInfoMapper">
 
     <insert id="addUser" parameterType="com.zjedu.pojo.dto.RegisterDTO">
-        insert into user_info(uuid, username, password, email)
-        values (#{uuid}, #{username}, #{password}, #{email})
+        insert into user_info(uuid, username, password)
+        values (#{uuid}, #{username}, #{password})
     </insert>
 
 </mapper>

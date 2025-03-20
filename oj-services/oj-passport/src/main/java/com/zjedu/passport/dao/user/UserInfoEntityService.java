@@ -13,5 +13,5 @@ import com.zjedu.pojo.entity.user.UserInfo;
 
 public interface UserInfoEntityService extends IService<UserInfo>
 {
-    public Boolean addUser(RegisterDTO registerDto);
+    Boolean addUser(RegisterDTO registerDto);
 }

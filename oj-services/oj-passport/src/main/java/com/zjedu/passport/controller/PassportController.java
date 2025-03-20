@@ -4,6 +4,7 @@ import com.zjedu.annotation.AnonApi;
 import com.zjedu.common.result.CommonResult;
 import com.zjedu.passport.service.PassportService;
 import com.zjedu.pojo.dto.LoginDTO;
+import com.zjedu.pojo.dto.RegisterDTO;
 import com.zjedu.pojo.vo.RegisterCodeVO;
 import com.zjedu.pojo.vo.UserInfoVO;
 import jakarta.annotation.Resource;
@@ -25,6 +26,11 @@ public class PassportController
     @Resource
     private PassportService passportService;
 
+    /**
+     * 处理登录逻辑
+     * @param loginDto
+     * @return CommonResult
+     */
     @PostMapping("/login")
     @AnonApi
     public CommonResult<UserInfoVO> login(@Validated @RequestBody LoginDTO loginDto, HttpServletResponse response, HttpServletRequest request)
@@ -32,11 +38,23 @@ public class PassportController
         return passportService.login(loginDto, response, request);
     }
 
+    /**
+     * 发送注册流程的6位随机验证码
+     * @param username
+     * @return
+     */
     @GetMapping(value = "/get-register-code")
     @AnonApi
     public CommonResult<RegisterCodeVO> getRegisterCode(@RequestParam(value = "username", required = true) String username)
     {
         return passportService.getRegisterCode(username);
+    }
+
+    @PostMapping("/register")
+    @AnonApi
+    public CommonResult<Void> register(@Validated @RequestBody RegisterDTO registerDTO)
+    {
+        return passportService.register(registerDTO);
     }
 
 }

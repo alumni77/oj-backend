@@ -2,6 +2,7 @@ package com.zjedu.passport.service;
 
 import com.zjedu.common.result.CommonResult;
 import com.zjedu.pojo.dto.LoginDTO;
+import com.zjedu.pojo.dto.RegisterDTO;
 import com.zjedu.pojo.vo.RegisterCodeVO;
 import com.zjedu.pojo.vo.UserInfoVO;
 import jakarta.servlet.http.HttpServletRequest;
@@ -16,7 +17,9 @@ import jakarta.servlet.http.HttpServletResponse;
 
 public interface PassportService
 {
-    CommonResult<UserInfoVO> login(LoginDTO loginDto, HttpServletResponse response, HttpServletRequest request);
+    public CommonResult<UserInfoVO> login(LoginDTO loginDto, HttpServletResponse response, HttpServletRequest request);
 
-    CommonResult<RegisterCodeVO> getRegisterCode(String username);
+    public CommonResult<RegisterCodeVO> getRegisterCode(String username);
+
+    public CommonResult<Void> register(RegisterDTO registerDto);
 }
