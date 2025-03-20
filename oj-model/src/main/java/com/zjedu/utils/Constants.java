@@ -7,13 +7,15 @@ package com.zjedu.utils;
  * @Description
  */
 
-public class Constants {
+public class Constants
+{
 
     /**
      * @Description 提交评测结果的状态码
      * @Since 2021/1/1
      */
-    public enum Judge {
+    public enum Judge
+    {
         STATUS_NOT_SUBMITTED(-10, "Not Submitted", null),
         STATUS_SUBMITTED_UNKNOWN_RESULT(-5, "Submitted Unknown Result", null),
         STATUS_CANCELLED(-4, "Cancelled", "ca"),
@@ -34,7 +36,8 @@ public class Constants {
         STATUS_NULL(15, "No Status", null),
         JUDGE_SERVER_SUBMIT_PREFIX(-1002, "Judge SubmitId-ServerId:", null);
 
-        private Judge(Integer status, String name, String columnName) {
+        private Judge(Integer status, String name, String columnName)
+        {
             this.status = status;
             this.name = name;
             this.columnName = columnName;
@@ -44,15 +47,18 @@ public class Constants {
         private final String name;
         private final String columnName;
 
-        public Integer getStatus() {
+        public Integer getStatus()
+        {
             return status;
         }
 
-        public String getName() {
+        public String getName()
+        {
             return name;
         }
 
-        public String getColumnName() {
+        public String getColumnName()
+        {
             return columnName;
         }
     }
@@ -63,25 +69,29 @@ public class Constants {
      * @Since 2021/12/22
      */
 
-    public enum Queue {
+    public enum Queue
+    {
         CONTEST_JUDGE_WAITING("Contest_Waiting_Handle_Queue"),
         GENERAL_JUDGE_WAITING("General_Waiting_Handle_Queue"),
         TEST_JUDGE_WAITING("Test_Judge_Waiting_Handle_Queue"),
         CONTEST_REMOTE_JUDGE_WAITING_HANDLE("Contest_Remote_Waiting_Handle_Queue"),
         GENERAL_REMOTE_JUDGE_WAITING_HANDLE("General_Remote_Waiting_Handle_Queue");
 
-        private Queue(String name) {
+        private Queue(String name)
+        {
             this.name = name;
         }
 
         private final String name;
 
-        public String getName() {
+        public String getName()
+        {
             return name;
         }
     }
 
-    public enum RemoteOJ {
+    public enum RemoteOJ
+    {
         HDU("HDU"),
         CODEFORCES("CF"),
         GYM("GYM"),
@@ -92,17 +102,22 @@ public class Constants {
 
         private final String name;
 
-        private RemoteOJ(String name) {
+        private RemoteOJ(String name)
+        {
             this.name = name;
         }
 
-        public String getName() {
+        public String getName()
+        {
             return name;
         }
 
-        public static Boolean isRemoteOJ(String name) {
-            for (RemoteOJ remoteOJ : RemoteOJ.values()) {
-                if (remoteOJ.getName().equals(name)) {
+        public static Boolean isRemoteOJ(String name)
+        {
+            for (RemoteOJ remoteOJ : RemoteOJ.values())
+            {
+                if (remoteOJ.getName().equals(name))
+                {
                     return true;
                 }
             }
@@ -110,9 +125,12 @@ public class Constants {
 
         }
 
-        public static RemoteOJ getRemoteOJ(String name) {
-            for (RemoteOJ remoteOJ : RemoteOJ.values()) {
-                if (remoteOJ.getName().equals(name)) {
+        public static RemoteOJ getRemoteOJ(String name)
+        {
+            for (RemoteOJ remoteOJ : RemoteOJ.values())
+            {
+                if (remoteOJ.getName().equals(name))
+                {
                     return remoteOJ;
                 }
             }
@@ -125,7 +143,8 @@ public class Constants {
      * @Description 比赛相关的常量
      * @Since 2021/1/7
      */
-    public enum Contest {
+    public enum Contest
+    {
         TYPE_ACM(0, "ACM"),
         TYPE_OI(1, "OI"),
 
@@ -151,16 +170,19 @@ public class Constants {
         private final Integer code;
         private final String name;
 
-        Contest(Integer code, String name) {
+        Contest(Integer code, String name)
+        {
             this.code = code;
             this.name = name;
         }
 
-        public Integer getCode() {
+        public Integer getCode()
+        {
             return code;
         }
 
-        public String getName() {
+        public String getName()
+        {
             return name;
         }
     }
@@ -169,8 +191,8 @@ public class Constants {
      * @Description 账户相关常量
      * @Since 2021/1/8
      */
-
-    public enum Account {
+    public enum Account
+    {
         CODE_CHANGE_PASSWORD_FAIL("change-password-fail:"),
         CODE_CHANGE_PASSWORD_LOCK("change-password-lock:"),
         CODE_ACCOUNT_LOCK("account-lock:"),
@@ -197,11 +219,13 @@ public class Constants {
 
         private final String code;
 
-        Account(String code) {
+        Account(String code)
+        {
             this.code = code;
         }
 
-        public String getCode() {
+        public String getCode()
+        {
             return code;
         }
     }
@@ -211,7 +235,8 @@ public class Constants {
      * @Description 文件操作的一些常量
      * @Since 2021/1/10
      */
-    public enum  File {
+    public enum File
+    {
 
 
         USER_AVATAR_FOLDER("D:/DeskTop/hoj/file/avatar"),
@@ -240,11 +265,13 @@ public class Constants {
 
         private final String path;
 
-        File(String path) {
+        File(String path)
+        {
             this.path = path;
         }
 
-        public String getPath() {
+        public String getPath()
+        {
             return path;
         }
     }
@@ -254,8 +281,8 @@ public class Constants {
      * @Description 邮件任务的一些常量
      * @Since 2021/1/14
      */
-
-    public enum Email {
+    public enum Email
+    {
 
         OJ_URL("OJ_UR"),
         OJ_NAME("OJ_NAME"),
@@ -271,25 +298,30 @@ public class Constants {
 
         private final String value;
 
-        Email(String value) {
+        Email(String value)
+        {
             this.value = value;
         }
 
-        public String getValue() {
+        public String getValue()
+        {
             return value;
         }
     }
 
-    public enum Schedule {
+    public enum Schedule
+    {
         RECENT_OTHER_CONTEST("recent-other-contest");
 
         private final String code;
 
-        Schedule(String code) {
+        Schedule(String code)
+        {
             this.code = code;
         }
 
-        public String getCode() {
+        public String getCode()
+        {
             return code;
 
         }
@@ -299,38 +331,47 @@ public class Constants {
      * @Description 训练题单的一些常量
      * @Since 2021/11/20
      */
-    public enum Training {
+    public enum Training
+    {
 
         AUTH_PRIVATE("Private"),
         AUTH_PUBLIC("Public");
 
         private final String value;
 
-        Training(String value) {
+        Training(String value)
+        {
             this.value = value;
         }
 
-        public String getValue() {
+        public String getValue()
+        {
             return value;
         }
     }
 
-    public enum ProblemType {
+    public enum ProblemType
+    {
         ACM(0),
         OI(1);
         private final Integer type;
 
-        ProblemType(Integer type) {
+        ProblemType(Integer type)
+        {
             this.type = type;
         }
 
-        public Integer getType() {
+        public Integer getType()
+        {
             return type;
         }
 
-        public static ProblemType getProblemType(Integer type) {
-            for (ProblemType problemType : ProblemType.values()) {
-                if (problemType.getType().equals(type)) {
+        public static ProblemType getProblemType(Integer type)
+        {
+            for (ProblemType problemType : ProblemType.values())
+            {
+                if (problemType.getType().equals(type))
+                {
                     return problemType;
                 }
             }
@@ -338,24 +379,30 @@ public class Constants {
         }
     }
 
-    public enum ProblemAuth {
+    public enum ProblemAuth
+    {
         PUBLIC(1),
         PRIVATE(2),
         CONTEST(3);
 
         private final Integer auth;
 
-        ProblemAuth(Integer auth) {
+        ProblemAuth(Integer auth)
+        {
             this.auth = auth;
         }
 
-        public Integer getAuth() {
+        public Integer getAuth()
+        {
             return auth;
         }
 
-        public static ProblemAuth getProblemAuth(Integer auth) {
-            for (ProblemAuth problemAuth : ProblemAuth.values()) {
-                if (problemAuth.getAuth().equals(auth)) {
+        public static ProblemAuth getProblemAuth(Integer auth)
+        {
+            for (ProblemAuth problemAuth : ProblemAuth.values())
+            {
+                if (problemAuth.getAuth().equals(auth))
+                {
                     return problemAuth;
                 }
             }
@@ -363,24 +410,30 @@ public class Constants {
         }
     }
 
-    public enum JudgeMode {
+    public enum JudgeMode
+    {
         DEFAULT("default"),
         SPJ("spj"),
         INTERACTIVE("interactive");
 
         private final String mode;
 
-        JudgeMode(String mode) {
+        JudgeMode(String mode)
+        {
             this.mode = mode;
         }
 
-        public String getMode() {
+        public String getMode()
+        {
             return mode;
         }
 
-        public static JudgeMode getJudgeMode(String mode) {
-            for (JudgeMode judgeMode : JudgeMode.values()) {
-                if (judgeMode.getMode().equals(mode)) {
+        public static JudgeMode getJudgeMode(String mode)
+        {
+            for (JudgeMode judgeMode : JudgeMode.values())
+            {
+                if (judgeMode.getMode().equals(mode))
+                {
                     return judgeMode;
                 }
             }
@@ -388,7 +441,8 @@ public class Constants {
         }
     }
 
-    public enum JudgeCaseMode {
+    public enum JudgeCaseMode
+    {
         DEFAULT("default"),
         SUBTASK_LOWEST("subtask_lowest"),
         SUBTASK_AVERAGE("subtask_average"),
@@ -396,18 +450,23 @@ public class Constants {
 
         private final String mode;
 
-        JudgeCaseMode(String mode) {
+        JudgeCaseMode(String mode)
+        {
             this.mode = mode;
         }
 
-        public String getMode() {
+        public String getMode()
+        {
             return mode;
         }
 
 
-        public static JudgeCaseMode getJudgeCaseMode(String mode) {
-            for (JudgeCaseMode judgeCaseMode : JudgeCaseMode.values()) {
-                if (judgeCaseMode.getMode().equals(mode)) {
+        public static JudgeCaseMode getJudgeCaseMode(String mode)
+        {
+            for (JudgeCaseMode judgeCaseMode : JudgeCaseMode.values())
+            {
+                if (judgeCaseMode.getMode().equals(mode))
+                {
                     return judgeCaseMode;
                 }
             }
@@ -415,7 +474,8 @@ public class Constants {
         }
     }
 
-    public enum TaskType {
+    public enum TaskType
+    {
         /**
          * 自身评测
          */
@@ -441,11 +501,13 @@ public class Constants {
 
         private final String path;
 
-        TaskType(String path) {
+        TaskType(String path)
+        {
             this.path = path;
         }
 
-        public String getPath() {
+        public String getPath()
+        {
             return path;
         }
 

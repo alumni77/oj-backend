@@ -32,6 +32,15 @@
             <version>4.5.0</version>
         </dependency>
 
+        <!-- https://hutool.cn/docs/index.html#/-->
+        <!--hutool工具-->
+        <dependency>
+            <groupId>cn.hutool</groupId>
+            <artifactId>hutool-all</artifactId>
+            <version>5.8.8</version>
+        </dependency>
+
+
         <!--JWT-->
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
@@ -63,9 +72,21 @@
         </dependency>
 
         <dependency>
+            <groupId>redis.clients</groupId>
+            <artifactId>jedis</artifactId>
+            <version>4.2.3</version>
+        </dependency>
+
+        <dependency>
             <groupId>jakarta.servlet</groupId>
             <artifactId>jakarta.servlet-api</artifactId>
             <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>jakarta.annotation</groupId>
+            <artifactId>jakarta.annotation-api</artifactId>
+            <version>3.0.0</version>
         </dependency>
 
         <!--Mybatis-Plus-->
