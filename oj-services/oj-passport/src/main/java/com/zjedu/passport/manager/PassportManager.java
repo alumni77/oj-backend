@@ -5,6 +5,7 @@ import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.crypto.SecureUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.zjedu.common.exception.StatusAccessDeniedException;
 import com.zjedu.common.exception.StatusFailException;
 import com.zjedu.config.NacosSwitchConfig;
@@ -14,11 +15,12 @@ import com.zjedu.passport.dao.user.UserRecordEntityService;
 import com.zjedu.passport.dao.user.UserRoleEntityService;
 import com.zjedu.pojo.dto.LoginDTO;
 import com.zjedu.pojo.dto.RegisterDTO;
+import com.zjedu.pojo.dto.ResetPasswordDTO;
 import com.zjedu.pojo.entity.user.Role;
 import com.zjedu.pojo.entity.user.UserInfo;
 import com.zjedu.pojo.entity.user.UserRecord;
 import com.zjedu.pojo.entity.user.UserRole;
-import com.zjedu.pojo.vo.RegisterCodeVO;
+import com.zjedu.pojo.vo.CodeVO;
 import com.zjedu.pojo.vo.UserInfoVO;
 import com.zjedu.pojo.vo.UserRolesVO;
 import com.zjedu.utils.Constants;
@@ -137,7 +139,7 @@ public class PassportManager
         return userInfoVo;
     }
 
-    public RegisterCodeVO getRegisterCode(String username) throws StatusAccessDeniedException, StatusFailException
+    public CodeVO getCode(String username) throws StatusAccessDeniedException, StatusFailException
     {
         WebConfig webConfig = nacosSwitchConfig.getWebConfig();
         // 需要判断一下网站是否开启注册
@@ -145,7 +147,6 @@ public class PassportManager
         {
             throw new StatusAccessDeniedException("对不起！本站点暂时关闭注册功能！");
         }
-
         if (!StringUtils.hasText(username))
         {
             throw new StatusFailException("用户名不能为空！");
@@ -159,21 +160,13 @@ public class PassportManager
             throw new StatusFailException("对不起,您的操作频率过快,请在" + redisUtils.getExpire(lockKey) + "秒后再次获取验证码");
         }
 
-        QueryWrapper<UserInfo> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("username", username);
-        UserInfo userInfo = userInfoEntityService.getOne(queryWrapper, false);
-        if (userInfo != null)
-        {
-            throw new StatusFailException("对不起！该用户名已被注册，请更换用户名！");
-        }
-
         // 随机生成6位数字的组合
         String numbers = RandomUtil.randomNumbers(6);
         //默认验证码有效10分钟
         redisUtils.set(Constants.Email.REGISTER_KEY_PREFIX.getValue() + username, numbers, 10 * 60);
         redisUtils.set(lockKey, 0, 60);
 
-        RegisterCodeVO registerCodeVo = new RegisterCodeVO();
+        CodeVO registerCodeVo = new CodeVO();
         // 将验证码直接返回给前端
         registerCodeVo.setCode(numbers);
         // 验证码有效期10分钟
@@ -201,6 +194,14 @@ public class PassportManager
             //验证码判断
             throw new StatusFailException("验证码不正确");
         }
+        if (!StringUtils.hasText(registerDto.getUsername()))
+        {
+            throw new StatusFailException("用户名不能为空");
+        }
+        if (registerDto.getUsername().length() > 20)
+        {
+            throw new StatusFailException("用户名长度不能超过20位!");
+        }
         if (!StringUtils.hasText(registerDto.getPassword()))
         {
             throw new StatusFailException("密码不能为空");
@@ -209,13 +210,12 @@ public class PassportManager
         {
             throw new StatusFailException("密码长度应该为6~20位！");
         }
-        if (!StringUtils.hasText(registerDto.getUsername()))
+        QueryWrapper<UserInfo> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("username", registerDto.getUsername());
+        UserInfo userInfo = userInfoEntityService.getOne(queryWrapper, false);
+        if (userInfo != null)
         {
-            throw new StatusFailException("用户名不能为空");
-        }
-        if (registerDto.getUsername().length() > 20)
-        {
-            throw new StatusFailException("用户名长度不能超过20位!");
+            throw new StatusFailException("对不起！该用户名已被注册，请更换用户名！");
         }
 
         String uuid = IdUtil.simpleUUID();
@@ -239,5 +239,48 @@ public class PassportManager
         {
             throw new StatusFailException("注册失败，请稍后重新尝试！");
         }
+    }
+
+    public void resetPassword(ResetPasswordDTO resetPasswordDTO) throws StatusFailException
+    {
+        String username = resetPasswordDTO.getUsername();
+        String password = resetPasswordDTO.getPassword();
+        String code = resetPasswordDTO.getCode();
+
+        if (!StringUtils.hasText(password) || !StringUtils.hasText(username) || !StringUtils.hasText(code))
+        {
+            throw new StatusFailException("用户名、新密码或验证码不能为空");
+        }
+        if (password.length() < 6 || password.length() > 20)
+        {
+            throw new StatusFailException("新密码长度应该为6~20位！");
+        }
+        QueryWrapper<UserInfo> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("username", username.trim());
+        UserInfo userInfo = userInfoEntityService.getOne(queryWrapper, false);
+        if (userInfo == null)
+        {
+            throw new StatusFailException("对不起，无该用户，请重新检查！");
+        }
+        //验证码判断
+        String lockKey = Constants.Email.REGISTER_KEY_PREFIX.getValue() + username;
+        if (!redisUtils.hasKey(lockKey))
+        {
+            throw new StatusFailException("验证码已过期，请重新获取验证码");
+        }
+        if (!redisUtils.get(lockKey).equals(code))
+        {
+            throw new StatusFailException("验证码不正确，请重新输入");
+        }
+
+        UpdateWrapper<UserInfo> updateWrapper = new UpdateWrapper<>();
+        updateWrapper.eq("username", username.trim()).set("password", SecureUtil.md5(password));
+        boolean isOk = userInfoEntityService.update(updateWrapper);
+        if (!isOk)
+        {
+            throw new StatusFailException("重置密码失败");
+        }
+        redisUtils.del(lockKey);
+
     }
 }

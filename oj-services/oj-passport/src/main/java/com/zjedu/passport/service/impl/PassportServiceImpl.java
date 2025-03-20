@@ -8,12 +8,12 @@ import com.zjedu.passport.manager.PassportManager;
 import com.zjedu.passport.service.PassportService;
 import com.zjedu.pojo.dto.LoginDTO;
 import com.zjedu.pojo.dto.RegisterDTO;
-import com.zjedu.pojo.vo.RegisterCodeVO;
+import com.zjedu.pojo.dto.ResetPasswordDTO;
+import com.zjedu.pojo.vo.CodeVO;
 import com.zjedu.pojo.vo.UserInfoVO;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.apache.poi.ss.formula.functions.T;
 import org.springframework.stereotype.Service;
 
 /**
@@ -42,11 +42,11 @@ public class PassportServiceImpl implements PassportService
     }
 
     @Override
-    public CommonResult<RegisterCodeVO> getRegisterCode(String email)
+    public CommonResult<CodeVO> getCode(String username)
     {
         try
         {
-            return CommonResult.successResponse(passportManager.getRegisterCode(email));
+            return CommonResult.successResponse(passportManager.getCode(username));
         } catch (StatusFailException e)
         {
             return CommonResult.errorResponse(e.getMessage());
@@ -69,6 +69,19 @@ public class PassportServiceImpl implements PassportService
         } catch (StatusAccessDeniedException e)
         {
             return CommonResult.errorResponse(e.getMessage(), ResultStatus.ACCESS_DENIED);
+        }
+    }
+
+    @Override
+    public CommonResult<Void> resetPassword(ResetPasswordDTO resetPasswordDTO)
+    {
+        try
+        {
+            passportManager.resetPassword(resetPasswordDTO);
+            return CommonResult.successResponse();
+        } catch (StatusFailException e)
+        {
+            return CommonResult.errorResponse(e.getMessage());
         }
     }
 }

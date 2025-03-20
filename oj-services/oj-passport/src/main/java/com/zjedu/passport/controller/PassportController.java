@@ -5,7 +5,8 @@ import com.zjedu.common.result.CommonResult;
 import com.zjedu.passport.service.PassportService;
 import com.zjedu.pojo.dto.LoginDTO;
 import com.zjedu.pojo.dto.RegisterDTO;
-import com.zjedu.pojo.vo.RegisterCodeVO;
+import com.zjedu.pojo.dto.ResetPasswordDTO;
+import com.zjedu.pojo.vo.CodeVO;
 import com.zjedu.pojo.vo.UserInfoVO;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
@@ -39,22 +40,34 @@ public class PassportController
     }
 
     /**
-     * 发送注册流程的6位随机验证码
+     * 发送 6 位随机验证码
      * @param username
      * @return
      */
-    @GetMapping(value = "/get-register-code")
+    @GetMapping(value = "/get-code")
     @AnonApi
-    public CommonResult<RegisterCodeVO> getRegisterCode(@RequestParam(value = "username", required = true) String username)
+    public CommonResult<CodeVO> getCode(@RequestParam(value = "username") String username)
     {
-        return passportService.getRegisterCode(username);
+        return passportService.getCode(username);
     }
 
+    /**
+     * 注册逻辑
+     * @param registerDTO
+     * @return
+     */
     @PostMapping("/register")
     @AnonApi
     public CommonResult<Void> register(@Validated @RequestBody RegisterDTO registerDTO)
     {
         return passportService.register(registerDTO);
+    }
+
+    @PostMapping("/reset-password")
+    @AnonApi
+    public CommonResult<Void> resetPassword(@RequestBody ResetPasswordDTO resetPasswordDTO)
+    {
+        return passportService.resetPassword(resetPasswordDTO);
     }
 
 }

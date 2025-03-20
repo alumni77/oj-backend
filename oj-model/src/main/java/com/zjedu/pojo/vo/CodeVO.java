@@ -11,7 +11,7 @@ import lombok.Data;
  */
 
 @Data
-public class RegisterCodeVO
+public class CodeVO
 {
     @Schema(description = "验证码")
     private String code;
