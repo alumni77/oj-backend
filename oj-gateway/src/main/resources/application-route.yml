@@ -6,6 +6,23 @@ spring:
           uri: lb://oj-passport
           predicates:
             - Path=/api/passport/**
+        - id: oj-account
+          uri: lb://oj-account
+          predicates:
+            - Path=/api/account/**
+        # 添加以下API文档路由
+        - id: oj-passport-docs
+          uri: lb://oj-passport
+          predicates:
+            - Path=/api/passport/v3/api-docs/**
+          filters:
+            - StripPrefix=1
+        - id: oj-account-docs
+          uri: lb://oj-account
+          predicates:
+            - Path=/api/account/v3/api-docs/**
+          filters:
+            - StripPrefix=1
       discovery:
         locator:
           enabled: true

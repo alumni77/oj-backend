@@ -1,8 +1,8 @@
 # Port 配置
-SERVER_PORT: 8000
+SERVER_PORT: 8010
 
 # Path 配置
-CONTEXT_PATH: /api/passport
+CONTEXT_PATH: /api/account
 
 # Nacos 配置文件名
 NACOS_CONFIG_URL: 127.0.0.1:8848

@@ -1,6 +1,6 @@
 spring:
   application:
-    name: oj-passport
+    name: oj-account
 
   # 默认环境
   profiles:
@@ -67,7 +67,7 @@ mybatis-plus:
     cache-enabled: true
   global-config:
     banner: false
-  mapper-locations: classpath*:com/zjedu/passport/mapper/xml/*.xml
+  mapper-locations: classpath*:com/zjedu/account/mapper/xml/*.xml
   type-aliases-package: com.zjedu.pojo
 
 # Swagger 配置
@@ -78,11 +78,10 @@ springdoc:
     operations-sorter: alpha
   api-docs:
     path: /v3/api-docs
-    enabled: true
   group-configs:
     - group: 'default'
       paths-to-match: '/**'
-      packages-to-scan: com.zjedu.passport.controller
+      packages-to-scan: com.zjedu.account.controller
 
 # knife4j配置
 knife4j:
