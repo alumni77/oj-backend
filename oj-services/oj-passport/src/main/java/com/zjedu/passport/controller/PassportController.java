@@ -1,5 +1,6 @@
 package com.zjedu.passport.controller;
 
+import org.apache.shiro.authz.annotation.RequiresAuthentication;
 import com.zjedu.annotation.AnonApi;
 import com.zjedu.common.result.CommonResult;
 import com.zjedu.passport.service.PassportService;
@@ -29,6 +30,7 @@ public class PassportController
 
     /**
      * 处理登录逻辑
+     *
      * @param loginDto
      * @return CommonResult
      */
@@ -41,6 +43,7 @@ public class PassportController
 
     /**
      * 发送 6 位随机验证码
+     *
      * @param username
      * @return
      */
@@ -53,6 +56,7 @@ public class PassportController
 
     /**
      * 注册逻辑
+     *
      * @param registerDTO
      * @return
      */
@@ -63,6 +67,12 @@ public class PassportController
         return passportService.register(registerDTO);
     }
 
+    /**
+     * 用户重置密码
+     *
+     * @param resetPasswordDTO
+     * @return
+     */
     @PostMapping("/reset-password")
     @AnonApi
     public CommonResult<Void> resetPassword(@RequestBody ResetPasswordDTO resetPasswordDTO)
@@ -70,4 +80,15 @@ public class PassportController
         return passportService.resetPassword(resetPasswordDTO);
     }
 
+    /**
+     * 退出逻辑，将jwt在redis中清除，下次需要再次登录。
+     *
+     * @return
+     */
+    @GetMapping("/logout")
+    @RequiresAuthentication
+    public CommonResult<Void> logout()
+    {
+        return passportService.logout();
+    }
 }

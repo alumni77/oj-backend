@@ -25,4 +25,6 @@ public interface PassportService
     CommonResult<Void> register(RegisterDTO registerDto);
 
     CommonResult<Void> resetPassword(ResetPasswordDTO resetPasswordDTO);
+
+    CommonResult<Void> logout();
 }
