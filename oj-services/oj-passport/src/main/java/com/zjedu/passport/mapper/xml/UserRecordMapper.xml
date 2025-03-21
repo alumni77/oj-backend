@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zjedu.passport.mapper.UserRecordMapper">
+    <resultMap id="map_UserHomeVo" type="com.zjedu.pojo.vo.UserHomeVO">
+        <id column="uid" property="uid"/>
+        <result column="username" property="username"/>
+        <result column="school" property="school"/>
+        <result column="signature" property="signature"/>
+        <result column="nickname" property="nickname"/>
+        <result column="github" property="github"/>
+        <result column="blog" property="blog"/>
+        <result column="avatar" property="avatar"/>
+        <result column="title_name" property="titleName"/>
+        <result column="title_color" property="titleColor"/>
+        <result column="rating" property="rating"/>
+        <result column="total" property="total"/>
+        <collection property="scoreList" ofType="java.lang.Integer" select="getProblemScore" column="uid">
+        </collection>
+    </resultMap>
+
+    <select id="getUserHomeInfo" resultMap="map_UserHomeVo">
+        SELECT u.uuid as uid,u.username,u.nickname,u.gender,u.signature,u.school,u.github,u.blog,
+        u.avatar,u.title_name,u.title_color,ur.rating,
+        (SELECT COUNT(uid) FROM judge WHERE uid=u.uuid ) AS total
+        FROM user_info u,user_record ur
+        <where>
+            u.uuid = ur.uid AND u.status = 0
+            <if test="uid!=null">
+                AND u.uuid = #{uid}
+            </if>
+            <if test="username!=null">
+                AND u.username = #{username}
+            </if>
+        </where>
+    </select>
+
+    <!-- 子查询-->
+    <select id="getProblemScore" resultType="java.lang.Integer">
+        SELECT MAX(oi_rank_score) AS sum_score
+        FROM judge
+        WHERE uid = #{uid}
+          AND score IS NOT NULL
+        GROUP BY pid
+    </select>
+
+</mapper>

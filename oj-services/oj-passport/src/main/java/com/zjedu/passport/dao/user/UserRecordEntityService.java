@@ -2,6 +2,7 @@ package com.zjedu.passport.dao.user;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.zjedu.pojo.entity.user.UserRecord;
+import com.zjedu.pojo.vo.UserHomeVO;
 
 /**
  * @Author Zhong
@@ -12,4 +13,6 @@ import com.zjedu.pojo.entity.user.UserRecord;
 
 public interface UserRecordEntityService extends IService<UserRecord>
 {
+    UserHomeVO getUserHomeInfo(String uid, String username);
+
 }
