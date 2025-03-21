@@ -5,6 +5,7 @@ import com.zjedu.annotation.AnonApi;
 import com.zjedu.common.result.CommonResult;
 import com.zjedu.pojo.dto.CheckUsernameDTO;
 import com.zjedu.pojo.vo.CheckUsernameVO;
+import com.zjedu.pojo.vo.UserCalendarHeatmapVO;
 import com.zjedu.pojo.vo.UserHomeVO;
 import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.*;
@@ -47,6 +48,22 @@ public class AccountController
                                                     @RequestParam(value = "username", required = false) String username)
     {
         return accountService.getUserHomeInfo(uid, username);
+    }
+
+
+    /**
+     * 获取用户最近一年的提交热力图数据
+     *
+     * @param uid
+     * @param username
+     * @return
+     */
+    @GetMapping("/get-user-calendar-heatmap")
+    @AnonApi
+    public CommonResult<UserCalendarHeatmapVO> getUserCalendarHeatmap(@RequestParam(value = "uid", required = false) String uid,
+                                                                      @RequestParam(value = "username", required = false) String username)
+    {
+        return accountService.getUserCalendarHeatmap(uid, username);
     }
 
 }

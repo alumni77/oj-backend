@@ -6,6 +6,7 @@ import com.zjedu.common.exception.StatusFailException;
 import com.zjedu.common.result.CommonResult;
 import com.zjedu.pojo.dto.CheckUsernameDTO;
 import com.zjedu.pojo.vo.CheckUsernameVO;
+import com.zjedu.pojo.vo.UserCalendarHeatmapVO;
 import com.zjedu.pojo.vo.UserHomeVO;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
@@ -34,6 +35,15 @@ public class AccountServiceImpl implements AccountService
     {
         try {
             return CommonResult.successResponse(accountManager.getUserHomeInfo(uid, username));
+        } catch (StatusFailException e) {
+            return CommonResult.errorResponse(e.getMessage());
+        }
+    }
+
+    @Override
+    public CommonResult<UserCalendarHeatmapVO> getUserCalendarHeatmap(String uid, String username) {
+        try {
+            return CommonResult.successResponse(accountManager.getUserCalendarHeatmap(uid, username));
         } catch (StatusFailException e) {
             return CommonResult.errorResponse(e.getMessage());
         }

@@ -3,6 +3,7 @@ package com.zjedu.account.service;
 import com.zjedu.common.result.CommonResult;
 import com.zjedu.pojo.dto.CheckUsernameDTO;
 import com.zjedu.pojo.vo.CheckUsernameVO;
+import com.zjedu.pojo.vo.UserCalendarHeatmapVO;
 import com.zjedu.pojo.vo.UserHomeVO;
 
 /**
@@ -17,4 +18,6 @@ public interface AccountService
     CommonResult<CheckUsernameVO> checkUsername(CheckUsernameDTO checkUsernameDTO);
 
     CommonResult<UserHomeVO> getUserHomeInfo(String uid, String username);
+
+    CommonResult<UserCalendarHeatmapVO> getUserCalendarHeatmap(String uid, String username);
 }

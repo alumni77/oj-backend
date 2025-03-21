@@ -1,17 +1,21 @@
 package com.zjedu.account.manager;
 
+import cn.hutool.core.date.DateUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.zjedu.account.dao.problem.ProblemEntityService;
 import com.zjedu.account.dao.user.SessionEntityService;
 import com.zjedu.account.dao.user.UserAcproblemEntityService;
 import com.zjedu.account.feign.PassportFeignClient;
+import com.zjedu.account.mapper.JudgeMapper;
 import com.zjedu.common.exception.StatusFailException;
 import com.zjedu.pojo.dto.CheckUsernameDTO;
+import com.zjedu.pojo.entity.judge.Judge;
 import com.zjedu.pojo.entity.problem.Problem;
 import com.zjedu.pojo.entity.user.Session;
 import com.zjedu.pojo.entity.user.UserAcproblem;
 import com.zjedu.pojo.entity.user.UserInfo;
 import com.zjedu.pojo.vo.CheckUsernameVO;
+import com.zjedu.pojo.vo.UserCalendarHeatmapVO;
 import com.zjedu.pojo.vo.UserHomeProblemVO;
 import com.zjedu.pojo.vo.UserHomeVO;
 import com.zjedu.shiro.AccountProfile;
@@ -19,10 +23,10 @@ import jakarta.annotation.Resource;
 import org.apache.shiro.SecurityUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
+import org.springframework.util.CollectionUtils;
 
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -47,6 +51,9 @@ public class AccountManager
 
     @Resource
     private SessionEntityService sessionEntityService;
+
+    @Resource
+    private JudgeMapper judgeMapper;
 
 
     /**
@@ -81,26 +88,7 @@ public class AccountManager
      */
     public UserHomeVO getUserHomeInfo(String uid, String username) throws StatusFailException
     {
-        // 先检查传入的参数
-        if (!StringUtils.hasText(uid) && !StringUtils.hasText(username))
-        {
-            try
-            {
-                // 安全地尝试获取当前用户
-                if (SecurityUtils.getSecurityManager() != null && SecurityUtils.getSubject() != null
-                        && SecurityUtils.getSubject().getPrincipal() != null)
-                {
-                    AccountProfile userRolesVo = (AccountProfile) SecurityUtils.getSubject().getPrincipal();
-                    uid = userRolesVo.getUid();
-                } else
-                {
-                    throw new StatusFailException("请求参数错误：uid和username不能都为空！");
-                }
-            } catch (Exception e)
-            {
-                throw new StatusFailException("请求参数错误：uid和username不能都为空！");
-            }
-        }
+        uid = getResolvedUid(uid, username);
 
         UserHomeVO userHomeInfo = passportFeignClient.getUserHomeInfo(uid, username);
         if (userHomeInfo == null)
@@ -152,4 +140,69 @@ public class AccountManager
                 .build();
     }
 
+    /**
+     * 获取用户最近一年的提交热力图数据
+     * @param uid
+     * @param username
+     * @return
+     * @throws StatusFailException
+     */
+    public UserCalendarHeatmapVO getUserCalendarHeatmap(String uid, String username) throws StatusFailException
+    {
+
+        uid = getResolvedUid(uid, username);
+
+        UserCalendarHeatmapVO userCalendarHeatmapVo = new UserCalendarHeatmapVO();
+        userCalendarHeatmapVo.setEndDate(DateUtil.format(new Date(), "yyyy-MM-dd"));
+        List<Judge> lastYearUserJudgeList = judgeMapper.getLastYearUserJudgeList(uid, username);
+        if (CollectionUtils.isEmpty(lastYearUserJudgeList))
+        {
+            userCalendarHeatmapVo.setDataList(new ArrayList<>());
+            return userCalendarHeatmapVo;
+        }
+        HashMap<String, Integer> tmpRecordMap = new HashMap<>();
+        for (Judge judge : lastYearUserJudgeList)
+        {
+            Date submitTime = judge.getSubmitTime();
+            String dateStr = DateUtil.format(submitTime, "yyyy-MM-dd");
+            tmpRecordMap.merge(dateStr, 1, Integer::sum);
+        }
+        List<HashMap<String, Object>> dataList = new ArrayList<>();
+        for (Map.Entry<String, Integer> record : tmpRecordMap.entrySet())
+        {
+            HashMap<String, Object> tmp = new HashMap<>(2);
+            tmp.put("date", record.getKey());
+            tmp.put("count", record.getValue());
+            dataList.add(tmp);
+        }
+        userCalendarHeatmapVo.setDataList(dataList);
+        return userCalendarHeatmapVo;
+    }
+
+    /**
+     * 解析用户 ID，当 uid 和 username 都为空时尝试获取当前登录用户的 uid
+     *
+     * @param uid 用户 ID
+     * @param username 用户名
+     * @return 解析后的用户 ID
+     * @throws StatusFailException 当无法确定用户时抛出异常
+     */
+    private String getResolvedUid(String uid, String username) throws StatusFailException {
+        if (!StringUtils.hasText(uid) && !StringUtils.hasText(username)) {
+            try {
+                // 安全地尝试获取当前用户
+                if (SecurityUtils.getSecurityManager() != null && SecurityUtils.getSubject() != null
+                        && SecurityUtils.getSubject().getPrincipal() != null) {
+                    AccountProfile userRolesVo = (AccountProfile) SecurityUtils.getSubject().getPrincipal();
+                    return userRolesVo.getUid();
+                } else {
+                    throw new StatusFailException("请求参数错误：uid和username不能都为空！");
+                }
+            } catch (Exception e) {
+                throw new StatusFailException("请求参数错误：uid和username不能都为空！");
+            }
+        }
+        return uid;
+    }
 }
+

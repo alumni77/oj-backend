@@ -67,7 +67,7 @@ mybatis-plus:
     cache-enabled: true
   global-config:
     banner: false
-  mapper-locations: classpath*:com/zjedu/account/mapper/xml/*.xml
+  mapper-locations: classpath*:**/mapper/xml/*.xml
   type-aliases-package: com.zjedu.pojo
 
 # Swagger 配置
@@ -96,3 +96,10 @@ oj:
     expire: 86500
     check-refresh-expire: 43200
     header: Authorization
+
+
+logging:
+  level:
+    com.zjedu.account.manager: debug
+    org.mybatis: debug
+    feign: debug
