@@ -1,5 +1,8 @@
 package com.zjedu.passport.controller;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.zjedu.passport.dao.user.UserInfoEntityService;
+import com.zjedu.pojo.entity.user.UserInfo;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
 import com.zjedu.annotation.AnonApi;
 import com.zjedu.common.result.CommonResult;
@@ -91,4 +94,16 @@ public class PassportController
     {
         return passportService.logout();
     }
+
+    @Resource
+    private UserInfoEntityService userInfoEntityService;
+
+    @GetMapping("/{username}")
+    public UserInfo getByUsername(@PathVariable String username)
+    {
+        QueryWrapper<UserInfo> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("username", username);
+        return userInfoEntityService.getOne(queryWrapper);
+    }
+
 }
