@@ -38,10 +38,10 @@ public class JwtGatewayFilter implements GlobalFilter, Ordered
     @Resource
     private RedisUtils redisUtils;
 
-    private AntPathMatcher pathMatcher = new AntPathMatcher();
+    private final AntPathMatcher pathMatcher = new AntPathMatcher();
 
     // 定义不需要认证的匿名路径
-    private List<String> anonymousUrls = Arrays.asList(
+    private final List<String> anonymousUrls = Arrays.asList(
             // 全局Swagger配置
             "/v3/api-docs/**",
             "/swagger-ui/**",
@@ -60,9 +60,13 @@ public class JwtGatewayFilter implements GlobalFilter, Ordered
             "/api/passport/get-user",
             "/api/passport/get-user-home-info",
             "/api/passport/get-user-by-uid",
+            "/api/passport/get-recent7-ac-rank",
 
             // Account服务的匿名接口
             "/api/account/check-username",
+            "/api/account/home-carousel",
+            "/api/account/get-recent-seven-ac-rank",
+            "/api/account/get-recent-updated-problem",
             // Passport服务的Swagger配置
             "/api/account/v3/api-docs/**",
             "/api/account/swagger-ui/**",

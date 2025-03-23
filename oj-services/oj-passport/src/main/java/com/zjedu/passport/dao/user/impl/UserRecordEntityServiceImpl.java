@@ -4,9 +4,12 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zjedu.passport.dao.user.UserRecordEntityService;
 import com.zjedu.passport.mapper.UserRecordMapper;
 import com.zjedu.pojo.entity.user.UserRecord;
+import com.zjedu.pojo.vo.ACMRankVO;
 import com.zjedu.pojo.vo.UserHomeVO;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 /**
  * @Author Zhong
@@ -26,5 +29,12 @@ public class UserRecordEntityServiceImpl extends ServiceImpl<UserRecordMapper, U
     public UserHomeVO getUserHomeInfo(String uid, String username)
     {
         return userRecordMapper.getUserHomeInfo(uid, username);
+    }
+
+    @Override
+    public List<ACMRankVO> getRecent7ACRank()
+    {
+        return userRecordMapper.getRecent7ACRank();
+
     }
 }

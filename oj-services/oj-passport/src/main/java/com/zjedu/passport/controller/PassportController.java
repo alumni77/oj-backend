@@ -15,10 +15,7 @@ import com.zjedu.pojo.dto.RegisterDTO;
 import com.zjedu.pojo.dto.ResetPasswordDTO;
 import com.zjedu.pojo.entity.user.Role;
 import com.zjedu.pojo.entity.user.UserInfo;
-import com.zjedu.pojo.vo.CodeVO;
-import com.zjedu.pojo.vo.UserHomeVO;
-import com.zjedu.pojo.vo.UserInfoVO;
-import com.zjedu.pojo.vo.UserRolesVO;
+import com.zjedu.pojo.vo.*;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -144,6 +141,12 @@ public class PassportController
     public UserHomeVO getUserHomeInfo(String uid, String username)
     {
         return userRecordEntityService.getUserHomeInfo(uid, username);
+    }
+
+    @GetMapping("/get-recent7-ac-rank")
+    public List<ACMRankVO> getRecent7ACRank()
+    {
+        return userRecordEntityService.getRecent7ACRank();
     }
 
 

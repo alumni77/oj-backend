@@ -43,4 +43,21 @@
         GROUP BY pid
     </select>
 
+    <select id="getRecent7ACRank" resultType="com.zjedu.pojo.vo.ACMRankVO">
+        SELECT u.uuid                                                          as uid,
+               u.nickname,
+               u.username,
+               u.avatar,
+               u.title_name,
+               u.title_color,
+               (SELECT COUNT(DISTINCT pid)
+                FROM user_acproblem
+                WHERE uid = u.uuid
+                  and DATE(gmt_create) >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)) AS ac
+        FROM user_info u
+        WHERE u.status = 0
+        ORDER BY ac DESC, u.gmt_create DESC
+        LIMIT 10
+    </select>
+
 </mapper>

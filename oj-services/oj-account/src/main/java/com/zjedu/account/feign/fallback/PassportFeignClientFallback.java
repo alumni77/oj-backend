@@ -4,6 +4,7 @@ import com.zjedu.account.feign.PassportFeignClient;
 import com.zjedu.common.exception.StatusFailException;
 import com.zjedu.pojo.entity.user.Role;
 import com.zjedu.pojo.entity.user.UserInfo;
+import com.zjedu.pojo.vo.ACMRankVO;
 import com.zjedu.pojo.vo.UserHomeVO;
 import com.zjedu.pojo.vo.UserInfoVO;
 import com.zjedu.pojo.vo.UserRolesVO;
@@ -74,6 +75,14 @@ public class PassportFeignClientFallback implements PassportFeignClient
     public List<Role> getRolesByUid(String uid)
     {
         log.error("调用passport-getRolesByUid服务失败——兜底回调");
+
+        return null;
+    }
+
+    @Override
+    public List<ACMRankVO> getRecent7ACRank()
+    {
+        log.error("调用passport-getRecent7ACRank服务失败——兜底回调");
 
         return null;
     }

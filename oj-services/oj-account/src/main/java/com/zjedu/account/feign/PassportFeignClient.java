@@ -4,6 +4,7 @@ import com.zjedu.account.feign.fallback.PassportFeignClientFallback;
 import com.zjedu.common.exception.StatusFailException;
 import com.zjedu.pojo.entity.user.Role;
 import com.zjedu.pojo.entity.user.UserInfo;
+import com.zjedu.pojo.vo.ACMRankVO;
 import com.zjedu.pojo.vo.UserHomeVO;
 import com.zjedu.pojo.vo.UserInfoVO;
 import com.zjedu.pojo.vo.UserRolesVO;
@@ -43,4 +44,7 @@ public interface PassportFeignClient
 
     @GetMapping("/get-roles-by-uid")
     List<Role> getRolesByUid(@RequestParam("uid") String uid);
+
+    @GetMapping("/get-recent7-ac-rank")
+    List<ACMRankVO> getRecent7ACRank();
 }
