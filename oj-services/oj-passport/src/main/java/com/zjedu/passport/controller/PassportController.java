@@ -4,22 +4,28 @@ import cn.hutool.crypto.SecureUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.zjedu.annotation.AnonApi;
+import com.zjedu.common.exception.StatusFailException;
 import com.zjedu.common.result.CommonResult;
 import com.zjedu.passport.dao.user.UserInfoEntityService;
 import com.zjedu.passport.dao.user.UserRecordEntityService;
+import com.zjedu.passport.dao.user.UserRoleEntityService;
 import com.zjedu.passport.service.PassportService;
 import com.zjedu.pojo.dto.LoginDTO;
 import com.zjedu.pojo.dto.RegisterDTO;
 import com.zjedu.pojo.dto.ResetPasswordDTO;
+import com.zjedu.pojo.entity.user.Role;
 import com.zjedu.pojo.entity.user.UserInfo;
 import com.zjedu.pojo.vo.CodeVO;
 import com.zjedu.pojo.vo.UserHomeVO;
 import com.zjedu.pojo.vo.UserInfoVO;
+import com.zjedu.pojo.vo.UserRolesVO;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * @Author Zhong
@@ -125,6 +131,12 @@ public class PassportController
         return userInfoEntityService.update(updateWrapper);
     }
 
+    @PostMapping("/change-user-info")
+    public boolean updateUserInfo(@RequestBody UserInfoVO userInfoVo, @RequestParam("userId") String userId) throws StatusFailException
+    {
+        return passportService.changeUserInfo(userInfoVo, userId);
+    }
+
     @Resource
     private UserRecordEntityService userRecordEntityService;
 
@@ -132,6 +144,22 @@ public class PassportController
     public UserHomeVO getUserHomeInfo(String uid, String username)
     {
         return userRecordEntityService.getUserHomeInfo(uid, username);
+    }
+
+
+    @Resource
+    private UserRoleEntityService userRoleEntityService;
+
+    @GetMapping("/get-user-role")
+    public UserRolesVO getUserRoles(@RequestParam("uid") String uid)
+    {
+        return userRoleEntityService.getUserRoles(uid, null);
+    }
+
+    @GetMapping("/get-roles-by-uid")
+    public List<Role> getRolesByUid(@RequestParam("uid") String uid)
+    {
+        return userRoleEntityService.getRolesByUid(uid);
     }
 
 }

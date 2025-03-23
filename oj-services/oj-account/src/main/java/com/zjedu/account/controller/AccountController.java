@@ -5,10 +5,7 @@ import com.zjedu.annotation.AnonApi;
 import com.zjedu.common.result.CommonResult;
 import com.zjedu.pojo.dto.ChangePasswordDTO;
 import com.zjedu.pojo.dto.CheckUsernameDTO;
-import com.zjedu.pojo.vo.ChangeAccountVO;
-import com.zjedu.pojo.vo.CheckUsernameVO;
-import com.zjedu.pojo.vo.UserCalendarHeatmapVO;
-import com.zjedu.pojo.vo.UserHomeVO;
+import com.zjedu.pojo.vo.*;
 import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.*;
 
@@ -78,6 +75,18 @@ public class AccountController
     public CommonResult<ChangeAccountVO> changePassword(@RequestBody ChangePasswordDTO changePasswordDto)
     {
         return accountService.changePassword(changePasswordDto);
+    }
+
+    @PostMapping("/change-user-info")
+    public CommonResult<UserInfoVO> changeUserInfo(@RequestBody UserInfoVO userInfoVo)
+    {
+        return accountService.changeUserInfo(userInfoVo);
+    }
+
+    @GetMapping("/get-user-auth-info")
+    public CommonResult<UserAuthInfoVO> getUserAuthInfo()
+    {
+        return accountService.getUserAuthInfo();
     }
 
 }

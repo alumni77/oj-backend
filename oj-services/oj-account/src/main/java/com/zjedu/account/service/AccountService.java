@@ -3,10 +3,7 @@ package com.zjedu.account.service;
 import com.zjedu.common.result.CommonResult;
 import com.zjedu.pojo.dto.ChangePasswordDTO;
 import com.zjedu.pojo.dto.CheckUsernameDTO;
-import com.zjedu.pojo.vo.ChangeAccountVO;
-import com.zjedu.pojo.vo.CheckUsernameVO;
-import com.zjedu.pojo.vo.UserCalendarHeatmapVO;
-import com.zjedu.pojo.vo.UserHomeVO;
+import com.zjedu.pojo.vo.*;
 
 /**
  * @Author Zhong
@@ -24,4 +21,8 @@ public interface AccountService
     CommonResult<UserCalendarHeatmapVO> getUserCalendarHeatmap(String uid, String username);
 
     CommonResult<ChangeAccountVO> changePassword(ChangePasswordDTO changePasswordDto);
+
+    CommonResult<UserInfoVO> changeUserInfo(UserInfoVO userInfoVo);
+
+    CommonResult<UserAuthInfoVO> getUserAuthInfo();
 }

@@ -59,10 +59,10 @@ public class JwtGatewayFilter implements GlobalFilter, Ordered
             "/api/passport/reset-password",
             "/api/passport/get-user",
             "/api/passport/get-user-home-info",
+            "/api/passport/get-user-by-uid",
 
             // Account服务的匿名接口
             "/api/account/check-username",
-            "/api/account/get-user-calendar-heatmap",
             // Passport服务的Swagger配置
             "/api/account/v3/api-docs/**",
             "/api/account/swagger-ui/**",

@@ -1,12 +1,16 @@
 package com.zjedu.account.feign;
 
 import com.zjedu.account.feign.fallback.PassportFeignClientFallback;
+import com.zjedu.common.exception.StatusFailException;
+import com.zjedu.pojo.entity.user.Role;
 import com.zjedu.pojo.entity.user.UserInfo;
 import com.zjedu.pojo.vo.UserHomeVO;
+import com.zjedu.pojo.vo.UserInfoVO;
+import com.zjedu.pojo.vo.UserRolesVO;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * @Author Zhong
@@ -30,4 +34,13 @@ public interface PassportFeignClient
 
     @PutMapping("/update-password")
     boolean updatePassword(@RequestParam("uid") String uid, @RequestParam("newPassword") String newPassword);
+
+    @PostMapping("/change-user-info")
+    boolean updateUserInfo(@RequestBody UserInfoVO userInfoVo, @RequestParam("userId") String userId) throws StatusFailException;
+
+    @GetMapping("/get-user-role")
+    UserRolesVO getUserRoles(@RequestParam("uid") String uid);
+
+    @GetMapping("/get-roles-by-uid")
+    List<Role> getRolesByUid(@RequestParam("uid") String uid);
 }

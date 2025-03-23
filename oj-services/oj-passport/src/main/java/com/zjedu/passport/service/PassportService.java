@@ -1,5 +1,6 @@
 package com.zjedu.passport.service;
 
+import com.zjedu.common.exception.StatusFailException;
 import com.zjedu.common.result.CommonResult;
 import com.zjedu.pojo.dto.LoginDTO;
 import com.zjedu.pojo.dto.RegisterDTO;
@@ -27,4 +28,6 @@ public interface PassportService
     CommonResult<Void> resetPassword(ResetPasswordDTO resetPasswordDTO);
 
     CommonResult<Void> logout();
+
+    boolean changeUserInfo(UserInfoVO userInfoVo, String userId) throws StatusFailException;
 }

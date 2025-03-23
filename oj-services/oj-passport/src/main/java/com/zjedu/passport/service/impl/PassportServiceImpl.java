@@ -91,4 +91,10 @@ public class PassportServiceImpl implements PassportService
         passportManager.logout();
         return CommonResult.successResponse("登出成功");
     }
+
+    @Override
+    public boolean changeUserInfo(UserInfoVO userInfoVo, String userId) throws StatusFailException
+    {
+        return passportManager.changeUserInfo(userInfoVo, userId);
+    }
 }

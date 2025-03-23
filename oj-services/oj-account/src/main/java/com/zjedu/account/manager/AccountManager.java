@@ -1,5 +1,6 @@
 package com.zjedu.account.manager;
 
+import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.crypto.SecureUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -14,6 +15,7 @@ import com.zjedu.pojo.dto.ChangePasswordDTO;
 import com.zjedu.pojo.dto.CheckUsernameDTO;
 import com.zjedu.pojo.entity.judge.Judge;
 import com.zjedu.pojo.entity.problem.Problem;
+import com.zjedu.pojo.entity.user.Role;
 import com.zjedu.pojo.entity.user.Session;
 import com.zjedu.pojo.entity.user.UserAcproblem;
 import com.zjedu.pojo.entity.user.UserInfo;
@@ -301,6 +303,41 @@ public class AccountManager
             resp.setMsg("原始密码错误！您已累计修改密码失败" + count + "次...");
             return resp;
         }
+    }
+
+    public UserInfoVO changeUserInfo(UserInfoVO userInfoVo) throws StatusFailException
+    {
+        //从请求头获取用户ID
+        String userId = request.getHeader("X-User-Id");
+        boolean isOk = passportFeignClient.updateUserInfo(userInfoVo, userId);
+        UserInfo userRolesVo = passportFeignClient.getByUid(userId);
+
+        if (isOk)
+        {
+            UserRolesVO userRoles = passportFeignClient.getUserRoles(userRolesVo.getUuid());
+            // 更新session
+            BeanUtil.copyProperties(userRoles, userRolesVo);
+            UserInfoVO userInfoVO = new UserInfoVO();
+            BeanUtil.copyProperties(userRoles, userInfoVO, "roles");
+            userInfoVO.setRoleList(userRoles.getRoles().stream().map(Role::getRole).collect(Collectors.toList()));
+            return userInfoVO;
+        } else
+        {
+            throw new StatusFailException("更新个人信息失败！");
+        }
+    }
+
+    public UserAuthInfoVO getUserAuthInfo()
+    {
+        // 获取当前登录的用户
+        //从请求头获取用户ID
+        String userId = request.getHeader("X-User-Id");
+        UserInfo userRolesVo = passportFeignClient.getByUid(userId);
+        //获取该用户角色所有的权限
+        List<Role> roles = passportFeignClient.getRolesByUid(userRolesVo.getUuid());
+        UserAuthInfoVO authInfoVO = new UserAuthInfoVO();
+        authInfoVO.setRoles(roles.stream().map(Role::getRole).collect(Collectors.toList()));
+        return authInfoVO;
     }
 
 }

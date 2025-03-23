@@ -3,11 +3,14 @@ package com.zjedu.passport.dao.user.impl;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zjedu.passport.dao.user.UserRoleEntityService;
 import com.zjedu.passport.mapper.UserRoleMapper;
+import com.zjedu.pojo.entity.user.Role;
 import com.zjedu.pojo.entity.user.UserRole;
 import com.zjedu.pojo.vo.UserRolesVO;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 /**
  * @Author Zhong
@@ -27,5 +30,11 @@ public class UserRoleEntityServiceImpl extends ServiceImpl<UserRoleMapper, UserR
     public UserRolesVO getUserRoles(String uid, String username)
     {
         return userRoleMapper.getUserRoles(uid, username);
+    }
+
+    @Override
+    public List<Role> getRolesByUid(String uid)
+    {
+        return userRoleMapper.getRolesByUid(uid);
     }
 }

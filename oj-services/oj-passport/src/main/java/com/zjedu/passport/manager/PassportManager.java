@@ -13,6 +13,7 @@ import com.zjedu.config.WebConfig;
 import com.zjedu.passport.dao.user.UserInfoEntityService;
 import com.zjedu.passport.dao.user.UserRecordEntityService;
 import com.zjedu.passport.dao.user.UserRoleEntityService;
+import com.zjedu.passport.validator.CommonValidator;
 import com.zjedu.pojo.dto.LoginDTO;
 import com.zjedu.pojo.dto.RegisterDTO;
 import com.zjedu.pojo.dto.ResetPasswordDTO;
@@ -34,6 +35,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -67,6 +69,9 @@ public class PassportManager
 
     @Resource
     private HttpServletRequest request;
+
+    @Resource
+    private CommonValidator commonValidator;
 
     public UserInfoVO login(LoginDTO loginDto, HttpServletResponse response, HttpServletRequest request) throws StatusFailException
     {
@@ -289,8 +294,89 @@ public class PassportManager
     public void logout()
     {
         String userId = request.getHeader("X-User-ID");
-        if (StringUtils.hasText(userId)) {
+        if (StringUtils.hasText(userId))
+        {
             jwtUtils.cleanToken(userId);
         }
     }
+
+    public boolean changeUserInfo(UserInfoVO userInfoVo, String userId) throws StatusFailException
+    {
+        // 参数校验
+        commonValidator.validateContentLength(userInfoVo.getRealname(), "真实姓名", 50);
+        commonValidator.validateContentLength(userInfoVo.getNickname(), "昵称", 20);
+        commonValidator.validateContentLength(userInfoVo.getSignature(), "个性简介", 65535);
+        commonValidator.validateContentLength(userInfoVo.getBlog(), "博客", 255);
+        commonValidator.validateContentLength(userInfoVo.getGithub(), "Github", 255);
+        commonValidator.validateContentLength(userInfoVo.getSchool(), "学校", 100);
+        commonValidator.validateContentLength(userInfoVo.getNumber(), "学号", 200);
+        commonValidator.validateContentLength(userInfoVo.getCfUsername(), "Codeforces用户名", 255);
+
+        // 获取当前登录用户信息
+        QueryWrapper<UserInfo> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("uuid", userId);
+        UserInfo userRolesVo = userInfoEntityService.getOne(queryWrapper, false);
+
+        if (userRolesVo == null)
+        {
+            throw new StatusFailException("用户不存在");
+        }
+
+        // 构造更新条件
+        UpdateWrapper<UserInfo> updateWrapper = getUserInfoUpdateWrapper(userInfoVo, userRolesVo);
+
+        // 如果没有字段变更，不执行更新，直接返回 true
+        if (updateWrapper.getSqlSet() == null)
+        {
+            return true;
+        }
+
+        return userInfoEntityService.update(updateWrapper);
+    }
+
+    private static UpdateWrapper<UserInfo> getUserInfoUpdateWrapper(UserInfoVO userInfoVo, UserInfo userRolesVo)
+    {
+        UpdateWrapper<UserInfo> updateWrapper = new UpdateWrapper<>();
+        updateWrapper.eq("uuid", userRolesVo.getUuid());
+
+        // 逐个字段比对，如果数据变更，则加入更新
+        if (!Objects.equals(userRolesVo.getCfUsername(), userInfoVo.getCfUsername()))
+        {
+            updateWrapper.set("cf_username", userInfoVo.getCfUsername());
+        }
+        if (!Objects.equals(userRolesVo.getRealname(), userInfoVo.getRealname()))
+        {
+            updateWrapper.set("realname", userInfoVo.getRealname());
+        }
+        if (!Objects.equals(userRolesVo.getNickname(), userInfoVo.getNickname()))
+        {
+            updateWrapper.set("nickname", userInfoVo.getNickname());
+        }
+        if (!Objects.equals(userRolesVo.getSignature(), userInfoVo.getSignature()))
+        {
+            updateWrapper.set("signature", userInfoVo.getSignature());
+        }
+        if (!Objects.equals(userRolesVo.getBlog(), userInfoVo.getBlog()))
+        {
+            updateWrapper.set("blog", userInfoVo.getBlog());
+        }
+        if (!Objects.equals(userRolesVo.getGender(), userInfoVo.getGender()))
+        {
+            updateWrapper.set("gender", userInfoVo.getGender());
+        }
+        if (!Objects.equals(userRolesVo.getGithub(), userInfoVo.getGithub()))
+        {
+            updateWrapper.set("github", userInfoVo.getGithub());
+        }
+        if (!Objects.equals(userRolesVo.getSchool(), userInfoVo.getSchool()))
+        {
+            updateWrapper.set("school", userInfoVo.getSchool());
+        }
+        if (!Objects.equals(userRolesVo.getNumber(), userInfoVo.getNumber()))
+        {
+            updateWrapper.set("number", userInfoVo.getNumber());
+        }
+        return updateWrapper;
+    }
+
 }

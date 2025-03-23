@@ -1,8 +1,11 @@
 package com.zjedu.passport.dao.user;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.zjedu.pojo.entity.user.Role;
 import com.zjedu.pojo.entity.user.UserRole;
 import com.zjedu.pojo.vo.UserRolesVO;
+
+import java.util.List;
 
 /**
  * @Author Zhong
@@ -14,4 +17,7 @@ import com.zjedu.pojo.vo.UserRolesVO;
 public interface UserRoleEntityService extends IService<UserRole>
 {
     UserRolesVO getUserRoles(String uid, String username);
+
+    List<Role> getRolesByUid(String uid);
+
 }

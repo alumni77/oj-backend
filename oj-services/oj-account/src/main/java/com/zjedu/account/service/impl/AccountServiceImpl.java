@@ -8,10 +8,7 @@ import com.zjedu.common.result.CommonResult;
 import com.zjedu.common.result.ResultStatus;
 import com.zjedu.pojo.dto.ChangePasswordDTO;
 import com.zjedu.pojo.dto.CheckUsernameDTO;
-import com.zjedu.pojo.vo.ChangeAccountVO;
-import com.zjedu.pojo.vo.CheckUsernameVO;
-import com.zjedu.pojo.vo.UserCalendarHeatmapVO;
-import com.zjedu.pojo.vo.UserHomeVO;
+import com.zjedu.pojo.vo.*;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 
@@ -71,5 +68,23 @@ public class AccountServiceImpl implements AccountService
         {
             return CommonResult.errorResponse(e.getMessage(), ResultStatus.SYSTEM_ERROR);
         }
+    }
+
+    @Override
+    public CommonResult<UserInfoVO> changeUserInfo(UserInfoVO userInfoVo)
+    {
+        try
+        {
+            return CommonResult.successResponse(accountManager.changeUserInfo(userInfoVo));
+        } catch (StatusFailException e)
+        {
+            return CommonResult.errorResponse(e.getMessage());
+        }
+    }
+
+    @Override
+    public CommonResult<UserAuthInfoVO> getUserAuthInfo()
+    {
+        return CommonResult.successResponse(accountManager.getUserAuthInfo());
     }
 }
