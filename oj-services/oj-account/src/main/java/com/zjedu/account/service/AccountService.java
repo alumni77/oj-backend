@@ -1,7 +1,9 @@
 package com.zjedu.account.service;
 
 import com.zjedu.common.result.CommonResult;
+import com.zjedu.pojo.dto.ChangePasswordDTO;
 import com.zjedu.pojo.dto.CheckUsernameDTO;
+import com.zjedu.pojo.vo.ChangeAccountVO;
 import com.zjedu.pojo.vo.CheckUsernameVO;
 import com.zjedu.pojo.vo.UserCalendarHeatmapVO;
 import com.zjedu.pojo.vo.UserHomeVO;
@@ -20,4 +22,6 @@ public interface AccountService
     CommonResult<UserHomeVO> getUserHomeInfo(String uid, String username);
 
     CommonResult<UserCalendarHeatmapVO> getUserCalendarHeatmap(String uid, String username);
+
+    CommonResult<ChangeAccountVO> changePassword(ChangePasswordDTO changePasswordDto);
 }

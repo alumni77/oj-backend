@@ -3,8 +3,12 @@ package com.zjedu.account.service.impl;
 import com.zjedu.account.manager.AccountManager;
 import com.zjedu.account.service.AccountService;
 import com.zjedu.common.exception.StatusFailException;
+import com.zjedu.common.exception.StatusSystemErrorException;
 import com.zjedu.common.result.CommonResult;
+import com.zjedu.common.result.ResultStatus;
+import com.zjedu.pojo.dto.ChangePasswordDTO;
 import com.zjedu.pojo.dto.CheckUsernameDTO;
+import com.zjedu.pojo.vo.ChangeAccountVO;
 import com.zjedu.pojo.vo.CheckUsernameVO;
 import com.zjedu.pojo.vo.UserCalendarHeatmapVO;
 import com.zjedu.pojo.vo.UserHomeVO;
@@ -33,19 +37,39 @@ public class AccountServiceImpl implements AccountService
     @Override
     public CommonResult<UserHomeVO> getUserHomeInfo(String uid, String username)
     {
-        try {
+        try
+        {
             return CommonResult.successResponse(accountManager.getUserHomeInfo(uid, username));
-        } catch (StatusFailException e) {
+        } catch (StatusFailException e)
+        {
             return CommonResult.errorResponse(e.getMessage());
         }
     }
 
     @Override
-    public CommonResult<UserCalendarHeatmapVO> getUserCalendarHeatmap(String uid, String username) {
-        try {
+    public CommonResult<UserCalendarHeatmapVO> getUserCalendarHeatmap(String uid, String username)
+    {
+        try
+        {
             return CommonResult.successResponse(accountManager.getUserCalendarHeatmap(uid, username));
-        } catch (StatusFailException e) {
+        } catch (StatusFailException e)
+        {
             return CommonResult.errorResponse(e.getMessage());
+        }
+    }
+
+    @Override
+    public CommonResult<ChangeAccountVO> changePassword(ChangePasswordDTO changePasswordDto)
+    {
+        try
+        {
+            return CommonResult.successResponse(accountManager.changePassword(changePasswordDto));
+        } catch (StatusFailException e)
+        {
+            return CommonResult.errorResponse(e.getMessage());
+        } catch (StatusSystemErrorException e)
+        {
+            return CommonResult.errorResponse(e.getMessage(), ResultStatus.SYSTEM_ERROR);
         }
     }
 }

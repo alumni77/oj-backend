@@ -41,7 +41,8 @@ public class JwtUtils
     private RedisUtils redisUtils;
 
     // 生成 token
-    public String generateToken(String userId) {
+    public String generateToken(String userId)
+    {
         Date nowDate = new Date();
         Date expireDate = new Date(nowDate.getTime() + expire * 1000);
 
@@ -62,8 +63,10 @@ public class JwtUtils
     }
 
     // 解析 Claims
-    public Claims getClaimByToken(String token) {
-        try {
+    public Claims getClaimByToken(String token)
+    {
+        try
+        {
             // 创建密钥
             SecretKey key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
 
@@ -72,7 +75,8 @@ public class JwtUtils
                     .build()
                     .parseClaimsJws(token)
                     .getBody();
-        } catch (Exception e) {
+        } catch (Exception e)
+        {
             log.debug("validate is token error ", e);
             return null;
         }

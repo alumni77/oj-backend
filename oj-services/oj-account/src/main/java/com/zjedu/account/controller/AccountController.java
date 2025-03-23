@@ -3,7 +3,9 @@ package com.zjedu.account.controller;
 import com.zjedu.account.service.AccountService;
 import com.zjedu.annotation.AnonApi;
 import com.zjedu.common.result.CommonResult;
+import com.zjedu.pojo.dto.ChangePasswordDTO;
 import com.zjedu.pojo.dto.CheckUsernameDTO;
+import com.zjedu.pojo.vo.ChangeAccountVO;
 import com.zjedu.pojo.vo.CheckUsernameVO;
 import com.zjedu.pojo.vo.UserCalendarHeatmapVO;
 import com.zjedu.pojo.vo.UserHomeVO;
@@ -64,6 +66,18 @@ public class AccountController
                                                                       @RequestParam(value = "username", required = false) String username)
     {
         return accountService.getUserCalendarHeatmap(uid, username);
+    }
+
+    /**
+     * 修改密码的操作，连续半小时内修改密码错误5次，则需要半个小时后才可以再次尝试修改密码
+     *
+     * @param changePasswordDto
+     * @return
+     */
+    @PostMapping("/change-password")
+    public CommonResult<ChangeAccountVO> changePassword(@RequestBody ChangePasswordDTO changePasswordDto)
+    {
+        return accountService.changePassword(changePasswordDto);
     }
 
 }

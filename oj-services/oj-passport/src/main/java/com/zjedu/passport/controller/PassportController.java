@@ -1,6 +1,8 @@
 package com.zjedu.passport.controller;
 
+import cn.hutool.crypto.SecureUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.zjedu.annotation.AnonApi;
 import com.zjedu.common.result.CommonResult;
 import com.zjedu.passport.dao.user.UserInfoEntityService;
@@ -16,7 +18,6 @@ import com.zjedu.pojo.vo.UserInfoVO;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.apache.shiro.authz.annotation.RequiresAuthentication;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -91,7 +92,6 @@ public class PassportController
      * @return
      */
     @GetMapping("/logout")
-    @RequiresAuthentication
     public CommonResult<Void> logout()
     {
         return passportService.logout();
@@ -106,6 +106,23 @@ public class PassportController
         QueryWrapper<UserInfo> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("username", username);
         return userInfoEntityService.getOne(queryWrapper);
+    }
+
+    @GetMapping("/get-user-by-uid")
+    public UserInfo getByUid(String uid)
+    {
+        QueryWrapper<UserInfo> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("uuid", uid);
+        return userInfoEntityService.getOne(queryWrapper);
+    }
+
+    @PutMapping("/update-password")
+    public boolean updatePassword(String uid, String newPassword)
+    {
+        UpdateWrapper<UserInfo> updateWrapper = new UpdateWrapper<>();
+        updateWrapper.set("password", SecureUtil.md5(newPassword))
+                .eq("uuid", uid);
+        return userInfoEntityService.update(updateWrapper);
     }
 
     @Resource

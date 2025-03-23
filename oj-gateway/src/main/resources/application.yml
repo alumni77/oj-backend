@@ -4,11 +4,48 @@ server:
 spring:
   profiles:
     include: route
+    active: dev
   application:
     name: oj-gateway
   cloud:
     nacos:
-      server-addr: 127.0.0.1:8848
+      discovery:
+        server-addr: ${NACOS_CONFIG_URL}
+        username: ${NACOS_CONFIG_USERNAME}
+        password: ${NACOS_CONFIG_PASSWORD}
+        group: ${NACOS_CONFIG_GROUP}
+        enabled: true
+    gateway:
+      globalcors:
+        cors-configurations:
+            '[/**]':
+                allowedOrigins:
+                  - ${VITE_APP_BASE_URL}
+                allowedMethods:
+                - GET
+                - POST
+                - PUT
+                - DELETE
+                allowedHeaders:
+                - "*"
+                allowCredentials: true
+                max-age: 3600
+                exposed-headers:
+                  - Refresh-Token
+                  - Authorization
+                  - Url-Type
+                  - Content-disposition
+                  - Content-Type
+
+  # Redis 基础配置
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
+      password: ${REDIS_PASSWORD}
+      database: 0
+      timeout: 5000
+      connect-timeout: 100000
 
 
 springdoc:
@@ -25,3 +62,14 @@ knife4j:
       version: openapi3
       excluded-services:
         - oj-gateway
+
+oj:
+  jwt:
+    secret: ${JWT_SECRET}
+    expire: 86500
+    check-refresh-expire: 43200
+    header: Authorization
+
+logging:
+  level:
+    com.zjedu.gateway: DEBUG

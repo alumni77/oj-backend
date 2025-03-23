@@ -1,7 +1,10 @@
 spring:
   application:
     name: oj-account
-
+#  autoconfigure:
+#    exclude:
+#      - org.apache.shiro.spring.config.web.autoconfigure.ShiroWebAutoConfiguration
+#      - org.apache.shiro.spring.config.web.autoconfigure.ShiroWebFilterConfiguration
   # 默认环境
   profiles:
     active: dev
@@ -100,6 +103,6 @@ oj:
 
 logging:
   level:
-    com.zjedu.account.manager: debug
-    org.mybatis: debug
-    feign: debug
+    com.zjedu.account.manager: DEBUG
+    org.mybatis: DEBUG
+    feign: DEBUG

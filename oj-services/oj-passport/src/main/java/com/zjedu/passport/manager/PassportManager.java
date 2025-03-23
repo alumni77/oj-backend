@@ -23,7 +23,6 @@ import com.zjedu.pojo.entity.user.UserRole;
 import com.zjedu.pojo.vo.CodeVO;
 import com.zjedu.pojo.vo.UserInfoVO;
 import com.zjedu.pojo.vo.UserRolesVO;
-import com.zjedu.shiro.AccountProfile;
 import com.zjedu.utils.Constants;
 import com.zjedu.utils.IpUtils;
 import com.zjedu.utils.JwtUtils;
@@ -31,7 +30,6 @@ import com.zjedu.utils.RedisUtils;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.apache.shiro.SecurityUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -67,6 +65,8 @@ public class PassportManager
     @Resource
     private NacosSwitchConfig nacosSwitchConfig;
 
+    @Resource
+    private HttpServletRequest request;
 
     public UserInfoVO login(LoginDTO loginDto, HttpServletResponse response, HttpServletRequest request) throws StatusFailException
     {
@@ -288,8 +288,9 @@ public class PassportManager
 
     public void logout()
     {
-        AccountProfile userRolesVo = (AccountProfile) SecurityUtils.getSubject().getPrincipal();
-        jwtUtils.cleanToken(userRolesVo.getUid());
-        SecurityUtils.getSubject().logout();
+        String userId = request.getHeader("X-User-ID");
+        if (StringUtils.hasText(userId)) {
+            jwtUtils.cleanToken(userId);
+        }
     }
 }
