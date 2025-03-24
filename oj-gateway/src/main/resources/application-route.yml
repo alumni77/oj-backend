@@ -10,6 +10,10 @@ spring:
           uri: lb://oj-account
           predicates:
             - Path=/api/account/**
+        - id: oj-judge
+          uri: lb://oj-judge
+          predicates:
+            - Path=/api/judge/**
         # 添加以下API文档路由
         - id: oj-passport-docs
           uri: lb://oj-passport
@@ -21,6 +25,12 @@ spring:
           uri: lb://oj-account
           predicates:
             - Path=/api/account/v3/api-docs/**
+          filters:
+            - StripPrefix=1
+        - id: oj-judge-docs
+          uri: lb://oj-judge
+          predicates:
+            - Path=/api/judge/v3/api-docs/**
           filters:
             - StripPrefix=1
       discovery:

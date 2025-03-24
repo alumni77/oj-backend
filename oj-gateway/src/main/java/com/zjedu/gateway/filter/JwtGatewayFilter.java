@@ -61,6 +61,7 @@ public class JwtGatewayFilter implements GlobalFilter, Ordered
             "/api/passport/get-user-home-info",
             "/api/passport/get-user-by-uid",
             "/api/passport/get-recent7-ac-rank",
+            // Judge服务的匿名接口
 
             // Account服务的匿名接口
             "/api/account/check-username",
@@ -70,7 +71,12 @@ public class JwtGatewayFilter implements GlobalFilter, Ordered
             // Passport服务的Swagger配置
             "/api/account/v3/api-docs/**",
             "/api/account/swagger-ui/**",
-            "/api/account/doc.html"
+            "/api/account/doc.html",
+            // Judge服务的Swagger配置
+            "/api/judge/v3/api-docs/**",
+            "/api/judge/swagger-ui/**",
+            "/api/judge/doc.html"
+
 
     );
 
