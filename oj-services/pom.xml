@@ -15,6 +15,7 @@
         <module>oj-passport</module>
         <module>oj-account</module>
         <module>oj-judge</module>
+        <module>oj-judgeserve</module>
     </modules>
 
     <properties>
