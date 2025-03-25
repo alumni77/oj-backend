@@ -2,10 +2,13 @@ package com.zjedu.judge.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
+import com.zjedu.judge.common.exception.SystemError;
 import com.zjedu.judge.dao.JudgeEntityService;
 import com.zjedu.judge.dao.ProblemEntityService;
 import com.zjedu.judge.judge.JudgeContext;
 import com.zjedu.judge.service.JudgeService;
+import com.zjedu.pojo.dto.TestJudgeReq;
+import com.zjedu.pojo.dto.TestJudgeRes;
 import com.zjedu.pojo.entity.judge.Judge;
 import com.zjedu.pojo.entity.problem.Problem;
 import com.zjedu.utils.Constants;
@@ -13,6 +16,7 @@ import jakarta.annotation.Resource;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.Objects;
 
 /**
@@ -63,7 +67,7 @@ public class JudgeServiceImpl implements JudgeService
             return;
         }
 
-        // TODO 后续的判题操作未调通
+        // TODO 后续的判题操作未调通,Context的相关方法为调通
 
         // 进行判题操作
         QueryWrapper<Problem> problemQueryWrapper = new QueryWrapper<>();
@@ -105,5 +109,17 @@ public class JudgeServiceImpl implements JudgeService
                     finalJudgeRes.getScore(),
                     finalJudgeRes.getTime());
         }
+    }
+
+    @Override
+    public TestJudgeRes testJudge(TestJudgeReq testJudgeReq)
+    {
+        return judgeContext.testJudge(testJudgeReq);
+    }
+
+    @Override
+    public Boolean compileSpj(String code, Long pid, String spjLanguage, HashMap<String, String> extraFiles) throws SystemError
+    {
+        return judgeContext.compileSpj(code, pid, spjLanguage, extraFiles);
     }
 }
