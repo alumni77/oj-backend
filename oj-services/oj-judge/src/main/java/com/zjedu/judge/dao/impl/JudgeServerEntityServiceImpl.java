@@ -39,7 +39,8 @@ public class JudgeServerEntityServiceImpl extends ServiceImpl<JudgeServerMapper,
     private String name;
 
     @Override
-    public HashMap<String, Object> getJudgeServerInfo() {
+    public HashMap<String, Object> getJudgeServerInfo()
+    {
 
         HashMap<String, Object> res = new HashMap<>();
 
@@ -49,28 +50,35 @@ public class JudgeServerEntityServiceImpl extends ServiceImpl<JudgeServerMapper,
         res.put("cpu", Runtime.getRuntime().availableProcessors());
         res.put("languages", Arrays.asList("G++ 9.4.0", "GCC 9.4.0", "Python 3.7.5",
                 "Python 2.7.17", "OpenJDK 1.8", "Golang 1.19", "C# Mono 4.6.2",
-                "PHP 7.2.24","JavaScript Node 14.19.0","JavaScript V8 8.4.109",
-                "PyPy 2.7.18 (7.3.9)","PyPy 3.9.17 (7.3.12)", "Ruby 2.5.1", "Rust 1.65.0"));
+                "PHP 7.2.24", "JavaScript Node 14.19.0", "JavaScript V8 8.4.109",
+                "PyPy 2.7.18 (7.3.9)", "PyPy 3.9.17 (7.3.12)", "Ruby 2.5.1", "Rust 1.65.0"));
 
-        if (maxTaskNum == -1) {
+        if (maxTaskNum == -1)
+        {
             res.put("maxTaskNum", Runtime.getRuntime().availableProcessors() + 1);
-        } else {
+        } else
+        {
             res.put("maxTaskNum", maxTaskNum);
         }
-        if (isOpenRemoteJudge) {
+        if (isOpenRemoteJudge)
+        {
             res.put("isOpenRemoteJudge", true);
-            if (RemoteJudgeMaxTaskNum == -1) {
+            if (RemoteJudgeMaxTaskNum == -1)
+            {
                 res.put("remoteJudgeMaxTaskNum", Runtime.getRuntime().availableProcessors() * 2 + 1);
-            } else {
+            } else
+            {
                 res.put("remoteJudgeMaxTaskNum", RemoteJudgeMaxTaskNum);
             }
         }
 
         String versionResp = "";
 
-        try {
+        try
+        {
             versionResp = SandboxRun.getRestTemplate().getForObject(SandboxRun.getSandboxBaseUrl() + "/version", String.class);
-        } catch (Exception e) {
+        } catch (Exception e)
+        {
             res.put("SandBoxMsg", MapUtil.builder().put("error", e.getMessage()).map());
             return res;
         }

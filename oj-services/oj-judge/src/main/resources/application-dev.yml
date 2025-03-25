@@ -30,3 +30,6 @@ oj-judge-server:
   remote-judge:
     open: false  # 禁用远程判题功能
     max-task-num: -1  # 远程判题最大任务数，不使用时可忽略
+oj:
+  judge:
+    token: judge_token

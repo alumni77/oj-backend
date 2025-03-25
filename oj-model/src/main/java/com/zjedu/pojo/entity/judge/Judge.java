@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.Date;
 
@@ -23,6 +24,7 @@ import java.util.Date;
 public class Judge implements Serializable
 {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     @TableId(value = "submit_id", type = IdType.AUTO)
@@ -44,26 +46,26 @@ public class Judge implements Serializable
     private Date submitTime;
 
     @Schema(description = "结果码具体参考文档")
-    @TableField(updateStrategy = FieldStrategy.IGNORED)
+    @TableField(updateStrategy = FieldStrategy.NOT_NULL)
     private Integer status;
 
     @Schema(description = "0为仅自己可见，1为全部人可见。")
     private Boolean share;
 
     @Schema(description = "错误提醒（编译错误，或者vj提醒）")
-    @TableField(updateStrategy = FieldStrategy.IGNORED)
+    @TableField(updateStrategy = FieldStrategy.NOT_NULL)
     private String errorMessage;
 
     @Schema(description = "运行时间(ms)")
-    @TableField(updateStrategy = FieldStrategy.IGNORED)
+    @TableField(updateStrategy = FieldStrategy.NOT_NULL)
     private Integer time;
 
     @Schema(description = "运行内存(kb)")
-    @TableField(updateStrategy = FieldStrategy.IGNORED)
+    @TableField(updateStrategy = FieldStrategy.NOT_NULL)
     private Integer memory;
 
     @Schema(description = "IO判题不为空")
-    @TableField(updateStrategy = FieldStrategy.IGNORED)
+    @TableField(updateStrategy = FieldStrategy.NOT_NULL)
     private Integer score;
 
     @Schema(description = "代码长度")
@@ -94,7 +96,7 @@ public class Judge implements Serializable
     private Integer version;
 
     @Schema(description = "该题在OI排行榜的分数")
-    @TableField(updateStrategy = FieldStrategy.IGNORED)
+    @TableField(updateStrategy = FieldStrategy.NOT_NULL)
     private Integer oiRankScore;
 
     @Schema(description = "vjudge判题在其它oj的提交id")

@@ -1,5 +1,7 @@
 package com.zjedu.judge.service;
 
+import com.zjedu.pojo.entity.judge.Judge;
+
 /**
  * @Author Zhong
  * @Create 2025/3/24 21:45
@@ -9,4 +11,5 @@ package com.zjedu.judge.service;
 
 public interface JudgeService
 {
+    void judge(Judge judge);
 }
