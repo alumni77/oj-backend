@@ -1,7 +1,9 @@
 package com.zjedu.judge.dao;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.zjedu.pojo.entity.judge.Judge;
+import com.zjedu.pojo.vo.JudgeVO;
 
 /**
  * @Author Zhong
@@ -12,5 +14,12 @@ import com.zjedu.pojo.entity.judge.Judge;
 
 public interface JudgeEntityService extends IService<Judge>
 {
-
+    IPage<JudgeVO> getCommonJudgeList(Integer limit,
+                                      Integer currentPage,
+                                      String searchPid,
+                                      Integer status,
+                                      String username,
+                                      String uid,
+                                      Boolean completeProblemID,
+                                      Long gid);
 }

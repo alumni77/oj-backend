@@ -1,23 +1,25 @@
 package com.zjedu.judge.controller;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.zjedu.common.result.CommonResult;
 import com.zjedu.common.result.ResultStatus;
 import com.zjedu.judge.common.exception.SystemError;
+import com.zjedu.judge.dao.JudgeEntityService;
 import com.zjedu.judge.dao.JudgeServerEntityService;
+import com.zjedu.judge.dao.ProblemEntityService;
 import com.zjedu.judge.service.JudgeService;
 import com.zjedu.pojo.dto.CompileDTO;
 import com.zjedu.pojo.dto.TestJudgeReq;
 import com.zjedu.pojo.dto.TestJudgeRes;
 import com.zjedu.pojo.dto.ToJudgeDTO;
 import com.zjedu.pojo.entity.judge.Judge;
+import com.zjedu.pojo.entity.problem.Problem;
+import com.zjedu.pojo.vo.JudgeVO;
 import jakarta.annotation.Resource;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.Objects;
@@ -71,9 +73,9 @@ public class JudgeController
     public CommonResult<TestJudgeRes> submitProblemTestJudge(@RequestBody TestJudgeReq testJudgeReq)
     {
         if (testJudgeReq == null
-                || StringUtils.isEmpty(testJudgeReq.getCode())
-                || StringUtils.isEmpty(testJudgeReq.getLanguage())
-                || StringUtils.isEmpty(testJudgeReq.getUniqueKey())
+                || !StringUtils.hasText(testJudgeReq.getCode())
+                || !StringUtils.hasText(testJudgeReq.getLanguage())
+                || !StringUtils.hasText(testJudgeReq.getUniqueKey())
                 || testJudgeReq.getTimeLimit() == null
                 || testJudgeReq.getMemoryLimit() == null
                 || testJudgeReq.getStackLimit() == null)
@@ -104,6 +106,40 @@ public class JudgeController
         {
             return CommonResult.errorResponse(systemError.getStderr(), ResultStatus.SYSTEM_ERROR);
         }
+    }
+
+    // 外露给openFeign调用
+    @Resource
+    private JudgeEntityService judgeEntityService;
+
+    @GetMapping("/common-judge-list")
+    public IPage<JudgeVO> getCommonJudgeList(
+            @RequestParam(value = "limit", required = false) Integer limit,
+            @RequestParam(value = "currentPage", required = false) Integer currentPage,
+            @RequestParam(value = "searchPid", required = false) String searchPid,
+            @RequestParam(value = "status", required = false) Integer status,
+            @RequestParam(value = "username", required = false) String username,
+            @RequestParam(value = "uid", required = false) String uid,
+            @RequestParam(value = "completeProblemID", defaultValue = "false") Boolean completeProblemID,
+            @RequestParam(value = "gid", required = false) Long gid)
+    {
+        return judgeEntityService.getCommonJudgeList(
+                limit, currentPage, searchPid, status, username, uid, completeProblemID, gid);
+    }
+
+    @GetMapping("/get-judge-by-id")
+    public Judge getJudgeById(@RequestParam("submitId") Long submitId)
+    {
+        return judgeEntityService.getById(submitId);
+    }
+
+    @Resource
+    private ProblemEntityService problemEntityService;
+
+    @GetMapping("/get-problem-by-id")
+    public Problem getProblemById(@RequestParam("pid") Long pid)
+    {
+        return problemEntityService.getById(pid);
     }
 
 }

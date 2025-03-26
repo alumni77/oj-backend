@@ -1,4 +1,4 @@
-package com.zjedu.passport.validator;
+package com.zjedu.validator;
 
 import cn.hutool.core.util.StrUtil;
 import com.zjedu.common.exception.StatusFailException;

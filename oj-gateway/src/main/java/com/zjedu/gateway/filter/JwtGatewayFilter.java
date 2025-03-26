@@ -48,10 +48,6 @@ public class JwtGatewayFilter implements GlobalFilter, Ordered
             "/doc.html",
             "/webjars/**",  // Swagger UI依赖的资源
 
-            // Passport服务的Swagger配置
-            "/api/passport/v3/api-docs/**",
-            "/api/passport/swagger-ui/**",
-            "/api/passport/doc.html",
             // Passport服务的匿名接口
             "/api/passport/login",
             "/api/passport/get-code",
@@ -62,15 +58,23 @@ public class JwtGatewayFilter implements GlobalFilter, Ordered
             "/api/passport/get-user-by-uid",
             "/api/passport/get-recent7-ac-rank",
             // Judge服务的匿名接口
-
+            "/api/judge/common-judge-list",
+            "/api/judge/get-judge-by-id",
+            "/api/judge/get-problem-by-id",
             // JudgeServe服务的匿名接口
-
+            "/api/judgeserve/get-submission-list",
+            "/api/judgeserve/get-submission-detail",
             // Account服务的匿名接口
             "/api/account/check-username",
             "/api/account/home-carousel",
             "/api/account/get-recent-seven-ac-rank",
             "/api/account/get-recent-updated-problem",
+
             // Passport服务的Swagger配置
+            "/api/passport/v3/api-docs/**",
+            "/api/passport/swagger-ui/**",
+            "/api/passport/doc.html",
+            // account服务的Swagger配置
             "/api/account/v3/api-docs/**",
             "/api/account/swagger-ui/**",
             "/api/account/doc.html",

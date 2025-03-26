@@ -13,7 +13,7 @@ import com.zjedu.config.WebConfig;
 import com.zjedu.passport.dao.user.UserInfoEntityService;
 import com.zjedu.passport.dao.user.UserRecordEntityService;
 import com.zjedu.passport.dao.user.UserRoleEntityService;
-import com.zjedu.passport.validator.CommonValidator;
+import com.zjedu.validator.CommonValidator;
 import com.zjedu.pojo.dto.LoginDTO;
 import com.zjedu.pojo.dto.RegisterDTO;
 import com.zjedu.pojo.dto.ResetPasswordDTO;
