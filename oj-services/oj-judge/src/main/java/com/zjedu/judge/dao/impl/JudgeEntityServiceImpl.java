@@ -1,6 +1,7 @@
 package com.zjedu.judge.dao.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -10,6 +11,7 @@ import com.zjedu.judge.mapper.ProblemMapper;
 import com.zjedu.pojo.entity.judge.Judge;
 import com.zjedu.pojo.entity.problem.Problem;
 import com.zjedu.pojo.vo.JudgeVO;
+import com.zjedu.utils.Constants;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -36,12 +38,12 @@ public class JudgeEntityServiceImpl extends ServiceImpl<JudgeMapper, Judge> impl
 
 
     @Override
-    public IPage<JudgeVO> getCommonJudgeList(Integer limit, Integer currentPage, String searchPid, Integer status, String username, String uid, Boolean completeProblemID, Long gid)
+    public IPage<JudgeVO> getCommonJudgeList(Integer limit, Integer currentPage, String searchPid, Integer status, String username, String uid, Boolean completeProblemID)
     {
         //新建分页
         Page<JudgeVO> page = new Page<>(currentPage, limit);
 
-        IPage<JudgeVO> commonJudgeList = judgeMapper.getCommonJudgeList(page, searchPid, status, username, uid, completeProblemID, gid);
+        IPage<JudgeVO> commonJudgeList = judgeMapper.getCommonJudgeList(page, searchPid, status, username, uid, completeProblemID);
         List<JudgeVO> records = commonJudgeList.getRecords();
         if (!CollectionUtils.isEmpty(records))
         {
@@ -75,5 +77,24 @@ public class JudgeEntityServiceImpl extends ServiceImpl<JudgeMapper, Judge> impl
             }
         }
         return "";
+    }
+
+    @Override
+    public void failToUseRedisPublishJudge(Long submitId, Long pid, Boolean isContest)
+    {
+        UpdateWrapper<Judge> judgeUpdateWrapper = new UpdateWrapper<>();
+        judgeUpdateWrapper.eq("submit_id", submitId)
+                .set("error_message", "The something has gone wrong with the data Backup server. Please report this to administrator.")
+                .set("status", Constants.Judge.STATUS_SYSTEM_ERROR.getStatus());
+        judgeMapper.update(null, judgeUpdateWrapper);
+//        // 更新contest_record表
+//        if (isContest)
+//        {
+//            UpdateWrapper<ContestRecord> updateWrapper = new UpdateWrapper<>();
+//            updateWrapper.eq("submit_id", submitId) // submit_id一定只有一个
+//                    .set("first_blood", false)
+//                    .set("status", Constants.Contest.RECORD_NOT_AC_NOT_PENALTY.getCode());
+//            contestRecordEntityService.update(updateWrapper);
+//        }
     }
 }

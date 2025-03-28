@@ -77,14 +77,14 @@ public class Judge implements Serializable
     @Schema(description = "代码语言")
     private String language;
 
-    @Schema(description = "比赛id，非比赛提交默认为0")
-    private Long cid;
+//    @Schema(description = "比赛id，非比赛提交默认为0")
+//    private Long cid;
 
-    @Schema(description = "比赛中题目排序id，非比赛提交默认为0")
-    private Long cpid;
+//    @Schema(description = "比赛中题目排序id，非比赛提交默认为0")
+//    private Long cpid;
 
-    @Schema(description = "团队id，非团队内题目提交为null")
-    private Long gid;
+//    @Schema(description = "团队id，非团队内题目提交为null")
+//    private Long gid;
 
     @Schema(description = "判题机名称")
     private String judger;

@@ -20,6 +20,6 @@ import org.springframework.stereotype.Repository;
 public interface JudgeMapper extends BaseMapper<Judge>
 {
 
-    IPage<JudgeVO> getCommonJudgeList(Page<JudgeVO> page, String searchPid, Integer status, String username, String uid, Boolean completeProblemID, Long gid);
+    IPage<JudgeVO> getCommonJudgeList(Page<JudgeVO> page, String searchPid, Integer status, String username, String uid, Boolean completeProblemID);
 
 }

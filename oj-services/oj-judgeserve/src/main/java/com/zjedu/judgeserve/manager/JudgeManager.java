@@ -2,11 +2,13 @@ package com.zjedu.judgeserve.manager;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.zjedu.annotation.HOJAccessEnum;
-import com.zjedu.common.exception.AccessException;
-import com.zjedu.common.exception.StatusAccessDeniedException;
-import com.zjedu.common.exception.StatusNotFoundException;
+import com.zjedu.common.exception.*;
+import com.zjedu.config.NacosSwitchConfig;
+import com.zjedu.config.SwitchConfig;
 import com.zjedu.judgeserve.feign.JudgeFeignClient;
 import com.zjedu.judgeserve.feign.PassportFeignClient;
+import com.zjedu.judgeserve.judge.self.JudgeDispatcher;
+import com.zjedu.pojo.dto.SubmitJudgeDTO;
 import com.zjedu.pojo.entity.judge.Judge;
 import com.zjedu.pojo.entity.problem.Problem;
 import com.zjedu.pojo.entity.user.UserInfo;
@@ -14,10 +16,17 @@ import com.zjedu.pojo.vo.JudgeVO;
 import com.zjedu.pojo.vo.SubmissionInfoVO;
 import com.zjedu.pojo.vo.UserRolesVO;
 import com.zjedu.utils.Constants;
+import com.zjedu.utils.IpUtils;
+import com.zjedu.utils.RedisUtils;
 import com.zjedu.validator.AccessValidator;
+import com.zjedu.validator.JudgeValidator;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Component;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
+
+import java.util.Date;
 
 /**
  * @Author Zhong
@@ -37,10 +46,25 @@ public class JudgeManager
     private AccessValidator accessValidator;
 
     @Resource
+    private JudgeValidator judgeValidator;
+
+    @Resource
+    private NacosSwitchConfig nacosSwitchConfig;
+
+    @Resource
+    private RedisUtils redisUtils;
+
+    @Resource
     private PassportFeignClient passportFeignClient;
 
     @Resource
     private JudgeFeignClient judgeFeignClient;
+
+    @Resource
+    private BeforeDispatchInitManager beforeDispatchInitManager;
+
+    @Resource
+    private JudgeDispatcher judgeDispatcher;
 
     /**
      * 通用查询判题记录列表
@@ -52,11 +76,10 @@ public class JudgeManager
      * @param searchStatus
      * @param searchUsername
      * @param completeProblemID
-     * @param gid
      * @return
      * @throws StatusAccessDeniedException
      */
-    public IPage<JudgeVO> getJudgeList(Integer limit, Integer currentPage, Boolean onlyMine, String searchPid, Integer searchStatus, String searchUsername, Boolean completeProblemID, Long gid) throws StatusAccessDeniedException
+    public IPage<JudgeVO> getJudgeList(Integer limit, Integer currentPage, Boolean onlyMine, String searchPid, Integer searchStatus, String searchUsername, Boolean completeProblemID) throws StatusAccessDeniedException
     {
         // 页数，每页题数若为空，设置默认值
         if (currentPage == null || currentPage < 1) currentPage = 1;
@@ -91,8 +114,7 @@ public class JudgeManager
                 searchStatus,
                 searchUsername,
                 uid,
-                completeProblemID,
-                gid);
+                completeProblemID);
 
     }
 
@@ -179,5 +201,59 @@ public class JudgeManager
         submissionInfoVo.setCodeShare(problem.getCodeShare());
 
         return submissionInfoVo;
+    }
+
+    public Judge submitProblemJudge(SubmitJudgeDTO judgeDto) throws StatusForbiddenException, StatusFailException, StatusNotFoundException, StatusAccessDeniedException, AccessException
+    {
+        judgeValidator.validateSubmissionInfo(judgeDto);
+
+        // 需要获取一下该token对应用户的数据
+        //从请求头获取用户ID
+        String userId = request.getHeader("X-User-Id");
+        UserInfo userRolesVo = passportFeignClient.getByUid(userId);
+
+        boolean isTrainingSubmission = judgeDto.getTid() != null && judgeDto.getTid() != 0;
+        boolean isContestSubmission = false;
+
+        SwitchConfig switchConfig = nacosSwitchConfig.getSwitchConfig();
+
+        // 提交频率限制
+        String lockKey = Constants.Account.SUBMIT_NON_CONTEST_LOCK.getCode() + userRolesVo.getUuid();
+        if (switchConfig.getDefaultSubmitInterval() > 0 && !redisUtils.isWithinRateLimit(lockKey, switchConfig.getDefaultSubmitInterval()))
+        {
+            throw new StatusForbiddenException("对不起，您的提交频率过快，请稍后再尝试！");
+        }
+
+        HttpServletRequest request = ((ServletRequestAttributes) (RequestContextHolder.currentRequestAttributes())).getRequest();
+        // 将提交先写入数据库，准备调用判题服务器
+        Judge judge = new Judge();
+        judge.setShare(false) // 默认设置代码为单独自己可见
+                .setCode(judgeDto.getCode())
+//                .setCid(judgeDto.getCid())
+//                .setGid(judgeDto.getGid())
+                .setLanguage(judgeDto.getLanguage())
+                .setLength(judgeDto.getCode().length())
+                .setUid(userRolesVo.getUuid())
+                .setUsername(userRolesVo.getUsername())
+                .setStatus(Constants.Judge.STATUS_PENDING.getStatus()) // 开始进入判题队列
+                .setSubmitTime(new Date())
+                .setVersion(0)
+                .setIp(IpUtils.getUserIpAddr(request));
+
+        // 根据提交类型初始化
+        if (isTrainingSubmission)
+        {
+//            beforeDispatchInitManager.initTrainingSubmission(judgeDto.getTid(), judgeDto.getPid(), userRolesVo, judge);
+        } else
+        {
+            judge = beforeDispatchInitManager.initCommonSubmission(judgeDto.getPid(), judge);
+        }
+
+        // 将提交加入任务队列
+        judgeDispatcher.sendTask(judge.getSubmitId(),
+                judge.getPid(),
+                isContestSubmission);
+
+        return judge;
     }
 }

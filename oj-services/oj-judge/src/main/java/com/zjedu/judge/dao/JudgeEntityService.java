@@ -20,6 +20,7 @@ public interface JudgeEntityService extends IService<Judge>
                                       Integer status,
                                       String username,
                                       String uid,
-                                      Boolean completeProblemID,
-                                      Long gid);
+                                      Boolean completeProblemID);
+
+    void failToUseRedisPublishJudge(Long submitId, Long pid, Boolean isContest);
 }

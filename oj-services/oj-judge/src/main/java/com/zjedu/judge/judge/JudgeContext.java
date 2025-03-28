@@ -103,15 +103,13 @@ public class JudgeContext
 
     public void updateOtherTable(Long submitId,
                                  Integer status,
-                                 Long cid,
                                  String uid,
                                  Long pid,
-                                 Long gid,
                                  Integer score,
                                  Integer useTime)
     {
         // 如果是AC,就更新user_acproblem表,
-        if (status.intValue() == Constants.Judge.STATUS_ACCEPTED.getStatus() && gid == null)
+        if (status.intValue() == Constants.Judge.STATUS_ACCEPTED.getStatus())
         {
             userAcproblemEntityService.saveOrUpdate(new UserAcproblem()
                     .setPid(pid)

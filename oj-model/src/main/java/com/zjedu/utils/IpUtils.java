@@ -3,6 +3,7 @@ package com.zjedu.utils;
 import lombok.extern.slf4j.Slf4j;
 
 import jakarta.servlet.http.HttpServletRequest;
+
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
@@ -16,49 +17,65 @@ import java.net.UnknownHostException;
 @Slf4j(topic = "oj-Ip")
 public class IpUtils
 {
-    public static String getUserIpAddr(HttpServletRequest request) {
+    public static String getUserIpAddr(HttpServletRequest request)
+    {
         String ipAddress = null;
-        try {
+        try
+        {
             ipAddress = request.getHeader("x-forwarded-for");
-            if (ipAddress == null || ipAddress.length() == 0 || "unknown".equalsIgnoreCase(ipAddress)) {
+            if (ipAddress == null || ipAddress.isEmpty() || "unknown".equalsIgnoreCase(ipAddress))
+            {
                 ipAddress = request.getHeader("Proxy-Client-IP");
             }
-            if (ipAddress == null || ipAddress.length() == 0 || "unknown".equalsIgnoreCase(ipAddress)) {
+            if (ipAddress == null || ipAddress.isEmpty() || "unknown".equalsIgnoreCase(ipAddress))
+            {
                 ipAddress = request.getHeader("WL-Proxy-Client-IP");
             }
-            if (ipAddress == null || ipAddress.length() == 0 || "unknown".equalsIgnoreCase(ipAddress)) {
+            if (ipAddress == null || ipAddress.isEmpty() || "unknown".equalsIgnoreCase(ipAddress))
+            {
                 ipAddress = request.getRemoteAddr();
-                if (ipAddress.equals("127.0.0.1")) {
+                if (ipAddress.equals("127.0.0.1") || ipAddress.equals("0:0:0:0:0:0:0:1"))
+                {
                     // 根据网卡取本机配置的IP
-                    try {
+                    try
+                    {
                         ipAddress = InetAddress.getLocalHost().getHostAddress();
-                    } catch (UnknownHostException e) {
+                    } catch (UnknownHostException e)
+                    {
                         log.error("用户ip获取异常------->{}", e.getMessage());
                     }
                 }
             }
             // 通过多个代理的情况，第一个IP为客户端真实IP,多个IP按照','分割
-            if (ipAddress != null) {
-                if (ipAddress.contains(",")) {
+            if (ipAddress != null)
+            {
+                if (ipAddress.contains(","))
+                {
                     return ipAddress.split(",")[0];
-                } else {
+                } else
+                {
                     return ipAddress;
                 }
-            } else {
+            } else
+            {
                 return "";
             }
-        } catch (Exception e) {
+        } catch (Exception e)
+        {
             log.error("用户ip获取异常------->{}", e.getMessage());
             return "";
         }
     }
 
-    public static String getServiceIp() {
+    public static String getServiceIp()
+    {
         InetAddress address = null;
-        try {
+        try
+        {
             address = InetAddress.getLocalHost();
             return address.getHostAddress(); //返回IP地址
-        } catch (UnknownHostException e) {
+        } catch (UnknownHostException e)
+        {
             log.error("本地ip获取异常---------->{}", e.getMessage());
         }
         return null;

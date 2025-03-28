@@ -21,4 +21,6 @@ public interface JudgeService
     TestJudgeRes testJudge(TestJudgeReq testJudgeReq);
 
     Boolean compileSpj(String code, Long pid, String spjLanguage, HashMap<String, String> extraFiles) throws SystemError;
+
+    Boolean compileInteractive(String code, Long pid, String language, HashMap<String, String> extraFiles) throws SystemError;
 }

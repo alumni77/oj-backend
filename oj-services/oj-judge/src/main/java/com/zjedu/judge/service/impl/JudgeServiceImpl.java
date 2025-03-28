@@ -58,10 +58,8 @@ public class JudgeServiceImpl implements JudgeService
         {
             judgeContext.updateOtherTable(judge.getSubmitId(),
                     Constants.Judge.STATUS_CANCELLED.getStatus(),
-                    judge.getCid(),
                     judge.getUid(),
                     judge.getPid(),
-                    judge.getGid(),
                     null,
                     null);
             return;
@@ -102,10 +100,8 @@ public class JudgeServiceImpl implements JudgeService
             // 更新其它表
             judgeContext.updateOtherTable(finalJudgeRes.getSubmitId(),
                     finalJudgeRes.getStatus(),
-                    judge.getCid(),
                     judge.getUid(),
                     judge.getPid(),
-                    judge.getGid(),
                     finalJudgeRes.getScore(),
                     finalJudgeRes.getTime());
         }
@@ -121,5 +117,11 @@ public class JudgeServiceImpl implements JudgeService
     public Boolean compileSpj(String code, Long pid, String spjLanguage, HashMap<String, String> extraFiles) throws SystemError
     {
         return judgeContext.compileSpj(code, pid, spjLanguage, extraFiles);
+    }
+
+    @Override
+    public Boolean compileInteractive(String code, Long pid, String interactiveLanguage, HashMap<String, String> extraFiles) throws SystemError
+    {
+        return judgeContext.compileInteractive(code, pid, interactiveLanguage, extraFiles);
     }
 }

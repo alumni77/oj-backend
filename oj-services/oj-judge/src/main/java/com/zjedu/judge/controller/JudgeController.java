@@ -1,5 +1,7 @@
 package com.zjedu.judge.controller;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.zjedu.common.result.CommonResult;
 import com.zjedu.common.result.ResultStatus;
@@ -13,15 +15,18 @@ import com.zjedu.pojo.dto.TestJudgeReq;
 import com.zjedu.pojo.dto.TestJudgeRes;
 import com.zjedu.pojo.dto.ToJudgeDTO;
 import com.zjedu.pojo.entity.judge.Judge;
+import com.zjedu.pojo.entity.judge.JudgeServer;
 import com.zjedu.pojo.entity.problem.Problem;
 import com.zjedu.pojo.vo.JudgeVO;
 import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -32,6 +37,7 @@ import java.util.Objects;
  */
 @RestController
 @RefreshScope
+@Slf4j
 public class JudgeController
 {
     @Resource
@@ -108,24 +114,43 @@ public class JudgeController
         }
     }
 
+    @PostMapping(value = "/compile-interactive")
+    public CommonResult<Void> compileInteractive(@RequestBody CompileDTO compileDTO)
+    {
+
+        if (!Objects.equals(compileDTO.getToken(), judgeToken))
+        {
+            return CommonResult.errorResponse("对不起！您使用的判题服务调用凭证不正确！访问受限！", ResultStatus.ACCESS_DENIED);
+        }
+
+        try
+        {
+            judgeService.compileInteractive(compileDTO.getCode(), compileDTO.getPid(), compileDTO.getLanguage(), compileDTO.getExtraFiles());
+            return CommonResult.successResponse(null, "编译成功！");
+        } catch (SystemError systemError)
+        {
+            return CommonResult.errorResponse(systemError.getStderr(), ResultStatus.SYSTEM_ERROR);
+        }
+    }
+
     // 外露给openFeign调用
     @Resource
     private JudgeEntityService judgeEntityService;
 
     @GetMapping("/common-judge-list")
     public IPage<JudgeVO> getCommonJudgeList(
-            @RequestParam(value = "limit", required = false) Integer limit,
-            @RequestParam(value = "currentPage", required = false) Integer currentPage,
+            @RequestParam(value = "limit", required = false, defaultValue = "10") Integer limit,
+            @RequestParam(value = "currentPage", required = false, defaultValue = "1") Integer currentPage,
             @RequestParam(value = "searchPid", required = false) String searchPid,
             @RequestParam(value = "status", required = false) Integer status,
             @RequestParam(value = "username", required = false) String username,
             @RequestParam(value = "uid", required = false) String uid,
-            @RequestParam(value = "completeProblemID", defaultValue = "false") Boolean completeProblemID,
-            @RequestParam(value = "gid", required = false) Long gid)
+            @RequestParam(value = "completeProblemID", defaultValue = "false") Boolean completeProblemID)
     {
         return judgeEntityService.getCommonJudgeList(
-                limit, currentPage, searchPid, status, username, uid, completeProblemID, gid);
+                limit, currentPage, searchPid, status, username, uid, completeProblemID);
     }
+
 
     @GetMapping("/get-judge-by-id")
     public Judge getJudgeById(@RequestParam("submitId") Long submitId)
@@ -133,13 +158,76 @@ public class JudgeController
         return judgeEntityService.getById(submitId);
     }
 
+    @PostMapping("/save-judge")
+    public Judge saveJudge(@RequestBody Judge judge)
+    {
+        judgeEntityService.save(judge);
+        log.info("submitId: {}", judge.getSubmitId());
+        return judge;
+    }
+
+    @PostMapping("/update-judge-by-id")
+    public boolean updateJudgeById(@RequestBody Judge judge)
+    {
+        return judgeEntityService.updateById(judge);
+    }
+
+    @PostMapping("/fail-to-use-redis-publish-judge")
+    public boolean failToUseRedisPublishJudge(
+            @RequestParam("submitId") Long submitId,
+            @RequestParam("pid") Long pid,
+            @RequestParam("isContest") Boolean isContest)
+    {
+        judgeEntityService.failToUseRedisPublishJudge(submitId, pid, isContest);
+        return true;
+    }
+
     @Resource
     private ProblemEntityService problemEntityService;
 
     @GetMapping("/get-problem-by-id")
-    public Problem getProblemById(@RequestParam("pid") Long pid)
+    public Problem getProblemById(@RequestParam("id") Long id)
     {
-        return problemEntityService.getById(pid);
+        return problemEntityService.getById(id);
     }
+
+    @GetMapping("/query-problem-by-problemId")
+    public Problem queryProblemByPId(@RequestParam("problemId") String problemId)
+    {
+        QueryWrapper<Problem> problemQueryWrapper = new QueryWrapper<>();
+        problemQueryWrapper.select("id", "problem_id", "auth");
+        problemQueryWrapper.eq("problem_id", problemId);
+        return problemEntityService.getOne(problemQueryWrapper, false);
+    }
+
+
+    @GetMapping("/query-judge-server-by-urls")
+    public List<JudgeServer> getJudgeServerList(@RequestParam List<String> urls, @RequestParam Boolean isRemote)
+    {
+
+        boolean isRemoteBool = isRemote != null && isRemote; // 避免空值
+        int isRemoteInt = isRemoteBool ? 1 : 0; // MySQL tinyint 只能用 0 或 1
+
+        QueryWrapper<JudgeServer> queryWrapper = new QueryWrapper<>();
+        queryWrapper.in("url", urls)
+                .eq("is_remote", isRemoteInt) // 这里传 int
+                .orderByAsc("task_number")
+                .last("for update"); // 开启悲观锁
+
+        return judgeServerEntityService.list(queryWrapper);
+    }
+
+    @PostMapping("/update-judge-server-by-id")
+    public boolean updateJudgeServerById(@RequestBody JudgeServer judgeServer)
+    {
+        return judgeServerEntityService.updateById(judgeServer);
+    }
+
+    @PostMapping("/update-judge-server-by-wrapper")
+    public boolean updateJudgeServerByWrapper(@RequestBody UpdateWrapper<JudgeServer> updateWrapper)
+    {
+        return judgeServerEntityService.update(updateWrapper);
+    }
+
 
 }

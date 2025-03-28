@@ -22,3 +22,10 @@ MYSQL_PASSWORD: 123456
 REDIS_HOST: localhost
 REDIS_PORT: 6379
 REDIS_PASSWORD: 123456
+
+oj:
+  judge:
+    token: judge_token
+
+service-url:
+  name: oj-judge  # 这里填写要连接的判题服务名称
