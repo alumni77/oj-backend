@@ -26,11 +26,9 @@ import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 /**
  * @Author Zhong
@@ -205,14 +203,22 @@ public class JudgeController
         return true;
     }
 
-    @GetMapping("/get-judge-list-by-pids")
-    public List<ProblemCountVO> getJudgeListByPids(@RequestParam String pidList)
+    @GetMapping("/get-problem-list-by-pids")
+    public List<ProblemCountVO> getProblemListByPids(@RequestParam List<Long> pidList)
     {
         log.info("pidList: {}", pidList);
-        List<Long> pids = Arrays.stream(pidList.split(","))
-                .map(Long::parseLong)
-                .collect(Collectors.toList());
-        return judgeEntityService.getProblemListCount(pids);
+        return judgeEntityService.getProblemListCount(pidList);
+    }
+
+    @GetMapping("/get-judge-list-by-pids")
+    public List<Judge> getJudgeListByPids(@RequestParam List<Long> pidList, @RequestParam String uid)
+    {
+        QueryWrapper<Judge> queryWrapper = new QueryWrapper<>();
+        queryWrapper.select("distinct pid,status,submit_time,score")
+                .in("pid", pidList)
+                .eq("uid", uid)
+                .orderByDesc("submit_time");
+        return judgeEntityService.list(queryWrapper);
     }
 
 

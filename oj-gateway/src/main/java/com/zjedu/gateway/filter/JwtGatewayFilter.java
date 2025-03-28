@@ -73,6 +73,7 @@ public class JwtGatewayFilter implements GlobalFilter, Ordered
             "/api/judgeserve/get-all-case-result",
             // Problem服务的匿名接口
             "/api/problem/get-problem-list",
+            "/api/problem/get-random-problem",
 
             // Passport服务的Swagger配置
             "/api/passport/v3/api-docs/**",

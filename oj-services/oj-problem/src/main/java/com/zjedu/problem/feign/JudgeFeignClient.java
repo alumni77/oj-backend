@@ -1,5 +1,6 @@
 package com.zjedu.problem.feign;
 
+import com.zjedu.pojo.entity.judge.Judge;
 import com.zjedu.pojo.vo.ProblemCountVO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,6 +18,9 @@ import java.util.List;
 @FeignClient(value = "oj-judge", path = "/api/judge")
 public interface JudgeFeignClient
 {
+    @GetMapping("/get-problem-list-by-pids")
+    List<ProblemCountVO> getProblemListByPids(@RequestParam List<Long> pidList);
+
     @GetMapping("/get-judge-list-by-pids")
-    List<ProblemCountVO> getJudgeListByPids(@RequestParam List<Long> pidList);
+    List<Judge> getJudgeListByPids(@RequestParam List<Long> pidList, @RequestParam String uid);
 }

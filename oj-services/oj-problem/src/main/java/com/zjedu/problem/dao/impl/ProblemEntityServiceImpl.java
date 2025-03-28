@@ -48,7 +48,7 @@ public class ProblemEntityServiceImpl extends ServiceImpl<ProblemMapper, Problem
         if (!problemList.isEmpty())
         {
             List<Long> pidList = problemList.stream().map(ProblemVO::getPid).collect(Collectors.toList());
-            List<ProblemCountVO> problemListCount = judgeFeignClient.getJudgeListByPids(pidList);
+            List<ProblemCountVO> problemListCount = judgeFeignClient.getProblemListByPids(pidList);
             for (ProblemVO problemVo : problemList)
             {
                 for (ProblemCountVO problemCountVo : problemListCount)

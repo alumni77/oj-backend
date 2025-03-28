@@ -1,5 +1,6 @@
 package com.zjedu.problem.feign.fallback;
 
+import com.zjedu.pojo.entity.judge.Judge;
 import com.zjedu.pojo.vo.ProblemCountVO;
 import com.zjedu.problem.feign.JudgeFeignClient;
 import lombok.extern.slf4j.Slf4j;
@@ -19,9 +20,17 @@ import java.util.List;
 public class JudgeFeignClientFallback implements JudgeFeignClient
 {
     @Override
-    public List<ProblemCountVO> getJudgeListByPids(List<Long> pidList)
+    public List<ProblemCountVO> getProblemListByPids(List<Long> pidList)
     {
-        log.error("调用judge-getJudgeListByPids服务失败——兜底回调");
+        log.error("调用judge-getProblemListByPids服务失败——兜底回调");
+
+        return List.of();
+    }
+
+    @Override
+    public List<Judge> getJudgeListByPids(List<Long> pidList, String uid)
+    {
+        log.error("调用judge-queryJudgeListByPids服务失败——兜底回调");
 
         return List.of();
     }
