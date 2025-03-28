@@ -3,9 +3,11 @@ package com.zjedu.judgeserve.service;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.zjedu.common.result.CommonResult;
 import com.zjedu.pojo.dto.SubmitJudgeDTO;
+import com.zjedu.pojo.dto.TestJudgeDTO;
 import com.zjedu.pojo.entity.judge.Judge;
 import com.zjedu.pojo.vo.JudgeVO;
 import com.zjedu.pojo.vo.SubmissionInfoVO;
+import com.zjedu.pojo.vo.TestJudgeVO;
 
 /**
  * @Author Zhong
@@ -21,4 +23,8 @@ public interface JudgeService
     CommonResult<SubmissionInfoVO> getSubmission(Long submitId);
 
     CommonResult<Judge> submitProblemJudge(SubmitJudgeDTO judgeDto);
+
+    CommonResult<String> submitProblemTestJudge(TestJudgeDTO testJudgeDto);
+
+    CommonResult<TestJudgeVO> getTestJudgeResult(String testJudgeKey);
 }

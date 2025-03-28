@@ -1,5 +1,7 @@
 package com.zjedu.judgeserve.manager;
 
+import cn.hutool.core.util.IdUtil;
+import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.zjedu.annotation.HOJAccessEnum;
 import com.zjedu.common.exception.*;
@@ -9,11 +11,15 @@ import com.zjedu.judgeserve.feign.JudgeFeignClient;
 import com.zjedu.judgeserve.feign.PassportFeignClient;
 import com.zjedu.judgeserve.judge.self.JudgeDispatcher;
 import com.zjedu.pojo.dto.SubmitJudgeDTO;
+import com.zjedu.pojo.dto.TestJudgeDTO;
+import com.zjedu.pojo.dto.TestJudgeReq;
+import com.zjedu.pojo.dto.TestJudgeRes;
 import com.zjedu.pojo.entity.judge.Judge;
 import com.zjedu.pojo.entity.problem.Problem;
 import com.zjedu.pojo.entity.user.UserInfo;
 import com.zjedu.pojo.vo.JudgeVO;
 import com.zjedu.pojo.vo.SubmissionInfoVO;
+import com.zjedu.pojo.vo.TestJudgeVO;
 import com.zjedu.pojo.vo.UserRolesVO;
 import com.zjedu.utils.Constants;
 import com.zjedu.utils.IpUtils;
@@ -23,10 +29,13 @@ import com.zjedu.validator.JudgeValidator;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @Author Zhong
@@ -255,5 +264,81 @@ public class JudgeManager
                 isContestSubmission);
 
         return judge;
+    }
+
+    public String submitProblemTestJudge(TestJudgeDTO testJudgeDto) throws AccessException,
+            StatusFailException, StatusForbiddenException, StatusSystemErrorException
+    {
+        judgeValidator.validateTestJudgeInfo(testJudgeDto);
+        // 需要获取一下该token对应用户的数据
+        //从请求头获取用户ID
+        String userId = request.getHeader("X-User-Id");
+        UserInfo userRolesVo = passportFeignClient.getByUid(userId);
+
+        String lockKey = Constants.Account.TEST_JUDGE_LOCK.getCode() + userRolesVo.getUuid();
+        SwitchConfig switchConfig = nacosSwitchConfig.getSwitchConfig();
+        if (switchConfig.getDefaultSubmitInterval() > 0)
+        {
+            if (!redisUtils.isWithinRateLimit(lockKey, switchConfig.getDefaultSubmitInterval()))
+            {
+                throw new StatusForbiddenException("对不起，您使用在线调试过于频繁，请稍后再尝试！");
+            }
+        }
+
+        Problem problem = judgeFeignClient.getProblemById(testJudgeDto.getPid());
+        if (problem == null)
+        {
+            throw new StatusFailException("当前题目不存在！不支持在线调试！");
+        }
+
+        String uniqueKey = "TEST_JUDGE_" + IdUtil.simpleUUID();
+        TestJudgeReq testJudgeReq = new TestJudgeReq();
+        testJudgeReq.setMemoryLimit(problem.getMemoryLimit())
+                .setTimeLimit(problem.getTimeLimit())
+                .setStackLimit(problem.getStackLimit())
+                .setCode(testJudgeDto.getCode())
+                .setLanguage(testJudgeDto.getLanguage())
+                .setUniqueKey(uniqueKey)
+                .setExpectedOutput(testJudgeDto.getExpectedOutput())
+                .setTestCaseInput(testJudgeDto.getUserInput())
+                .setProblemJudgeMode(problem.getJudgeMode())
+                .setIsRemoveEndBlank(problem.getIsRemoveEndBlank() || problem.getIsRemote())
+                .setIsFileIO(problem.getIsFileIO())
+                .setIoReadFileName(problem.getIoReadFileName())
+                .setIoWriteFileName(problem.getIoWriteFileName());
+        String userExtraFile = problem.getUserExtraFile();
+        if (StringUtils.hasText(userExtraFile))
+        {
+            testJudgeReq.setExtraFile((HashMap<String, String>) JSONUtil.toBean(userExtraFile, Map.class));
+        }
+        judgeDispatcher.sendTestJudgeTask(testJudgeReq);
+        redisUtils.set(uniqueKey, TestJudgeRes.builder()
+                .status(Constants.Judge.STATUS_PENDING.getStatus())
+                .build(), 10 * 60);
+        return uniqueKey;
+    }
+
+    public TestJudgeVO getTestJudgeResult(String testJudgeKey) throws StatusFailException
+    {
+        TestJudgeRes testJudgeRes = (TestJudgeRes) redisUtils.get(testJudgeKey);
+        if (testJudgeRes == null)
+        {
+            throw new StatusFailException("查询错误！当前在线调试任务不存在！");
+        }
+        TestJudgeVO testJudgeVo = new TestJudgeVO();
+        testJudgeVo.setStatus(testJudgeRes.getStatus());
+        if (Constants.Judge.STATUS_PENDING.getStatus().equals(testJudgeRes.getStatus()))
+        {
+            return testJudgeVo;
+        }
+        testJudgeVo.setUserInput(testJudgeRes.getInput());
+        testJudgeVo.setUserOutput(testJudgeRes.getStdout());
+        testJudgeVo.setExpectedOutput(testJudgeRes.getExpectedOutput());
+        testJudgeVo.setMemory(testJudgeRes.getMemory());
+        testJudgeVo.setTime(testJudgeRes.getTime());
+        testJudgeVo.setStderr(testJudgeRes.getStderr());
+        testJudgeVo.setProblemJudgeMode(testJudgeRes.getProblemJudgeMode());
+        redisUtils.del(testJudgeKey);
+        return testJudgeVo;
     }
 }

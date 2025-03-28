@@ -1,19 +1,17 @@
 package com.zjedu.judgeserve.service.impl;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.zjedu.common.exception.AccessException;
-import com.zjedu.common.exception.StatusAccessDeniedException;
-import com.zjedu.common.exception.StatusFailException;
-import com.zjedu.common.exception.StatusForbiddenException;
-import com.zjedu.common.exception.StatusNotFoundException;
+import com.zjedu.common.exception.*;
 import com.zjedu.common.result.CommonResult;
 import com.zjedu.common.result.ResultStatus;
 import com.zjedu.judgeserve.manager.JudgeManager;
 import com.zjedu.judgeserve.service.JudgeService;
 import com.zjedu.pojo.dto.SubmitJudgeDTO;
+import com.zjedu.pojo.dto.TestJudgeDTO;
 import com.zjedu.pojo.entity.judge.Judge;
 import com.zjedu.pojo.vo.JudgeVO;
 import com.zjedu.pojo.vo.SubmissionInfoVO;
+import com.zjedu.pojo.vo.TestJudgeVO;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 
@@ -85,6 +83,36 @@ public class JudgeServiceImpl implements JudgeService
         } catch (StatusAccessDeniedException e)
         {
             return CommonResult.errorResponse(e.getMessage(), ResultStatus.ACCESS_DENIED);
+        } catch (StatusFailException e)
+        {
+            return CommonResult.errorResponse(e.getMessage());
+        }
+    }
+
+    @Override
+    public CommonResult<String> submitProblemTestJudge(TestJudgeDTO testJudgeDto)
+    {
+        try
+        {
+            return CommonResult.successResponse(judgeManager.submitProblemTestJudge(testJudgeDto), "success");
+        } catch (StatusForbiddenException | AccessException e)
+        {
+            return CommonResult.errorResponse(e.getMessage(), ResultStatus.FORBIDDEN);
+        } catch (StatusFailException e)
+        {
+            return CommonResult.errorResponse(e.getMessage());
+        } catch (StatusSystemErrorException e)
+        {
+            return CommonResult.errorResponse(e.getMessage(), ResultStatus.SYSTEM_ERROR);
+        }
+    }
+
+    @Override
+    public CommonResult<TestJudgeVO> getTestJudgeResult(String testJudgeKey)
+    {
+        try
+        {
+            return CommonResult.successResponse(judgeManager.getTestJudgeResult(testJudgeKey));
         } catch (StatusFailException e)
         {
             return CommonResult.errorResponse(e.getMessage());

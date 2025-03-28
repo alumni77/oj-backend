@@ -5,9 +5,11 @@ import com.zjedu.annotation.AnonApi;
 import com.zjedu.common.result.CommonResult;
 import com.zjedu.judgeserve.service.JudgeService;
 import com.zjedu.pojo.dto.SubmitJudgeDTO;
+import com.zjedu.pojo.dto.TestJudgeDTO;
 import com.zjedu.pojo.entity.judge.Judge;
 import com.zjedu.pojo.vo.JudgeVO;
 import com.zjedu.pojo.vo.SubmissionInfoVO;
+import com.zjedu.pojo.vo.TestJudgeVO;
 import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.*;
 
@@ -73,6 +75,17 @@ public class JudgeController
     public CommonResult<Judge> submitProblemJudge(@RequestBody SubmitJudgeDTO judgeDto)
     {
         return judgeService.submitProblemJudge(judgeDto);
+    }
+
+    @PostMapping(value = "/submit-problem-test-judge")
+    public CommonResult<String> submitProblemTestJudge(@RequestBody TestJudgeDTO testJudgeDto)
+    {
+        return judgeService.submitProblemTestJudge(testJudgeDto);
+    }
+
+    @GetMapping("/get-test-judge-result")
+    public CommonResult<TestJudgeVO> getTestJudgeResult(@RequestParam("testJudgeKey") String testJudgeKey) {
+        return judgeService.getTestJudgeResult(testJudgeKey);
     }
 
 
