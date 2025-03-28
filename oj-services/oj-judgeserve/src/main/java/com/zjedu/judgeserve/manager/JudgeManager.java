@@ -2,25 +2,24 @@ package com.zjedu.judgeserve.manager;
 
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.json.JSONUtil;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.zjedu.annotation.HOJAccessEnum;
 import com.zjedu.common.exception.*;
 import com.zjedu.config.NacosSwitchConfig;
 import com.zjedu.config.SwitchConfig;
+import com.zjedu.judgeserve.dao.judge.JudgeCaseEntityService;
+import com.zjedu.judgeserve.dao.user.UserAcproblemEntityService;
 import com.zjedu.judgeserve.feign.JudgeFeignClient;
 import com.zjedu.judgeserve.feign.PassportFeignClient;
 import com.zjedu.judgeserve.judge.self.JudgeDispatcher;
-import com.zjedu.pojo.dto.SubmitJudgeDTO;
-import com.zjedu.pojo.dto.TestJudgeDTO;
-import com.zjedu.pojo.dto.TestJudgeReq;
-import com.zjedu.pojo.dto.TestJudgeRes;
+import com.zjedu.pojo.dto.*;
 import com.zjedu.pojo.entity.judge.Judge;
+import com.zjedu.pojo.entity.judge.JudgeCase;
 import com.zjedu.pojo.entity.problem.Problem;
+import com.zjedu.pojo.entity.user.UserAcproblem;
 import com.zjedu.pojo.entity.user.UserInfo;
-import com.zjedu.pojo.vo.JudgeVO;
-import com.zjedu.pojo.vo.SubmissionInfoVO;
-import com.zjedu.pojo.vo.TestJudgeVO;
-import com.zjedu.pojo.vo.UserRolesVO;
+import com.zjedu.pojo.vo.*;
 import com.zjedu.utils.Constants;
 import com.zjedu.utils.IpUtils;
 import com.zjedu.utils.RedisUtils;
@@ -29,13 +28,14 @@ import com.zjedu.validator.JudgeValidator;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @Author Zhong
@@ -47,6 +47,11 @@ import java.util.Map;
 @Component
 public class JudgeManager
 {
+    @Resource
+    private UserAcproblemEntityService userAcproblemEntityService;
+
+    @Resource
+    private JudgeCaseEntityService judgeCaseEntityService;
 
     @Resource
     private HttpServletRequest request;
@@ -340,5 +345,290 @@ public class JudgeManager
         testJudgeVo.setProblemJudgeMode(testJudgeRes.getProblemJudgeMode());
         redisUtils.del(testJudgeKey);
         return testJudgeVo;
+    }
+
+    /**
+     * 调用判题服务器提交失败超过60s后，用户点击按钮重新提交判题进入的方法
+     *
+     * @param submitId
+     * @return
+     * @throws StatusNotFoundException
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public Judge resubmit(Long submitId) throws StatusNotFoundException
+    {
+
+        Judge judge = judgeFeignClient.getJudgeById(submitId);
+        if (judge == null)
+        {
+            throw new StatusNotFoundException("此提交数据不存在！");
+        }
+
+        // 重判前，需要将该题目对应记录表一并更新
+        // 如果该题已经是AC通过状态，更新该题目的用户ac做题表 user_acproblem
+        if (judge.getStatus().intValue() == Constants.Judge.STATUS_ACCEPTED.getStatus().intValue())
+        {
+            QueryWrapper<UserAcproblem> userAcproblemQueryWrapper = new QueryWrapper<>();
+            userAcproblemQueryWrapper.eq("submit_id", judge.getSubmitId());
+            userAcproblemEntityService.remove(userAcproblemQueryWrapper);
+        }
+
+        // 重新进入等待队列
+        judge.setStatus(Constants.Judge.STATUS_PENDING.getStatus());
+        judge.setVersion(judge.getVersion() + 1);
+        judge.setErrorMessage(null)
+                .setOiRankScore(null)
+                .setScore(null)
+                .setTime(null)
+                .setJudger("")
+                .setMemory(null);
+        judgeFeignClient.updateJudgeById(judge);
+
+        // 将提交加入任务队列
+        judgeDispatcher.sendTask(judge.getSubmitId(),
+                judge.getPid(),
+                false);
+        return judge;
+    }
+
+    /**
+     * 修改单个提交详情的分享权限
+     *
+     * @param judge
+     */
+    public Judge updateSubmission(Judge judge) throws StatusForbiddenException, StatusFailException
+    {
+
+        if (judge == null || judge.getSubmitId() == null || judge.getShare() == null)
+        {
+            throw new StatusFailException("修改失败，请求参数错误！");
+        }
+
+        Judge judgeInfo = judgeFeignClient.getJudgeInfo(judge.getSubmitId());
+
+        // 需要获取一下该token对应用户的数据
+        //从请求头获取用户ID
+        String userId = request.getHeader("X-User-Id");
+        UserInfo userRolesVo = passportFeignClient.getByUid(userId);
+
+        if (!userRolesVo.getUuid().equals(judgeInfo.getUid()))
+        { // 判断该提交是否为当前用户的
+            throw new StatusForbiddenException("对不起，您不能修改他人的代码分享权限！");
+        }
+
+        boolean isOk = judgeFeignClient.updateJudgeShare(judge.getSubmitId(), judge.getShare());
+        if (!isOk)
+        {
+            throw new StatusFailException("修改代码权限失败！");
+        }
+        return judge;
+    }
+
+    /**
+     * 对提交列表状态为Pending和Judging的提交进行更新检查
+     *
+     * @param submitIdListDto
+     * @return
+     */
+    public HashMap<Long, Object> checkCommonJudgeResult(SubmitIdListDTO submitIdListDto)
+    {
+
+        List<Long> submitIds = submitIdListDto.getSubmitIds();
+
+        if (CollectionUtils.isEmpty(submitIds))
+        {
+            return new HashMap<>();
+        }
+
+        List<Judge> judgeList = judgeFeignClient.getJudgeListByIds(submitIds);
+        HashMap<Long, Object> result = new HashMap<>();
+        for (Judge judge : judgeList)
+        {
+            judge.setCode(null);
+            judge.setErrorMessage(null);
+            judge.setVjudgeUsername(null);
+            judge.setVjudgeSubmitId(null);
+            judge.setVjudgePassword(null);
+            result.put(judge.getSubmitId(), judge);
+        }
+        return result;
+    }
+
+    public JudgeCaseVO getALLCaseResult(Long submitId) throws StatusNotFoundException, StatusForbiddenException
+    {
+
+        Judge judge = judgeFeignClient.getJudgeById(submitId);
+
+        if (judge == null)
+        {
+            throw new StatusNotFoundException("此提交数据不存在！");
+        }
+
+        Problem problem = judgeFeignClient.getProblemById(judge.getPid());
+
+        // 如果该题不支持开放测试点结果查看
+        if (!problem.getOpenCaseResult())
+        {
+            return null;
+        }
+
+        // 需要获取一下该token对应用户的数据
+        //从请求头获取用户ID
+        String userId = request.getHeader("X-User-Id");
+        UserInfo userRolesVo = passportFeignClient.getByUid(userId);
+
+        QueryWrapper<JudgeCase> wrapper = new QueryWrapper<>();
+        if (userRolesVo == null)
+        {
+            // 没有登录
+            wrapper.select("time", "memory", "score", "status", "user_output", "group_num", "seq", "mode");
+        } else
+        {
+            UserRolesVO userRoles = passportFeignClient.getUserRoles(userId);
+            // 是否为超级管理员
+            boolean isRoot = userRoles.getRoles().stream()
+                    .anyMatch(role -> "root".equals(role.getRole()));
+            // 是否为admin
+            boolean isAdmin = userRoles.getRoles().stream()
+                    .anyMatch(role -> "admin".equals(role.getRole()));
+            // 是否为problem_admin
+            boolean isProblemAdmin = userRoles.getRoles().stream()
+                    .anyMatch(role -> "problem_admin".equals(role.getRole()));
+            if (!isRoot && !isAdmin && !isProblemAdmin)
+            {
+                // 不是管理员
+                wrapper.select("time", "memory", "score", "status", "user_output", "group_num", "seq", "mode");
+            }
+        }
+
+        wrapper.eq("submit_id", submitId);
+
+        if (!problem.getIsRemote())
+        {
+            wrapper.last("order by seq asc");
+        }
+        // 当前所有测试点只支持 空间 时间 状态码 IO得分 和错误信息提示查看而已
+        List<JudgeCase> judgeCaseList = judgeCaseEntityService.list(wrapper);
+        JudgeCaseVO judgeCaseVo = new JudgeCaseVO();
+        if (!CollectionUtils.isEmpty(judgeCaseList))
+        {
+            String mode = judgeCaseList.get(0).getMode();
+            Constants.JudgeCaseMode judgeCaseMode = Constants.JudgeCaseMode.getJudgeCaseMode(mode);
+            switch (judgeCaseMode)
+            {
+                case DEFAULT:
+                case ERGODIC_WITHOUT_ERROR:
+                    judgeCaseVo.setJudgeCaseList(judgeCaseList);
+                    break;
+                case SUBTASK_AVERAGE:
+                case SUBTASK_LOWEST:
+                    judgeCaseVo.setSubTaskJudgeCaseVoList(buildSubTaskDetail(judgeCaseList, judgeCaseMode));
+                    break;
+            }
+            judgeCaseVo.setJudgeCaseMode(judgeCaseMode.getMode());
+        } else
+        {
+            judgeCaseVo.setJudgeCaseList(judgeCaseList);
+            judgeCaseVo.setJudgeCaseMode(Constants.JudgeCaseMode.DEFAULT.getMode());
+        }
+        return judgeCaseVo;
+    }
+
+    private List<SubTaskJudgeCaseVO> buildSubTaskDetail(List<JudgeCase> judgeCaseList, Constants.JudgeCaseMode judgeCaseMode)
+    {
+        List<SubTaskJudgeCaseVO> subTaskJudgeCaseVOS = new ArrayList<>();
+        LinkedHashMap<Integer, List<JudgeCase>> groupJudgeCaseMap = judgeCaseList.stream()
+                .sorted(Comparator.comparingInt(JudgeCase::getGroupNum).thenComparingInt(JudgeCase::getSeq))
+                .collect(Collectors.groupingBy(JudgeCase::getGroupNum, LinkedHashMap::new, Collectors.toList()));
+        if (judgeCaseMode == Constants.JudgeCaseMode.SUBTASK_AVERAGE)
+        {
+            for (Map.Entry<Integer, List<JudgeCase>> entry : groupJudgeCaseMap.entrySet())
+            {
+                SubTaskJudgeCaseVO subTaskJudgeCaseVo = getSubTaskJudgeCaseVO(entry);
+                subTaskJudgeCaseVOS.add(subTaskJudgeCaseVo);
+            }
+        } else
+        {
+            for (Map.Entry<Integer, List<JudgeCase>> entry : groupJudgeCaseMap.entrySet())
+            {
+                int minScore = 2147483647;
+                JudgeCase finalResJudgeCase = null;
+                int acCount = 0;
+                for (JudgeCase judgeCase : entry.getValue())
+                {
+                    if (!Constants.Judge.STATUS_CANCELLED.getStatus().equals(judgeCase.getStatus()))
+                    {
+                        if (judgeCase.getScore() < minScore)
+                        {
+                            finalResJudgeCase = judgeCase;
+                            minScore = judgeCase.getScore();
+                        }
+                        if (Objects.equals(Constants.Judge.STATUS_ACCEPTED.getStatus(), judgeCase.getStatus()))
+                        {
+                            acCount++;
+                        }
+                    }
+                }
+                SubTaskJudgeCaseVO subTaskJudgeCaseVo = getSubTaskJudgeCaseVO(entry, acCount, finalResJudgeCase);
+                subTaskJudgeCaseVOS.add(subTaskJudgeCaseVo);
+            }
+        }
+        return subTaskJudgeCaseVOS;
+    }
+
+    private static SubTaskJudgeCaseVO getSubTaskJudgeCaseVO(Map.Entry<Integer, List<JudgeCase>> entry, int acCount, JudgeCase finalResJudgeCase)
+    {
+        SubTaskJudgeCaseVO subTaskJudgeCaseVo = new SubTaskJudgeCaseVO();
+        subTaskJudgeCaseVo.setGroupNum(entry.getKey());
+        subTaskJudgeCaseVo.setAc(acCount);
+        subTaskJudgeCaseVo.setTotal(entry.getValue().size());
+        if (finalResJudgeCase != null)
+        {
+            subTaskJudgeCaseVo.setMemory(finalResJudgeCase.getMemory());
+            subTaskJudgeCaseVo.setScore(finalResJudgeCase.getScore());
+            subTaskJudgeCaseVo.setTime(finalResJudgeCase.getTime());
+            subTaskJudgeCaseVo.setStatus(finalResJudgeCase.getStatus());
+        }
+        subTaskJudgeCaseVo.setSubtaskDetailList(entry.getValue());
+        return subTaskJudgeCaseVo;
+    }
+
+    private static SubTaskJudgeCaseVO getSubTaskJudgeCaseVO(Map.Entry<Integer, List<JudgeCase>> entry)
+    {
+        int sumScore = 0;
+        boolean hasNotACJudgeCase = false;
+        int acCount = 0;
+        for (JudgeCase judgeCase : entry.getValue())
+        {
+            sumScore += judgeCase.getScore();
+            if (!Objects.equals(Constants.Judge.STATUS_ACCEPTED.getStatus(), judgeCase.getStatus()))
+            {
+                hasNotACJudgeCase = true;
+            } else
+            {
+                acCount++;
+            }
+        }
+        SubTaskJudgeCaseVO subTaskJudgeCaseVo = new SubTaskJudgeCaseVO();
+        subTaskJudgeCaseVo.setGroupNum(entry.getKey());
+        subTaskJudgeCaseVo.setSubtaskDetailList(entry.getValue());
+        subTaskJudgeCaseVo.setAc(acCount);
+        subTaskJudgeCaseVo.setTotal(entry.getValue().size());
+        int score = (int) Math.round(sumScore * 1.0 / entry.getValue().size());
+        subTaskJudgeCaseVo.setScore(score);
+        if (hasNotACJudgeCase)
+        {
+            if (score == 0)
+            {
+                subTaskJudgeCaseVo.setStatus(Constants.Judge.STATUS_WRONG_ANSWER.getStatus());
+            } else
+            {
+                subTaskJudgeCaseVo.setStatus(Constants.Judge.STATUS_PARTIAL_ACCEPTED.getStatus());
+            }
+        } else
+        {
+            subTaskJudgeCaseVo.setStatus(Constants.Judge.STATUS_ACCEPTED.getStatus());
+        }
+        return subTaskJudgeCaseVo;
     }
 }

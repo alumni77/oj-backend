@@ -6,14 +6,18 @@ import com.zjedu.common.result.CommonResult;
 import com.zjedu.common.result.ResultStatus;
 import com.zjedu.judgeserve.manager.JudgeManager;
 import com.zjedu.judgeserve.service.JudgeService;
+import com.zjedu.pojo.dto.SubmitIdListDTO;
 import com.zjedu.pojo.dto.SubmitJudgeDTO;
 import com.zjedu.pojo.dto.TestJudgeDTO;
 import com.zjedu.pojo.entity.judge.Judge;
+import com.zjedu.pojo.vo.JudgeCaseVO;
 import com.zjedu.pojo.vo.JudgeVO;
 import com.zjedu.pojo.vo.SubmissionInfoVO;
 import com.zjedu.pojo.vo.TestJudgeVO;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
+
+import java.util.HashMap;
 
 /**
  * @Author Zhong
@@ -116,6 +120,55 @@ public class JudgeServiceImpl implements JudgeService
         } catch (StatusFailException e)
         {
             return CommonResult.errorResponse(e.getMessage());
+        }
+    }
+
+    @Override
+    public CommonResult<Judge> resubmit(Long submitId)
+    {
+        try
+        {
+            return CommonResult.successResponse(judgeManager.resubmit(submitId));
+        } catch (StatusNotFoundException e)
+        {
+            return CommonResult.errorResponse(e.getMessage(), ResultStatus.NOT_FOUND);
+        }
+    }
+
+    @Override
+    public CommonResult<Boolean> updateSubmission(Judge judge)
+    {
+        try
+        {
+            judge = judgeManager.updateSubmission(judge);
+            return CommonResult.successResponse(judge.getShare());
+        } catch (StatusFailException e)
+        {
+            return CommonResult.errorResponse(e.getMessage());
+        } catch (StatusForbiddenException e)
+        {
+            return CommonResult.errorResponse(e.getMessage(), ResultStatus.FORBIDDEN);
+        }
+    }
+
+    @Override
+    public CommonResult<HashMap<Long, Object>> checkCommonJudgeResult(SubmitIdListDTO submitIdListDto)
+    {
+        return CommonResult.successResponse(judgeManager.checkCommonJudgeResult(submitIdListDto));
+    }
+
+    @Override
+    public CommonResult<JudgeCaseVO> getALLCaseResult(Long submitId)
+    {
+        try
+        {
+            return CommonResult.successResponse(judgeManager.getALLCaseResult(submitId));
+        } catch (StatusNotFoundException e)
+        {
+            return CommonResult.errorResponse(e.getMessage(), ResultStatus.NOT_FOUND);
+        } catch (StatusForbiddenException e)
+        {
+            return CommonResult.errorResponse(e.getMessage(), ResultStatus.FORBIDDEN);
         }
     }
 }

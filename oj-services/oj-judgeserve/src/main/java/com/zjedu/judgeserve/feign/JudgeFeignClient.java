@@ -82,4 +82,14 @@ public interface JudgeFeignClient
             @RequestParam("pid") Long pid,
             @RequestParam("isContest") Boolean isContest);
 
+
+    @GetMapping("/get-judge-info")
+    Judge getJudgeInfo(@RequestParam("submitId") Long submitId);
+
+    @PostMapping("/update-judge-share")
+    boolean updateJudgeShare(@RequestParam("submitId") Long submitId, @RequestParam("share") Boolean share);
+
+    @GetMapping("/get-judge-list-by-ids")
+    List<Judge> getJudgeListByIds(@RequestParam List<Long> submitIds);
+
 }

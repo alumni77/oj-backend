@@ -158,6 +158,26 @@ public class JudgeController
         return judgeEntityService.getById(submitId);
     }
 
+    @GetMapping("/get-judge-info")
+    public Judge getJudgeInfo(@RequestParam("submitId") Long submitId)
+    {
+        QueryWrapper<Judge> queryWrapper = new QueryWrapper<>();
+        queryWrapper.select("submit_id", "uid")
+                .eq("submit_id", submitId);
+        return judgeEntityService.getOne(queryWrapper, false);
+    }
+
+    @PostMapping("/update-judge-share")
+    public boolean updateJudgeShare(@RequestParam("submitId") Long submitId, @RequestParam("share") Boolean share)
+    {
+        boolean shareBool = share != null && share; // 避免空值
+        int shareInt = shareBool ? 1 : 0; // MySQL tinyint 只能用 0 或 1
+        UpdateWrapper<Judge> judgeUpdateWrapper = new UpdateWrapper<>();
+        judgeUpdateWrapper.set("share", shareInt)
+                .eq("submit_id", submitId);
+        return judgeEntityService.update(judgeUpdateWrapper);
+    }
+
     @PostMapping("/save-judge")
     public Judge saveJudge(@RequestBody Judge judge)
     {
@@ -180,6 +200,16 @@ public class JudgeController
     {
         judgeEntityService.failToUseRedisPublishJudge(submitId, pid, isContest);
         return true;
+    }
+
+    @GetMapping("/get-judge-list-by-ids")
+    public List<Judge> getJudgeListByIds(@RequestParam List<Long> submitIds)
+    {
+        QueryWrapper<Judge> queryWrapper = new QueryWrapper<>();
+        // lambada表达式过滤掉code
+        queryWrapper.select(Judge.class, info -> !info.getColumn().equals("code"))
+                .in("submit_id", submitIds);
+        return judgeEntityService.list(queryWrapper);
     }
 
     @Resource

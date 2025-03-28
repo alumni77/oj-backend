@@ -2,12 +2,16 @@ package com.zjedu.judgeserve.service;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.zjedu.common.result.CommonResult;
+import com.zjedu.pojo.dto.SubmitIdListDTO;
 import com.zjedu.pojo.dto.SubmitJudgeDTO;
 import com.zjedu.pojo.dto.TestJudgeDTO;
 import com.zjedu.pojo.entity.judge.Judge;
+import com.zjedu.pojo.vo.JudgeCaseVO;
 import com.zjedu.pojo.vo.JudgeVO;
 import com.zjedu.pojo.vo.SubmissionInfoVO;
 import com.zjedu.pojo.vo.TestJudgeVO;
+
+import java.util.HashMap;
 
 /**
  * @Author Zhong
@@ -27,4 +31,12 @@ public interface JudgeService
     CommonResult<String> submitProblemTestJudge(TestJudgeDTO testJudgeDto);
 
     CommonResult<TestJudgeVO> getTestJudgeResult(String testJudgeKey);
+
+    CommonResult<Judge> resubmit(Long submitId);
+
+    CommonResult<Boolean> updateSubmission(Judge judge);
+
+    CommonResult<HashMap<Long, Object>> checkCommonJudgeResult(SubmitIdListDTO submitIdListDto);
+
+    CommonResult<JudgeCaseVO> getALLCaseResult(Long submitId);
 }

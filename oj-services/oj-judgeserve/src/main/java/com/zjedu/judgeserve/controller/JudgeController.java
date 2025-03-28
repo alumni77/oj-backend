@@ -4,14 +4,18 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.zjedu.annotation.AnonApi;
 import com.zjedu.common.result.CommonResult;
 import com.zjedu.judgeserve.service.JudgeService;
+import com.zjedu.pojo.dto.SubmitIdListDTO;
 import com.zjedu.pojo.dto.SubmitJudgeDTO;
 import com.zjedu.pojo.dto.TestJudgeDTO;
 import com.zjedu.pojo.entity.judge.Judge;
+import com.zjedu.pojo.vo.JudgeCaseVO;
 import com.zjedu.pojo.vo.JudgeVO;
 import com.zjedu.pojo.vo.SubmissionInfoVO;
 import com.zjedu.pojo.vo.TestJudgeVO;
 import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.HashMap;
 
 /**
  * @Author Zhong
@@ -84,8 +88,57 @@ public class JudgeController
     }
 
     @GetMapping("/get-test-judge-result")
-    public CommonResult<TestJudgeVO> getTestJudgeResult(@RequestParam("testJudgeKey") String testJudgeKey) {
+    public CommonResult<TestJudgeVO> getTestJudgeResult(@RequestParam("testJudgeKey") String testJudgeKey)
+    {
         return judgeService.getTestJudgeResult(testJudgeKey);
+    }
+
+    /**
+     * 调用判题服务器提交失败超过60s后，用户点击按钮重新提交判题进入的方法
+     *
+     * @param submitId
+     * @return
+     */
+    @GetMapping(value = "/resubmit")
+    public CommonResult<Judge> resubmit(@RequestParam("submitId") Long submitId)
+    {
+        return judgeService.resubmit(submitId);
+    }
+
+    /**
+     * 修改单个提交详情的分享权限
+     *
+     * @param judge
+     * @return
+     */
+    @PutMapping("/submission")
+    public CommonResult<Boolean> updateSubmission(@RequestBody Judge judge)
+    {
+        return judgeService.updateSubmission(judge);
+    }
+
+    /**
+     * 对提交列表状态为Pending和Judging的提交进行更新检查
+     *
+     * @param submitIdListDto
+     * @return
+     */
+    @PostMapping(value = "/check-submissions-status")
+    @AnonApi
+    public CommonResult<HashMap<Long, Object>> checkCommonJudgeResult(@RequestBody SubmitIdListDTO submitIdListDto)
+    {
+        return judgeService.checkCommonJudgeResult(submitIdListDto);
+    }
+
+    /**
+     * 获得指定提交id的测试样例结果，暂不支持查看测试数据，只可看测试点结果，时间，空间，或者IO得分
+     * @param submitId
+     * @return
+     */
+    @GetMapping("/get-all-case-result")
+    @AnonApi
+    public CommonResult<JudgeCaseVO> getALLCaseResult(@RequestParam(value = "submitId", required = true) Long submitId) {
+        return judgeService.getALLCaseResult(submitId);
     }
 
 

@@ -137,4 +137,28 @@ public class JudgeFeignClientFallback implements JudgeFeignClient
 
         return null;
     }
+
+    @Override
+    public boolean updateJudgeShare(Long submitId, Boolean share)
+    {
+        log.error("调用judge-updateJudgeShare服务失败——兜底回调");
+
+        return false;
+    }
+
+    @Override
+    public Judge getJudgeInfo(Long submitId)
+    {
+        log.error("调用judge-getJudgeInfo服务失败——兜底回调");
+
+        return null;
+    }
+
+    @Override
+    public List<Judge> getJudgeListByIds(List<Long> submitIds)
+    {
+        log.error("调用judge-getJudgeListByIds服务失败——兜底回调");
+
+        return List.of();
+    }
 }
