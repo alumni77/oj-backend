@@ -18,6 +18,10 @@ spring:
           uri: lb://oj-judgeserve
           predicates:
             - Path=/api/judgeserve/**
+        - id: oj-problem
+          uri: lb://oj-problem
+          predicates:
+            - Path=/api/problem/**
 
         # 添加以下API文档路由
         - id: oj-passport-docs
@@ -42,6 +46,12 @@ spring:
           uri: lb://oj-judgeserve
           predicates:
             - Path=/api/judgeserve/v3/api-docs/**
+          filters:
+            - StripPrefix=1
+        - id: oj-problem-docs
+          uri: lb://oj-problem
+          predicates:
+            - Path=/api/problem/v3/api-docs/**
           filters:
             - StripPrefix=1
       discovery:

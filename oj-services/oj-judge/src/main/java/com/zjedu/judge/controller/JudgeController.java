@@ -18,6 +18,7 @@ import com.zjedu.pojo.entity.judge.Judge;
 import com.zjedu.pojo.entity.judge.JudgeServer;
 import com.zjedu.pojo.entity.problem.Problem;
 import com.zjedu.pojo.vo.JudgeVO;
+import com.zjedu.pojo.vo.ProblemCountVO;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,9 +26,11 @@ import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * @Author Zhong
@@ -201,6 +204,17 @@ public class JudgeController
         judgeEntityService.failToUseRedisPublishJudge(submitId, pid, isContest);
         return true;
     }
+
+    @GetMapping("/get-judge-list-by-pids")
+    public List<ProblemCountVO> getJudgeListByPids(@RequestParam String pidList)
+    {
+        log.info("pidList: {}", pidList);
+        List<Long> pids = Arrays.stream(pidList.split(","))
+                .map(Long::parseLong)
+                .collect(Collectors.toList());
+        return judgeEntityService.getProblemListCount(pids);
+    }
+
 
     @GetMapping("/get-judge-list-by-ids")
     public List<Judge> getJudgeListByIds(@RequestParam List<Long> submitIds)

@@ -57,6 +57,11 @@ public class JwtGatewayFilter implements GlobalFilter, Ordered
             "/api/passport/get-user-home-info",
             "/api/passport/get-user-by-uid",
             "/api/passport/get-recent7-ac-rank",
+            // Account服务的匿名接口
+            "/api/account/check-username",
+            "/api/account/home-carousel",
+            "/api/account/get-recent-seven-ac-rank",
+            "/api/account/get-recent-updated-problem",
             // Judge服务的匿名接口
             "/api/judge/common-judge-list",
             "/api/judge/get-judge-by-id",
@@ -66,17 +71,14 @@ public class JwtGatewayFilter implements GlobalFilter, Ordered
             "/api/judgeserve/get-submission-detail",
             "/api/judgeserve/check-submissions-status",
             "/api/judgeserve/get-all-case-result",
-            // Account服务的匿名接口
-            "/api/account/check-username",
-            "/api/account/home-carousel",
-            "/api/account/get-recent-seven-ac-rank",
-            "/api/account/get-recent-updated-problem",
+            // Problem服务的匿名接口
+            "/api/problem/get-problem-list",
 
             // Passport服务的Swagger配置
             "/api/passport/v3/api-docs/**",
             "/api/passport/swagger-ui/**",
             "/api/passport/doc.html",
-            // account服务的Swagger配置
+            // Account服务的Swagger配置
             "/api/account/v3/api-docs/**",
             "/api/account/swagger-ui/**",
             "/api/account/doc.html",
@@ -87,7 +89,11 @@ public class JwtGatewayFilter implements GlobalFilter, Ordered
             // JudgeServe服务的Swagger配置
             "/api/judgeserve/v3/api-docs/**",
             "/api/judgeserve/swagger-ui/**",
-            "/api/judgeserve/doc.html"
+            "/api/judgeserve/doc.html",
+            // Problem服务的Swagger配置
+            "/api/problem/v3/api-docs/**",
+            "/api/problem/swagger-ui/**",
+            "/api/problem/doc.html"
 
 
     );

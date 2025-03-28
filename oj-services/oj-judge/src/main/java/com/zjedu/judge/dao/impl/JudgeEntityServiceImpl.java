@@ -11,6 +11,7 @@ import com.zjedu.judge.mapper.ProblemMapper;
 import com.zjedu.pojo.entity.judge.Judge;
 import com.zjedu.pojo.entity.problem.Problem;
 import com.zjedu.pojo.vo.JudgeVO;
+import com.zjedu.pojo.vo.ProblemCountVO;
 import com.zjedu.utils.Constants;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
@@ -96,5 +97,10 @@ public class JudgeEntityServiceImpl extends ServiceImpl<JudgeMapper, Judge> impl
 //                    .set("status", Constants.Contest.RECORD_NOT_AC_NOT_PENALTY.getCode());
 //            contestRecordEntityService.update(updateWrapper);
 //        }
+    }
+
+    @Override
+    public List<ProblemCountVO> getProblemListCount(List<Long> pidList) {
+        return judgeMapper.getProblemListCount(pidList);
     }
 }

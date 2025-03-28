@@ -4,6 +4,9 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.zjedu.pojo.entity.judge.Judge;
 import com.zjedu.pojo.vo.JudgeVO;
+import com.zjedu.pojo.vo.ProblemCountVO;
+
+import java.util.List;
 
 /**
  * @Author Zhong
@@ -23,4 +26,7 @@ public interface JudgeEntityService extends IService<Judge>
                                       Boolean completeProblemID);
 
     void failToUseRedisPublishJudge(Long submitId, Long pid, Boolean isContest);
+
+    List<ProblemCountVO> getProblemListCount(List<Long> pidList);
+
 }

@@ -3,6 +3,7 @@ package com.zjedu.judgeserve.feign;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.zjedu.common.result.CommonResult;
+import com.zjedu.judgeserve.feign.fallback.JudgeFeignClientFallback;
 import com.zjedu.pojo.dto.CompileDTO;
 import com.zjedu.pojo.dto.TestJudgeReq;
 import com.zjedu.pojo.dto.TestJudgeRes;
@@ -26,7 +27,7 @@ import java.util.List;
  * @Description
  */
 
-@FeignClient(value = "oj-judge", path = "/api/judge")
+@FeignClient(value = "oj-judge", path = "/api/judge",fallback = JudgeFeignClientFallback.class)
 public interface JudgeFeignClient
 {
     // 判题机调用
