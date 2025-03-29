@@ -232,6 +232,25 @@ public class JudgeController
         return judgeEntityService.list(queryWrapper);
     }
 
+    @GetMapping
+    public  List<Judge> queryJudgeListByWrapper(@RequestParam("pid") Long pid, @RequestParam("uid") String uid,@RequestParam("status") Integer status)
+    {
+        QueryWrapper<Judge> judgeQueryWrapper = new QueryWrapper<>();
+        judgeQueryWrapper.select("submit_id", "code", "username", "submit_time", "language")
+                .eq("uid", uid)
+                .eq("pid", pid)
+                .eq("status", 0)
+                .orderByDesc("submit_id")
+                .last("limit 1");
+        return judgeEntityService.list(judgeQueryWrapper);
+    }
+
+    @GetMapping("/get-problem-count-by-pid")
+    public ProblemCountVO getProblemCountByPid(@RequestParam("pid") Long pid)
+    {
+        return judgeEntityService.getProblemCount(pid);
+    }
+
     @Resource
     private ProblemEntityService problemEntityService;
 

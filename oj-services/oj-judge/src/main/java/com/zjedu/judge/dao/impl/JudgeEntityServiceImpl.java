@@ -100,7 +100,15 @@ public class JudgeEntityServiceImpl extends ServiceImpl<JudgeMapper, Judge> impl
     }
 
     @Override
-    public List<ProblemCountVO> getProblemListCount(List<Long> pidList) {
+    public List<ProblemCountVO> getProblemListCount(List<Long> pidList)
+    {
         return judgeMapper.getProblemListCount(pidList);
+    }
+
+    @Override
+    public ProblemCountVO getProblemCount(Long pid)
+    {
+        return judgeMapper.getProblemCount(pid);
+
     }
 }

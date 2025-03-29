@@ -28,4 +28,7 @@ public interface JudgeMapper extends BaseMapper<Judge>
 
     List<ProblemCountVO> getProblemListCount(@Param("pidList") List<Long> pidList);
 
+    ProblemCountVO getProblemCount(@Param("pid") Long pid);
+
+
 }

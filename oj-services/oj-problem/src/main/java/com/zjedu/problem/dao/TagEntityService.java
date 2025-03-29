@@ -1,0 +1,16 @@
+package com.zjedu.problem.dao;
+
+import com.baomidou.mybatisplus.extension.service.IService;
+import com.zjedu.pojo.entity.problem.Tag;
+
+/**
+ * @Author Zhong
+ * @Create 2025/3/29 15:05
+ * @Version 1.0
+ * @Description
+ */
+
+public interface TagEntityService extends IService<Tag>
+{
+
+}

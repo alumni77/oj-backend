@@ -1,27 +1,28 @@
 package com.zjedu.problem.manager;
 
+import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.core.date.DateUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.zjedu.common.exception.StatusFailException;
-import com.zjedu.common.exception.StatusNotFoundException;
+import com.zjedu.annotation.HOJAccessEnum;
+import com.zjedu.common.exception.*;
 import com.zjedu.pojo.dto.PidListDTO;
 import com.zjedu.pojo.entity.judge.Judge;
-import com.zjedu.pojo.entity.problem.Problem;
+import com.zjedu.pojo.entity.problem.*;
 import com.zjedu.pojo.entity.user.UserInfo;
-import com.zjedu.pojo.vo.ProblemVO;
-import com.zjedu.pojo.vo.RandomProblemVO;
-import com.zjedu.problem.dao.ProblemEntityService;
+import com.zjedu.pojo.vo.*;
+import com.zjedu.problem.dao.*;
 import com.zjedu.problem.feign.JudgeFeignClient;
 import com.zjedu.problem.feign.PassportFeignClient;
 import com.zjedu.utils.Constants;
+import com.zjedu.validator.AccessValidator;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @Author Zhong
@@ -35,6 +36,24 @@ public class ProblemManager
 {
     @Resource
     private ProblemEntityService problemEntityService;
+
+    @Resource
+    private ProblemTagEntityService problemTagEntityService;
+
+    @Resource
+    private TagEntityService tagEntityService;
+
+    @Resource
+    private LanguageEntityService languageEntityService;
+
+    @Resource
+    private ProblemLanguageEntityService problemLanguageEntityService;
+
+    @Resource
+    private CodeTemplateEntityService codeTemplateEntityService;
+
+    @Resource
+    private AccessValidator accessValidator;
 
     @Resource
     private HttpServletRequest request;
@@ -132,4 +151,173 @@ public class ProblemManager
 
     }
 
+    /**
+     * 获取指定题目的详情信息，标签，所支持语言，做题情况（只能查询公开题目 也就是auth为1）
+     *
+     * @param problemId
+     * @return
+     * @throws StatusNotFoundException
+     * @throws StatusForbiddenException
+     */
+    public ProblemInfoVO getProblemInfo(String problemId) throws StatusNotFoundException, StatusForbiddenException
+    {
+        QueryWrapper<Problem> wrapper = new QueryWrapper<Problem>().eq("problem_id", problemId);
+        //查询题目详情，题目标签，题目语言，题目做题情况
+        Problem problem = problemEntityService.getOne(wrapper, false);
+        if (problem == null)
+        {
+            throw new StatusNotFoundException("该题号对应的题目不存在");
+        }
+        if (problem.getAuth() != 1)
+        {
+            throw new StatusForbiddenException("该题号对应题目并非公开题目，不支持访问！");
+        }
+
+        QueryWrapper<ProblemTag> problemTagQueryWrapper = new QueryWrapper<>();
+        problemTagQueryWrapper.eq("pid", problem.getId());
+
+        // 获取该题号对应的标签id
+        List<Long> tidList = new LinkedList<>();
+        problemTagEntityService.list(problemTagQueryWrapper).forEach(problemTag ->
+        {
+            tidList.add(problemTag.getTid());
+        });
+        List<Tag> tags = new ArrayList<>();
+        if (!tidList.isEmpty())
+        {
+            tags = tagEntityService.listByIds(tidList);
+        }
+
+        // 记录 languageId对应的name
+        HashMap<Long, String> tmpMap = new HashMap<>();
+        // 获取题目提交的代码支持的语言
+        List<String> languagesStr = new LinkedList<>();
+        QueryWrapper<ProblemLanguage> problemLanguageQueryWrapper = new QueryWrapper<>();
+        problemLanguageQueryWrapper.eq("pid", problem.getId()).select("lid");
+        List<Long> lidList = problemLanguageEntityService.list(problemLanguageQueryWrapper)
+                .stream().map(ProblemLanguage::getLid).collect(Collectors.toList());
+        if (CollectionUtil.isNotEmpty(lidList))
+        {
+            Collection<Language> languages = languageEntityService.listByIds(lidList);
+            languages = languages.stream().sorted(Comparator.comparing(Language::getSeq, Comparator.reverseOrder())
+                            .thenComparing(Language::getId))
+                    .toList();
+            languages.forEach(language ->
+            {
+                languagesStr.add(language.getName());
+                tmpMap.put(language.getId(), language.getName());
+            });
+        }
+        // 获取题目的提交记录
+        ProblemCountVO problemCount = judgeFeignClient.getProblemCountByPid(problem.getId());
+
+        // 获取题目的代码模板
+        QueryWrapper<CodeTemplate> codeTemplateQueryWrapper = new QueryWrapper<>();
+        codeTemplateQueryWrapper.eq("pid", problem.getId()).eq("status", true);
+        List<CodeTemplate> codeTemplates = codeTemplateEntityService.list(codeTemplateQueryWrapper);
+        HashMap<String, String> LangNameAndCode = new HashMap<>();
+        if (CollectionUtil.isNotEmpty(codeTemplates))
+        {
+            for (CodeTemplate codeTemplate : codeTemplates)
+            {
+                LangNameAndCode.put(tmpMap.get(codeTemplate.getLid()), codeTemplate.getCode());
+            }
+        }
+        // 屏蔽一些题目参数
+        problem.setJudgeExtraFile(null)
+                .setSpjCode(null)
+                .setSpjLanguage(null);
+
+        // 将数据统一写入到一个Vo返回数据实体类中
+        return new ProblemInfoVO(problem, tags, languagesStr, problemCount, LangNameAndCode);
+    }
+
+    public LastAcceptedCodeVO getUserLastAcceptedCode(Long pid)
+    {
+        // 需要获取一下该token对应用户的数据
+        //从请求头获取用户ID
+        String userId = request.getHeader("X-User-Id");
+        UserInfo userRolesVo = passportFeignClient.getByUid(userId);
+
+        List<Judge> judgeList = judgeFeignClient.queryJudgeListByWrapper(pid, userId, 0);
+        LastAcceptedCodeVO lastAcceptedCodeVO = new LastAcceptedCodeVO();
+        if (CollectionUtil.isNotEmpty(judgeList))
+        {
+            Judge judge = judgeList.get(0);
+            lastAcceptedCodeVO.setSubmitId(judge.getSubmitId());
+            lastAcceptedCodeVO.setLanguage(judge.getLanguage());
+            lastAcceptedCodeVO.setCode(buildCode(judge, userRolesVo.getUuid()));
+        } else
+        {
+            lastAcceptedCodeVO.setCode("");
+        }
+        return lastAcceptedCodeVO;
+    }
+
+    private String buildCode(Judge judge, String uid)
+    {
+
+        //如果不是超管或题目管理员，需要检查网站是否开启隐藏代码功能
+        UserRolesVO userRolesVo = passportFeignClient.getUserRoles(uid);
+        // 是否为超级管理员
+        boolean isRoot = userRolesVo.getRoles().stream()
+                .anyMatch(role -> "root".equals(role.getRole()));
+        // 是否为题目管理员
+        boolean isProblemAdmin = userRolesVo.getRoles().stream()
+                .anyMatch((role -> "problem_admin".equals(role.getRole())));
+
+        if (!isRoot && !isProblemAdmin)
+        {
+            try
+            {
+                accessValidator.validateAccess(HOJAccessEnum.HIDE_NON_CONTEST_SUBMISSION_CODE);
+            } catch (AccessException e)
+            {
+                return "Because the super administrator has enabled " +
+                        "the function of not viewing the submitted code outside the contest of master station, \n" +
+                        "the code of this submission details has been hidden.";
+            }
+        }
+        if (judge.getLanguage().toLowerCase().contains("py"))
+        {
+            return judge.getCode() + "\n\n" +
+                    "'''\n" +
+                    "    @runId: " + judge.getSubmitId() + "\n" +
+                    "    @language: " + judge.getLanguage() + "\n" +
+                    "    @author: " + judge.getUsername() + "\n" +
+                    "    @submitTime: " + DateUtil.format(judge.getSubmitTime(), "yyyy-MM-dd HH:mm:ss") + "\n" +
+                    "'''";
+        } else if (judge.getLanguage().toLowerCase().contains("ruby"))
+        {
+            return judge.getCode() + "\n\n" +
+                    "=begin\n" +
+                    "* @runId: " + judge.getSubmitId() + "\n" +
+                    "* @language: " + judge.getLanguage() + "\n" +
+                    "* @author: " + judge.getUsername() + "\n" +
+                    "* @submitTime: " + DateUtil.format(judge.getSubmitTime(), "yyyy-MM-dd HH:mm:ss") + "\n" +
+                    "=end";
+        } else
+        {
+            return judge.getCode() + "\n\n" +
+                    "/**\n" +
+                    "* @runId: " + judge.getSubmitId() + "\n" +
+                    "* @language: " + judge.getLanguage() + "\n" +
+                    "* @author: " + judge.getUsername() + "\n" +
+                    "* @submitTime: " + DateUtil.format(judge.getSubmitTime(), "yyyy-MM-dd HH:mm:ss") + "\n" +
+                    "*/";
+        }
+    }
+
+    //TODO: 该方法需要用到trainingManager
+    public List<ProblemFullScreenListVO> getFullScreenProblemList(Long tid) throws StatusFailException, StatusForbiddenException, StatusAccessDeniedException
+    {
+        if (tid != null)
+        {
+            return null;
+//            return trainingManager.getProblemFullScreenList(tid);
+        } else
+        {
+            throw new StatusFailException("请求参数错误：tid不能为空");
+        }
+    }
 }

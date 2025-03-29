@@ -4,8 +4,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.zjedu.annotation.AnonApi;
 import com.zjedu.common.result.CommonResult;
 import com.zjedu.pojo.dto.PidListDTO;
-import com.zjedu.pojo.vo.ProblemVO;
-import com.zjedu.pojo.vo.RandomProblemVO;
+import com.zjedu.pojo.vo.*;
 import com.zjedu.problem.service.ProblemService;
 import jakarta.annotation.Resource;
 import org.springframework.validation.annotation.Validated;
@@ -74,4 +73,43 @@ public class ProblemController
     {
         return problemService.getUserProblemStatus(pidListDto);
     }
+
+    /**
+     * 获取指定题目的详情信息，标签，所支持语言，做题情况（只能查询公开题目 也就是auth为1）
+     *
+     * @param problemId
+     * @return
+     */
+    @GetMapping(value = "/get-problem-detail")
+    @AnonApi
+    public CommonResult<ProblemInfoVO> getProblemInfo(@RequestParam(value = "problemId", required = true) String problemId)
+    {
+        return problemService.getProblemInfo(problemId);
+    }
+
+    /**
+     * 获取用户对于该题最近AC的代码
+     *
+     * @param pid
+     * @return
+     */
+    @GetMapping("/get-last-ac-code")
+    public CommonResult<LastAcceptedCodeVO> getUserLastAcceptedCode(@RequestParam(value = "pid") Long pid)
+    {
+        return problemService.getUserLastAcceptedCode(pid);
+    }
+
+
+    /**
+     * 获取专注模式页面底部的题目列表
+     *
+     * @param tid
+     * @return
+     */
+    @GetMapping("/get-full-screen-problem-list")
+    public CommonResult<List<ProblemFullScreenListVO>> getFullScreenProblemList(@RequestParam(value = "tid", required = false) Long tid)
+    {
+        return problemService.getFullScreenProblemList(tid);
+    }
+
 }

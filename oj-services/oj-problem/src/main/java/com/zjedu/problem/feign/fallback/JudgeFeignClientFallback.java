@@ -34,4 +34,20 @@ public class JudgeFeignClientFallback implements JudgeFeignClient
 
         return List.of();
     }
+
+    @Override
+    public ProblemCountVO getProblemCountByPid(Long pid)
+    {
+        log.error("调用judge-getProblemCountByPid服务失败——兜底回调");
+
+        return null;
+    }
+
+    @Override
+    public List<Judge> queryJudgeListByWrapper(Long pid, String uid, Integer status)
+    {
+        log.error("调用judge-queryJudgeListByWrapper服务失败——兜底回调");
+
+        return List.of();
+    }
 }

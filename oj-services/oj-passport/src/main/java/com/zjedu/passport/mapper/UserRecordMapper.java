@@ -1,8 +1,11 @@
 package com.zjedu.passport.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.zjedu.pojo.entity.user.UserRecord;
 import com.zjedu.pojo.vo.ACMRankVO;
+import com.zjedu.pojo.vo.OIRankVO;
 import com.zjedu.pojo.vo.UserHomeVO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -24,4 +27,8 @@ public interface UserRecordMapper extends BaseMapper<UserRecord>
     UserHomeVO getUserHomeInfo(@Param("uid") String uid, @Param("username") String username);
 
     List<ACMRankVO> getRecent7ACRank();
+
+    IPage<ACMRankVO> getACMRankList(Page<ACMRankVO> page, @Param("uidList") List<String> uidList);
+
+    IPage<OIRankVO> getOIRankList(Page<OIRankVO> page, @Param("uidList") List<String> uidList);
 }

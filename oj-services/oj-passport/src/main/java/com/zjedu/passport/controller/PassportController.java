@@ -3,6 +3,7 @@ package com.zjedu.passport.controller;
 import cn.hutool.crypto.SecureUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.zjedu.annotation.AnonApi;
 import com.zjedu.common.exception.StatusFailException;
 import com.zjedu.common.result.CommonResult;
@@ -23,6 +24,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @Author Zhong
@@ -100,6 +102,7 @@ public class PassportController
         return passportService.logout();
     }
 
+    // 外露接口，给openFeign调用
     @Resource
     private UserInfoEntityService userInfoEntityService;
 
@@ -128,6 +131,27 @@ public class PassportController
         return userInfoEntityService.update(updateWrapper);
     }
 
+    @GetMapping("/search-user-uid-list")
+    public List<String> searchUserUidList(@RequestParam String keyword)
+    {
+        QueryWrapper<UserInfo> userInfoQueryWrapper = new QueryWrapper<>();
+        userInfoQueryWrapper.select("uuid");
+
+        userInfoQueryWrapper.and(wrapper -> wrapper
+                .like("username", keyword)
+                .or()
+                .like("nickname", keyword)
+                .or()
+                .like("realname", keyword));
+
+        userInfoQueryWrapper.eq("status", 0);
+
+        return userInfoEntityService.list(userInfoQueryWrapper)
+                .stream()
+                .map(UserInfo::getUuid)
+                .collect(Collectors.toList());
+    }
+
     @PostMapping("/change-user-info")
     public boolean updateUserInfo(@RequestBody UserInfoVO userInfoVo, @RequestParam("userId") String userId) throws StatusFailException
     {
@@ -149,6 +173,17 @@ public class PassportController
         return userRecordEntityService.getRecent7ACRank();
     }
 
+    @PostMapping("get-oi-rank-list")
+    public Page<OIRankVO> getOIRankList(@RequestBody Page<OIRankVO> page, @RequestParam(required = false) List<String> uidList)
+    {
+        return (Page<OIRankVO>) userRecordEntityService.getOIRankList(page, uidList);
+    }
+
+    @PostMapping("/get-acm-rank-list")
+    public Page<ACMRankVO> getACMRankList(@RequestBody Page<ACMRankVO> page, @RequestParam(required = false) List<String> uidList)
+    {
+        return (Page<ACMRankVO>) userRecordEntityService.getACMRankList(page, uidList);
+    }
 
     @Resource
     private UserRoleEntityService userRoleEntityService;
