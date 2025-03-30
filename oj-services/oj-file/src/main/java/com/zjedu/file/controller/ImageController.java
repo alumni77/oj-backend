@@ -21,11 +21,28 @@ public class ImageController
     @Resource
     private ImageService imageService;
 
+    /**
+     * 更新用户头像
+     *
+     * @param image
+     * @return
+     */
     @PostMapping(value = "/upload-avatar")
     public CommonResult<Map<Object, Object>> uploadAvatar(@RequestParam("image") MultipartFile image)
     {
         return imageService.uploadAvatar(image);
     }
 
+    /**
+     * 更新轮播图图片，只允许root用户上传
+     *
+     * @param image
+     * @return
+     */
+    @PostMapping(value = "/upload-carouse-img")
+    public CommonResult<Map<Object, Object>> uploadCarouselImg(@RequestParam("file") MultipartFile image)
+    {
+        return imageService.uploadCarouselImg(image);
+    }
 
 }

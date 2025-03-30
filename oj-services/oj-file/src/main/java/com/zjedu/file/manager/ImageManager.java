@@ -115,4 +115,65 @@ public class ImageManager
                 .put("roleList", userRolesVo.getRoles().stream().map(Role::getRole))
                 .map();
     }
+
+    @Transactional(rollbackFor = Exception.class)
+    public Map<Object, Object> uploadCarouselImg(MultipartFile image) throws StatusFailException, StatusSystemErrorException
+    {
+        // 需要获取一下该token对应用户的数据
+        //从请求头获取用户ID
+        // 获取当前登录用户
+        String userId = request.getHeader("X-User-Id");
+        UserInfo userInfo = passportFeignClient.getByUid(userId);
+        // 是否为超级管理员
+        UserRolesVO userRolesVo = passportFeignClient.getUserRoles(userId);
+        boolean isRoot = userRolesVo.getRoles().stream()
+                .anyMatch(role -> "root".equals(role.getRole()));
+        if (!isRoot)
+        {
+            throw new StatusFailException("您没有权限上传轮播图！");
+        }
+
+        if (image == null)
+        {
+            throw new StatusFailException("上传的图片文件不能为空！");
+        }
+        if (image.getSize() > 1024 * 1024 * 5)
+        {
+            throw new StatusFailException("上传的轮播图文件大小不能大于5M！");
+        }
+
+        //获取文件后缀
+        String suffix = Objects.requireNonNull(image.getOriginalFilename()).substring(image.getOriginalFilename().lastIndexOf(".") + 1);
+        if (!"jpg,jpeg,gif,png,webp,jfif,svg".toUpperCase().contains(suffix.toUpperCase()))
+        {
+            throw new StatusFailException("请选择jpg,jpeg,gif,png,webp,jfif,svg格式的头像图片！");
+        }
+        //若不存在该目录，则创建目录
+        FileUtil.mkdir(Constants.File.HOME_CAROUSEL_FOLDER.getPath());
+        //通过UUID生成唯一文件名
+        String filename = IdUtil.simpleUUID() + "." + suffix;
+        try
+        {
+            //将文件保存指定目录
+            image.transferTo(FileUtil.file(Constants.File.HOME_CAROUSEL_FOLDER.getPath() + File.separator + filename));
+        } catch (Exception e)
+        {
+            log.error("图片文件上传异常-------------->{}", e.getMessage());
+            throw new StatusSystemErrorException("服务器异常：图片上传失败！");
+        }
+
+        // 插入file表记录
+        com.zjedu.pojo.entity.common.File imgFile = new com.zjedu.pojo.entity.common.File();
+        imgFile.setName(filename).setFolderPath(Constants.File.HOME_CAROUSEL_FOLDER.getPath())
+                .setFilePath(Constants.File.HOME_CAROUSEL_FOLDER.getPath() + File.separator + filename)
+                .setSuffix(suffix)
+                .setType("carousel")
+                .setUid(userInfo.getUuid());
+        fileEntityService.saveOrUpdate(imgFile);
+
+        return MapUtil.builder()
+                .put("id", imgFile.getId())
+                .put("url", Constants.File.IMG_API.getPath() + filename)
+                .map();
+    }
 }

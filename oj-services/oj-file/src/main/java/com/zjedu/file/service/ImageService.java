@@ -15,4 +15,6 @@ import java.util.Map;
 public interface ImageService
 {
     CommonResult<Map<Object, Object>> uploadAvatar(MultipartFile image);
+
+    CommonResult<Map<Object, Object>> uploadCarouselImg(MultipartFile image);
 }

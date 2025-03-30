@@ -38,4 +38,19 @@ public class ImageServiceImpl implements ImageService
             return CommonResult.errorResponse(e.getMessage(), ResultStatus.SYSTEM_ERROR);
         }
     }
+
+    @Override
+    public CommonResult<Map<Object, Object>> uploadCarouselImg(MultipartFile image)
+    {
+        try
+        {
+            return CommonResult.successResponse(imageManager.uploadCarouselImg(image));
+        } catch (StatusFailException e)
+        {
+            return CommonResult.errorResponse(e.getMessage());
+        } catch (StatusSystemErrorException e)
+        {
+            return CommonResult.errorResponse(e.getMessage(), ResultStatus.SYSTEM_ERROR);
+        }
+    }
 }
