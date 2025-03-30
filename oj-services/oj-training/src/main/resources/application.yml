@@ -1,0 +1,80 @@
+spring:
+  application:
+    name: oj-training
+  profiles:
+    active: dev
+  # 支持 swagger3
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
+  # 数据库基础配置
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://${MYSQL_HOST}:${MYSQL_PORT}/hoj?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai
+    username: ${MYSQL_USERNAME}
+    password: ${MYSQL_PASSWORD}
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 5
+      idle-timeout: 30000
+      connection-timeout: 30000
+  # Redis 基础配置
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
+      password: ${REDIS_PASSWORD}
+      database: 0
+      timeout: 5000
+      connect-timeout: 100000
+  # 启用Nacos服务注册与发现
+  cloud:
+    nacos:
+      discovery:
+        server-addr: ${NACOS_CONFIG_URL}
+        username: ${NACOS_CONFIG_USERNAME}
+        password: ${NACOS_CONFIG_PASSWORD}
+        group: ${NACOS_CONFIG_GROUP}
+        enabled: true
+
+server:
+  address: 0.0.0.0
+  port: ${SERVER_PORT}
+  servlet:
+    context-path: ${CONTEXT_PATH}
+    session:
+      cookie:
+        max-age: 2592000
+        path: ${CONTEXT_PATH}
+        http-only: true
+
+# MybatisPlus 配置
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    cache-enabled: true
+  global-config:
+    banner: false
+  mapper-locations: classpath*:**/mapper/xml/*.xml
+  type-aliases-package: com.zjedu.pojo
+
+# Swagger 配置
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    tags-sorter: alpha
+    operations-sorter: alpha
+  api-docs:
+    path: /v3/api-docs
+  group-configs:
+    - group: 'default'
+      paths-to-match: '/**'
+      packages-to-scan: com.zjedu.training.controller
+
+# knife4j配置
+knife4j:
+  enable: true
+  setting:
+    language: zh_cn
+  production: false

@@ -26,6 +26,10 @@ spring:
           uri: lb://oj-common
           predicates:
             - Path=/api/common/**
+        - id: oj-training
+          uri: lb://oj-training
+          predicates:
+            - Path=/api/training/**
 
         # 添加以下API文档路由
         - id: oj-passport-docs
@@ -58,10 +62,16 @@ spring:
             - Path=/api/problem/v3/api-docs/**
           filters:
             - StripPrefix=1
-        - id:  oj-common-docs
+        - id: oj-common-docs
           uri: lb://oj-common
           predicates:
             - Path=/api/common/v3/api-docs/**
+          filters:
+            - StripPrefix=1
+        - id: oj-training-docs
+          uri: lb://oj-training
+          predicates:
+            - Path=/api/training/v3/api-docs/**
           filters:
             - StripPrefix=1
 

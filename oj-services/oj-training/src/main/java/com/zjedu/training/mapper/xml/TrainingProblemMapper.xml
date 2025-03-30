@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zjedu.training.mapper.TrainingProblemMapper">
+
+    <select id="getTrainingListAcceptedCountByUid" resultType="com.zjedu.pojo.entity.training.TrainingProblem">
+        SELECT a.pid,a.tid
+        FROM
+        (
+        SELECT pid,tid FROM training_problem WHERE tid in
+        <foreach collection="tidList" item="tid" open="(" separator="," close=")">
+            #{tid}
+        </foreach>
+        ) a
+        left join
+        (
+        SELECT DISTINCT pid FROM user_acproblem where uid = #{uid}
+        ) b
+        on a.pid = b.pid
+        where b.pid is not null
+    </select>
+
+</mapper>

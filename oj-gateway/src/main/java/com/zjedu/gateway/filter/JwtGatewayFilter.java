@@ -78,6 +78,8 @@ public class JwtGatewayFilter implements GlobalFilter, Ordered
             "/api/problem/get-rank-list",
             // Common服务的匿名接口
             "/api/common/**",
+            // Training服务的匿名接口
+            "/api/training/get-training-list",
 
 
             // Passport服务的Swagger配置
@@ -103,7 +105,11 @@ public class JwtGatewayFilter implements GlobalFilter, Ordered
             // Common服务的Swagger配置
             "/api/common/v3/api-docs/**",
             "/api/common/swagger-ui/**",
-            "/api/common/doc.html"
+            "/api/common/doc.html",
+            // Training服务的Swagger配置
+            "/api/training/v3/api-docs/**",
+            "/api/training/swagger-ui/**",
+            "/api/training/doc.html"
 
 
     );

@@ -18,6 +18,7 @@
         <module>oj-judgeserve</module>
         <module>oj-problem</module>
         <module>oj-common</module>
+        <module>oj-training</module>
     </modules>
 
     <properties>
