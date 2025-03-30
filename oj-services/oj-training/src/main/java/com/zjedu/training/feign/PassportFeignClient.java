@@ -24,4 +24,7 @@ public interface PassportFeignClient
 
     @GetMapping("/get-roles-by-uid")
     List<Role> getRolesByUid(@RequestParam("uid") String uid);
+
+    @GetMapping("/get-user-uid-list")
+    List<String> getSuperAdminUidList();
 }

@@ -2,7 +2,9 @@ package com.zjedu.training.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.zjedu.pojo.entity.training.TrainingProblem;
+import com.zjedu.pojo.vo.ProblemVO;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -18,8 +20,10 @@ import java.util.List;
 @Repository
 public interface TrainingProblemMapper extends BaseMapper<TrainingProblem>
 {
-    List<TrainingProblem> getTrainingListAcceptedCountByUid(List<Long> tidList, String uid);
+    List<TrainingProblem> getTrainingListAcceptedCountByUid(@Param("tidList") List<Long> tidList,
+                                                            @Param("uid") String uid);
 
-    List<Long> getTrainingProblemCount(Long tid);
+    List<Long> getTrainingProblemCount(@Param("tid") Long tid);
 
+    List<ProblemVO> getTrainingProblemList(@Param("tid") Long tid);
 }

@@ -28,4 +28,45 @@
           and p.auth = 1
     </select>
 
+    <resultMap id="map_TrainingProblemList" type="com.zjedu.pojo.vo.ProblemVO">
+        <id column="pid" property="pid"/>
+        <result column="problem_id" property="problemId"/>
+        <result column="title" property="title"/>
+        <result column="difficulty" property="difficulty"/>
+        <result column="type" property="type"/>
+        <result column="total" property="total"/>
+        <result column="ac" property="ac"/>
+        <collection property="tags" ofType="com.zjedu.pojo.entity.problem.Tag" select="getProblemTag" column="pid">
+        </collection>
+    </resultMap>
+    <select id="getTrainingProblemList" resultMap="map_TrainingProblemList">
+        SELECT p.id                 AS pid,
+               p.problem_id,
+               p.title,
+               p.difficulty,
+               p.type
+                ,
+               (SELECT COUNT(*)
+                FROM judge j
+                WHERE j.pid = p.id
+                  AND j.status = 0) as ac,
+               (SELECT COUNT(*)
+                FROM judge j
+                WHERE j.pid = p.id) as total
+        FROM problem p,
+             training_problem tp
+        where p.id = tp.pid
+          and p.auth = 1
+          and tp.tid = #{tid}
+        order by tp.`rank` asc
+    </select>
+    <!-- 子查询 :为了防止分页总数据数出错-->
+    <select id="getProblemTag" resultType="com.zjedu.pojo.entity.problem.Tag">
+        select t.*
+        from tag t,
+             problem_tag pt
+        where t.id = pt.tid
+          and pt.pid = #{pid}
+    </select>
+
 </mapper>

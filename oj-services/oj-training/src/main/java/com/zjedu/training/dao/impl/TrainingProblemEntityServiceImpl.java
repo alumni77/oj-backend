@@ -2,6 +2,7 @@ package com.zjedu.training.dao.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zjedu.pojo.entity.training.TrainingProblem;
+import com.zjedu.pojo.vo.ProblemVO;
 import com.zjedu.training.dao.TrainingProblemEntityService;
 import com.zjedu.training.feign.JudgeFeignClient;
 import com.zjedu.training.mapper.TrainingProblemMapper;
@@ -10,6 +11,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 /**
  * @Author Zhong
@@ -48,5 +54,18 @@ public class TrainingProblemEntityServiceImpl extends ServiceImpl<TrainingProble
         }
 
         return judgeFeignClient.getACProblemCount(pidList, uid, 0);
+    }
+
+    @Override
+    public List<ProblemVO> getTrainingProblemList(Long tid)
+    {
+        List<ProblemVO> trainingProblemList = trainingProblemMapper.getTrainingProblemList(tid);
+        return trainingProblemList.stream().filter(distinctByKey(ProblemVO::getPid)).collect(Collectors.toList());
+    }
+
+    static <T> Predicate<T> distinctByKey(Function<? super T, ?> keyExtractor)
+    {
+        Map<Object, Boolean> seen = new ConcurrentHashMap<>();
+        return t -> seen.putIfAbsent(keyExtractor.apply(t), Boolean.TRUE) == null;
     }
 }

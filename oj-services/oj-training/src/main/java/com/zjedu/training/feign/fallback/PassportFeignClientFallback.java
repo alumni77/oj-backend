@@ -32,4 +32,11 @@ public class PassportFeignClientFallback implements PassportFeignClient
         log.error("调用passport-getRolesByUid服务失败——兜底回调");
         return List.of();
     }
+
+    @Override
+    public List<String> getSuperAdminUidList()
+    {
+        log.error("调用passport-getSuperAdminUidList服务失败——兜底回调");
+        return List.of();
+    }
 }

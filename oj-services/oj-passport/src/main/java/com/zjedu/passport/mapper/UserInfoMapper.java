@@ -6,6 +6,8 @@ import com.zjedu.pojo.entity.user.UserInfo;
 import org.apache.ibatis.annotations.Mapper;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 /**
  * @Author Zhong
  * @Create 2025/3/20 10:29
@@ -18,4 +20,6 @@ import org.springframework.stereotype.Repository;
 public interface UserInfoMapper extends BaseMapper<UserInfo>
 {
     int addUser(RegisterDTO registerDto);
+
+    List<String> getSuperAdminUidList();
 }

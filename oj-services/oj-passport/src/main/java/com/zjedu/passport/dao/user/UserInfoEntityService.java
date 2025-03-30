@@ -4,6 +4,8 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.zjedu.pojo.dto.RegisterDTO;
 import com.zjedu.pojo.entity.user.UserInfo;
 
+import java.util.List;
+
 /**
  * @Author Zhong
  * @Create 2025/3/19 21:37
@@ -14,4 +16,6 @@ import com.zjedu.pojo.entity.user.UserInfo;
 public interface UserInfoEntityService extends IService<UserInfo>
 {
     Boolean addUser(RegisterDTO registerDto);
+
+    List<String> getSuperAdminUidList();
 }

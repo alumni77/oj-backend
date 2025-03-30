@@ -152,6 +152,12 @@ public class PassportController
                 .collect(Collectors.toList());
     }
 
+    @GetMapping("/get-user-uid-list")
+    public List<String> getSuperAdminUidList()
+    {
+        return userInfoEntityService.getSuperAdminUidList();
+    }
+
     @PostMapping("/change-user-info")
     public boolean updateUserInfo(@RequestBody UserInfoVO userInfoVo, @RequestParam("userId") String userId) throws StatusFailException
     {
