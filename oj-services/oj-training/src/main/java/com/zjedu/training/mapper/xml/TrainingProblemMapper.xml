@@ -19,4 +19,13 @@
         where b.pid is not null
     </select>
 
+    <select id="getTrainingProblemCount" resultType="java.lang.Long">
+        select p.id
+        from training_problem tp,
+             problem p
+        where tp.tid = #{tid}
+          and tp.pid = p.id
+          and p.auth = 1
+    </select>
+
 </mapper>

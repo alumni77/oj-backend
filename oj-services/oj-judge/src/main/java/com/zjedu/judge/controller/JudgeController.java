@@ -233,7 +233,7 @@ public class JudgeController
     }
 
     @GetMapping
-    public  List<Judge> queryJudgeListByWrapper(@RequestParam("pid") Long pid, @RequestParam("uid") String uid,@RequestParam("status") Integer status)
+    public List<Judge> queryJudgeListByWrapper(@RequestParam("pid") Long pid, @RequestParam("uid") String uid, @RequestParam("status") Integer status)
     {
         QueryWrapper<Judge> judgeQueryWrapper = new QueryWrapper<>();
         judgeQueryWrapper.select("submit_id", "code", "username", "submit_time", "language")
@@ -249,6 +249,17 @@ public class JudgeController
     public ProblemCountVO getProblemCountByPid(@RequestParam("pid") Long pid)
     {
         return judgeEntityService.getProblemCount(pid);
+    }
+
+    @GetMapping("/get-ac-problem-count")
+    public Integer getACProblemCount(@RequestParam List<Long> pidList, @RequestParam("uid") String uid, @RequestParam("status") Integer status)
+    {
+        QueryWrapper<Judge> judgeQueryWrapper = new QueryWrapper<>();
+        judgeQueryWrapper.select("DISTINCT pid")
+                .in("pid", pidList)
+                .eq("uid", uid)
+                .eq("status", 0);
+        return Math.toIntExact(judgeEntityService.count(judgeQueryWrapper));
     }
 
     @Resource

@@ -19,4 +19,7 @@ import java.util.List;
 public interface TrainingProblemMapper extends BaseMapper<TrainingProblem>
 {
     List<TrainingProblem> getTrainingListAcceptedCountByUid(List<Long> tidList, String uid);
+
+    List<Long> getTrainingProblemCount(Long tid);
+
 }

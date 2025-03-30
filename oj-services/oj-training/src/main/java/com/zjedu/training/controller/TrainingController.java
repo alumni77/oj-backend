@@ -46,4 +46,15 @@ public class TrainingController
         return trainingService.getTrainingList(limit, currentPage, keyword, categoryId, auth);
     }
 
+    /**
+     * 根据tid获取指定训练详情
+     * @param tid
+     * @return
+     */
+    @GetMapping("/get-training-detail")
+    public CommonResult<TrainingVO> getTraining(@RequestParam(value = "tid") Long tid)
+    {
+        return trainingService.getTraining(tid);
+    }
+
 }

@@ -14,4 +14,6 @@ import com.zjedu.pojo.vo.TrainingVO;
 public interface TrainingService
 {
     CommonResult<IPage<TrainingVO>> getTrainingList(Integer limit, Integer currentPage, String keyword, Long categoryId, String auth);
+
+    CommonResult<TrainingVO> getTraining(Long tid);
 }

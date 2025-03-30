@@ -16,4 +16,7 @@ public interface TrainingProblemEntityService extends IService<TrainingProblem>
 {
     List<TrainingProblem> getTrainingListAcceptedCountByUid(List<Long> tidList, String uid);
 
+    List<Long> getTrainingProblemIdList(Long tid);
+
+    Integer getUserTrainingACProblemCount(String uuid, List<Long> trainingProblemIdList);
 }

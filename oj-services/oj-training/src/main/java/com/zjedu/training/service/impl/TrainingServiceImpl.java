@@ -1,7 +1,11 @@
 package com.zjedu.training.service.impl;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.zjedu.common.exception.StatusAccessDeniedException;
+import com.zjedu.common.exception.StatusFailException;
+import com.zjedu.common.exception.StatusForbiddenException;
 import com.zjedu.common.result.CommonResult;
+import com.zjedu.common.result.ResultStatus;
 import com.zjedu.pojo.vo.TrainingVO;
 import com.zjedu.training.manager.TrainingManager;
 import com.zjedu.training.service.TrainingService;
@@ -27,5 +31,23 @@ public class TrainingServiceImpl implements TrainingService
     {
         return CommonResult.successResponse(trainingManager.getTrainingList(limit, currentPage, keyword, categoryId, auth));
 
+    }
+
+    @Override
+    public CommonResult<TrainingVO> getTraining(Long tid)
+    {
+        try
+        {
+            return CommonResult.successResponse(trainingManager.getTraining(tid));
+        } catch (StatusFailException e)
+        {
+            return CommonResult.errorResponse(e.getMessage());
+        } catch (StatusAccessDeniedException e)
+        {
+            return CommonResult.errorResponse(e.getMessage(), ResultStatus.ACCESS_DENIED);
+        } catch (StatusForbiddenException e)
+        {
+            return CommonResult.errorResponse(e.getMessage(), ResultStatus.FORBIDDEN);
+        }
     }
 }

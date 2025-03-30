@@ -1,13 +1,24 @@
 package com.zjedu.training.manager;
 
+import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.zjedu.common.exception.StatusAccessDeniedException;
+import com.zjedu.common.exception.StatusFailException;
+import com.zjedu.common.exception.StatusForbiddenException;
+import com.zjedu.pojo.entity.training.Training;
+import com.zjedu.pojo.entity.training.TrainingCategory;
 import com.zjedu.pojo.entity.user.UserInfo;
 import com.zjedu.pojo.vo.TrainingVO;
+import com.zjedu.training.dao.TrainingCategoryEntityService;
 import com.zjedu.training.dao.TrainingEntityService;
+import com.zjedu.training.dao.TrainingProblemEntityService;
 import com.zjedu.training.feign.PassportFeignClient;
+import com.zjedu.training.validator.TrainingValidator;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 /**
  * @Author Zhong
@@ -27,6 +38,15 @@ public class TrainingManager
 
     @Resource
     private TrainingEntityService trainingEntityService;
+
+    @Resource
+    private TrainingCategoryEntityService trainingCategoryEntityService;
+
+    @Resource
+    private TrainingProblemEntityService trainingProblemEntityService;
+
+    @Resource
+    private TrainingValidator trainingValidator;
 
 
     /**
@@ -63,4 +83,44 @@ public class TrainingManager
 
         return trainingEntityService.getTrainingList(limit, currentPage, categoryId, auth, keyword, currentUid);
     }
+
+    /**
+     * 根据tid获取指定训练详情
+     *
+     * @param tid
+     * @return
+     */
+    public TrainingVO   getTraining(Long tid) throws StatusFailException, StatusAccessDeniedException, StatusForbiddenException
+    {
+        // 获取当前登录的用户
+        //从请求头获取用户ID
+        String userId = request.getHeader("X-User-Id");
+        UserInfo userRolesVo = passportFeignClient.getByUid(userId);
+
+        Training training = trainingEntityService.getById(tid);
+        if (training == null || !training.getStatus())
+        {
+            throw new StatusFailException("该训练不存在或不允许显示！");
+        }
+
+        //TODO:由于训练的数据库表中没有数据，以下代码还不知是否调通
+        TrainingVO trainingVo = BeanUtil.copyProperties(training, TrainingVO.class);
+        TrainingCategory trainingCategory = trainingCategoryEntityService.getTrainingCategoryByTrainingId(training.getId());
+        trainingVo.setCategoryName(trainingCategory.getName());
+        trainingVo.setCategoryColor(trainingCategory.getColor());
+        List<Long> trainingProblemIdList = trainingProblemEntityService.getTrainingProblemIdList(training.getId());
+        trainingVo.setProblemCount(trainingProblemIdList.size());
+
+        if (userRolesVo != null && trainingValidator.isInTrainingOrAdmin(training, userRolesVo))
+        {
+            Integer count = trainingProblemEntityService.getUserTrainingACProblemCount(userRolesVo.getUuid(), trainingProblemIdList);
+            trainingVo.setAcCount(count);
+        } else
+        {
+            trainingVo.setAcCount(0);
+        }
+
+        return trainingVo;
+    }
+
 }
