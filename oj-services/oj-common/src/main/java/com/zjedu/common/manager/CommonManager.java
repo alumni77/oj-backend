@@ -4,10 +4,8 @@ import cn.hutool.core.util.IdUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.wf.captcha.ArithmeticCaptcha;
 import com.wf.captcha.base.Captcha;
-import com.zjedu.common.dao.TagClassificationEntityService;
-import com.zjedu.common.dao.TagEntityService;
-import com.zjedu.pojo.entity.problem.Tag;
-import com.zjedu.pojo.entity.problem.TagClassification;
+import com.zjedu.common.dao.*;
+import com.zjedu.pojo.entity.problem.*;
 import com.zjedu.pojo.vo.CaptchaVO;
 import com.zjedu.pojo.vo.ProblemTagVO;
 import com.zjedu.utils.RedisUtils;
@@ -16,6 +14,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @Author Zhong
@@ -35,6 +34,21 @@ public class CommonManager
 
     @Resource
     private TagClassificationEntityService tagClassificationEntityService;
+
+    @Resource
+    private ProblemTagEntityService problemTagEntityService;
+
+    @Resource
+    private LanguageEntityService languageEntityService;
+
+    @Resource
+    private ProblemEntityService problemEntityService;
+
+    @Resource
+    private ProblemLanguageEntityService problemLanguageEntityService;
+
+    @Resource
+    private CodeTemplateEntityService codeTemplateEntityService;
 
     public CaptchaVO getCaptcha()
     {
@@ -168,4 +182,68 @@ public class CommonManager
             }
         }
     };
+
+    public Collection<Tag> getProblemTags(Long pid)
+    {
+        Map<String, Object> map = new HashMap<>();
+        map.put("pid", pid);
+        List<Long> tidList = problemTagEntityService.listByMap(map)
+                .stream()
+                .map(ProblemTag::getTid)
+                .collect(Collectors.toList());
+        if (CollectionUtils.isEmpty(tidList))
+        {
+            return new ArrayList<>();
+        }
+        return tagEntityService.listByIds(tidList);
+    }
+
+    public List<Language> getLanguages(Long pid, Boolean all)
+    {
+        String oj = "ME";
+        if (pid != null)
+        {
+            Problem problem = problemEntityService.getById(pid);
+            if (problem.getIsRemote())
+            {
+                oj = problem.getProblemId().split("-")[0];
+            }
+        }
+
+        if (oj.equals("GYM"))
+        {  // GYM用与CF一样的编程语言列表
+            oj = "CF";
+        }
+
+        QueryWrapper<Language> queryWrapper = new QueryWrapper<>();
+        // 获取对应OJ支持的语言列表
+        queryWrapper.eq(all != null && !all, "oj", oj);
+        List<Language> languageList = languageEntityService.list(queryWrapper);
+        return languageList.stream().sorted(Comparator.comparing(Language::getSeq, Comparator.reverseOrder())
+                        .thenComparing(Language::getId))
+                .collect(Collectors.toList());
+    }
+
+    public Collection<Language> getProblemLanguages(Long pid)
+    {
+        QueryWrapper<ProblemLanguage> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("pid", pid).select("lid");
+        List<Long> idList = problemLanguageEntityService.list(queryWrapper)
+                .stream().map(ProblemLanguage::getLid).collect(Collectors.toList());
+        if (CollectionUtils.isEmpty(idList))
+        {
+            return Collections.emptyList();
+        }
+        Collection<Language> languages = languageEntityService.listByIds(idList);
+        return languages.stream().sorted(Comparator.comparing(Language::getSeq, Comparator.reverseOrder())
+                        .thenComparing(Language::getId))
+                .collect(Collectors.toList());
+    }
+
+    public List<CodeTemplate> getProblemCodeTemplate(Long pid)
+    {
+        QueryWrapper<CodeTemplate> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("pid", pid);
+        return codeTemplateEntityService.list(queryWrapper);
+    }
 }

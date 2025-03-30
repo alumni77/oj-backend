@@ -3,6 +3,8 @@ package com.zjedu.common.controller;
 import com.zjedu.annotation.AnonApi;
 import com.zjedu.common.result.CommonResult;
 import com.zjedu.common.service.CommonService;
+import com.zjedu.pojo.entity.problem.CodeTemplate;
+import com.zjedu.pojo.entity.problem.Language;
 import com.zjedu.pojo.entity.problem.Tag;
 import com.zjedu.pojo.vo.CaptchaVO;
 import com.zjedu.pojo.vo.ProblemTagVO;
@@ -11,6 +13,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -53,6 +56,35 @@ public class CommonController
     public CommonResult<List<ProblemTagVO>> getProblemTagsAndClassification(@RequestParam(value = "oj", defaultValue = "ME") String oj)
     {
         return commonService.getProblemTagsAndClassification(oj);
+    }
+
+    @GetMapping("/get-problem-tags")
+    @AnonApi
+    public CommonResult<Collection<Tag>> getProblemTags(Long pid)
+    {
+        return commonService.getProblemTags(pid);
+    }
+
+    @GetMapping("/languages")
+    @AnonApi
+    public CommonResult<List<Language>> getLanguages(@RequestParam(value = "pid", required = false) Long pid,
+                                                     @RequestParam(value = "all", required = false) Boolean all)
+    {
+        return commonService.getLanguages(pid, all);
+    }
+
+    @GetMapping("/get-problem-languages")
+    @AnonApi
+    public CommonResult<Collection<Language>> getProblemLanguages(@RequestParam("pid") Long pid)
+    {
+        return commonService.getProblemLanguages(pid);
+    }
+
+    @GetMapping("/get-problem-code-template")
+    @AnonApi
+    public CommonResult<List<CodeTemplate>> getProblemCodeTemplate(@RequestParam("pid") Long pid)
+    {
+        return commonService.getProblemCodeTemplate(pid);
     }
 
 }
