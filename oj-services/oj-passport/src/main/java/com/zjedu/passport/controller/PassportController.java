@@ -158,6 +158,15 @@ public class PassportController
         return userInfoEntityService.getSuperAdminUidList();
     }
 
+    @PostMapping("/update-avatar")
+    public void updateUserAvatar(@RequestParam("avatar") String avatar, @RequestParam("uid") String uid)
+    {
+        UpdateWrapper<UserInfo> userInfoUpdateWrapper = new UpdateWrapper<>();
+        userInfoUpdateWrapper.set("avatar", avatar)
+                .eq("uuid", uid);
+        userInfoEntityService.update(userInfoUpdateWrapper);
+    }
+
     @PostMapping("/change-user-info")
     public boolean updateUserInfo(@RequestBody UserInfoVO userInfoVo, @RequestParam("userId") String userId) throws StatusFailException
     {

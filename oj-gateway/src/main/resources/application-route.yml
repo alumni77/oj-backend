@@ -30,6 +30,10 @@ spring:
           uri: lb://oj-training
           predicates:
             - Path=/api/training/**
+        - id: oj-file
+          uri: lb://oj-file
+          predicates:
+            - Path=/api/file/**
 
         # 添加以下API文档路由
         - id: oj-passport-docs
@@ -72,6 +76,12 @@ spring:
           uri: lb://oj-training
           predicates:
             - Path=/api/training/v3/api-docs/**
+          filters:
+            - StripPrefix=1
+        - id: oj-file-docs
+          uri: lb://oj-file
+          predicates:
+            - Path=/api/file/v3/api-docs/**
           filters:
             - StripPrefix=1
 

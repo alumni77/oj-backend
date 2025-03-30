@@ -19,6 +19,7 @@
         <module>oj-problem</module>
         <module>oj-common</module>
         <module>oj-training</module>
+        <module>oj-file</module>
     </modules>
 
     <properties>
