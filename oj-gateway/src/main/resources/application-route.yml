@@ -22,6 +22,10 @@ spring:
           uri: lb://oj-problem
           predicates:
             - Path=/api/problem/**
+        - id: oj-common
+          uri: lb://oj-common
+          predicates:
+            - Path=/api/common/**
 
         # 添加以下API文档路由
         - id: oj-passport-docs
@@ -54,6 +58,13 @@ spring:
             - Path=/api/problem/v3/api-docs/**
           filters:
             - StripPrefix=1
+        - id:  oj-common-docs
+          uri: lb://oj-common
+          predicates:
+            - Path=/api/common/v3/api-docs/**
+          filters:
+            - StripPrefix=1
+
       discovery:
         locator:
           enabled: true

@@ -17,6 +17,7 @@
         <module>oj-judge</module>
         <module>oj-judgeserve</module>
         <module>oj-problem</module>
+        <module>oj-common</module>
     </modules>
 
     <properties>
