@@ -77,7 +77,7 @@ public class JwtGatewayFilter implements GlobalFilter, Ordered
             "/api/problem/get-problem-detail",
             "/api/problem/get-rank-list",
             // Common服务的匿名接口
-            "/api/common/captcha",
+            "/api/common/**",
 
 
             // Passport服务的Swagger配置

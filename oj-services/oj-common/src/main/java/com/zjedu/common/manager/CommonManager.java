@@ -1,12 +1,21 @@
 package com.zjedu.common.manager;
 
 import cn.hutool.core.util.IdUtil;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.wf.captcha.ArithmeticCaptcha;
 import com.wf.captcha.base.Captcha;
+import com.zjedu.common.dao.TagClassificationEntityService;
+import com.zjedu.common.dao.TagEntityService;
+import com.zjedu.pojo.entity.problem.Tag;
+import com.zjedu.pojo.entity.problem.TagClassification;
 import com.zjedu.pojo.vo.CaptchaVO;
+import com.zjedu.pojo.vo.ProblemTagVO;
 import com.zjedu.utils.RedisUtils;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
+
+import java.util.*;
 
 /**
  * @Author Zhong
@@ -20,6 +29,12 @@ public class CommonManager
 {
     @Resource
     private RedisUtils redisUtil;
+
+    @Resource
+    private TagEntityService tagEntityService;
+
+    @Resource
+    private TagClassificationEntityService tagClassificationEntityService;
 
     public CaptchaVO getCaptcha()
     {
@@ -37,4 +52,120 @@ public class CommonManager
         captchaVo.setCaptchaKey(key);
         return captchaVo;
     }
+
+    public List<Tag> getAllProblemTagsList(String oj)
+    {
+        List<Tag> tagList;
+        oj = oj.toUpperCase();
+        QueryWrapper<Tag> tagQueryWrapper = new QueryWrapper<>();
+        if (!oj.equals("ALL"))
+        {
+            tagQueryWrapper.eq("oj", oj);
+        }
+        tagList = tagEntityService.list(tagQueryWrapper);
+        return tagList;
+    }
+
+    public List<ProblemTagVO> getProblemTagsAndClassification(String oj)
+    {
+        oj = oj.toUpperCase();
+        List<ProblemTagVO> problemTagVOList = new ArrayList<>();
+        List<TagClassification> classificationList = null;
+        List<Tag> tagList = null;
+        if (oj.equals("ALL"))
+        {
+            classificationList = tagClassificationEntityService.list();
+            QueryWrapper<Tag> tagQueryWrapper = new QueryWrapper<>();
+            tagList = tagEntityService.list(tagQueryWrapper);
+        } else
+        {
+            QueryWrapper<TagClassification> tagClassificationQueryWrapper = new QueryWrapper<>();
+            tagClassificationQueryWrapper.eq("oj", oj)
+                    .orderByAsc("`rank`");
+            classificationList = tagClassificationEntityService.list(tagClassificationQueryWrapper);
+
+            QueryWrapper<Tag> tagQueryWrapper = new QueryWrapper<>();
+            tagQueryWrapper.eq("oj", oj);
+            tagList = tagEntityService.list(tagQueryWrapper);
+        }
+        if (CollectionUtils.isEmpty(classificationList))
+        {
+            ProblemTagVO problemTagVo = new ProblemTagVO();
+            problemTagVo.setTagList(tagList);
+            problemTagVOList.add(problemTagVo);
+        } else
+        {
+            for (TagClassification classification : classificationList)
+            {
+                ProblemTagVO problemTagVo = new ProblemTagVO();
+                problemTagVo.setClassification(classification);
+                List<Tag> tags = new ArrayList<>();
+                if (!CollectionUtils.isEmpty(tagList))
+                {
+                    Iterator<Tag> it = tagList.iterator();
+                    while (it.hasNext())
+                    {
+                        Tag tag = it.next();
+                        if (classification.getId().equals(tag.getTcid()))
+                        {
+                            tags.add(tag);
+                            it.remove();
+                        }
+                    }
+                }
+                problemTagVo.setTagList(tags);
+                problemTagVOList.add(problemTagVo);
+            }
+            if (!tagList.isEmpty())
+            {
+                ProblemTagVO problemTagVo = new ProblemTagVO();
+                problemTagVo.setTagList(tagList);
+                problemTagVOList.add(problemTagVo);
+            }
+        }
+
+        if (oj.equals("ALL"))
+        {
+            problemTagVOList.sort(problemTagVoComparator);
+        }
+        return problemTagVOList;
+    }
+
+    private final Comparator<ProblemTagVO> problemTagVoComparator = (p1, p2) ->
+    {
+        if (p1 == null)
+        {
+            return 1;
+        }
+        if (p2 == null)
+        {
+            return 1;
+        }
+        if (p1.getClassification() == null)
+        {
+            return 1;
+        }
+        if (p2.getClassification() == null)
+        {
+            return -1;
+        }
+        TagClassification p1Classification = p1.getClassification();
+        TagClassification p2Classification = p2.getClassification();
+        if (Objects.equals(p1Classification.getOj(), p2Classification.getOj()))
+        {
+            return p1Classification.getRank().compareTo(p2Classification.getRank());
+        } else
+        {
+            if ("ME".equals(p1Classification.getOj()))
+            {
+                return -1;
+            } else if ("ME".equals(p2Classification.getOj()))
+            {
+                return 1;
+            } else
+            {
+                return p1Classification.getOj().compareTo(p2Classification.getOj());
+            }
+        }
+    };
 }
