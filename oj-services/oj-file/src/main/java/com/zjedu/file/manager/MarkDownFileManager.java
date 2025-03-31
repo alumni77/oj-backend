@@ -157,7 +157,6 @@ public class MarkDownFileManager
         // 需要获取一下该token对应用户的数据
         //从请求头获取用户ID
         String userId = request.getHeader("X-User-Id");
-        UserInfo userRolesVo = passportFeignClient.getByUid(userId);
 
         UserRolesVO userRoles = passportFeignClient.getUserRoles(userId);
         // 是否为超级管理员

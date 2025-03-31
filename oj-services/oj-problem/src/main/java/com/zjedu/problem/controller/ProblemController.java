@@ -4,7 +4,9 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.zjedu.annotation.AnonApi;
 import com.zjedu.common.result.CommonResult;
 import com.zjedu.pojo.dto.PidListDTO;
+import com.zjedu.pojo.dto.ProblemDTO;
 import com.zjedu.pojo.vo.*;
+import com.zjedu.problem.dao.ProblemEntityService;
 import com.zjedu.problem.service.ProblemService;
 import jakarta.annotation.Resource;
 import org.springframework.validation.annotation.Validated;
@@ -110,6 +112,16 @@ public class ProblemController
     public CommonResult<List<ProblemFullScreenListVO>> getFullScreenProblemList(@RequestParam(value = "tid", required = false) Long tid)
     {
         return problemService.getFullScreenProblemList(tid);
+    }
+
+    // 外露接口给openFeign调用
+    @Resource
+    private ProblemEntityService problemEntityService;
+
+    @PostMapping("/admin-add-problem")
+    public boolean adminAddProblem(@RequestBody ProblemDTO problemDto)
+    {
+        return problemEntityService.adminAddProblem(problemDto);
     }
 
 

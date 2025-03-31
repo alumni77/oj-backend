@@ -1,0 +1,25 @@
+package com.zjedu.file.feign.fallback;
+
+import com.zjedu.file.feign.ProblemFeignClient;
+import com.zjedu.pojo.dto.ProblemDTO;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
+
+/**
+ * @Author Zhong
+ * @Create 2025/3/31 12:04
+ * @Version 1.0
+ * @Description
+ */
+
+@Slf4j
+@Component
+public class ProblemFeignClientFallback implements ProblemFeignClient
+{
+    @Override
+    public boolean adminAddProblem(ProblemDTO problemDto)
+    {
+        log.error("调用passport-adminAddProblem服务失败——兜底回调");
+        return false;
+    }
+}
