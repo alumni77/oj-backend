@@ -1,10 +1,11 @@
-package com.zjedu.file.service;
+package com.zjedu.file.service.impl;
 
 import com.zjedu.common.exception.StatusFailException;
 import com.zjedu.common.exception.StatusSystemErrorException;
 import com.zjedu.common.result.CommonResult;
 import com.zjedu.common.result.ResultStatus;
 import com.zjedu.file.manager.ImageManager;
+import com.zjedu.file.service.ImageService;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;

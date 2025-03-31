@@ -33,8 +33,8 @@ public class File implements Serializable
     @Schema(description = "用户id")
     private String uid;
 
-    @Schema(description = "团队id")
-    private Long gid;
+//    @Schema(description = "团队id")
+//    private Long gid;
 
     @Schema(description = "文件所属类型，例如avatar")
     @TableField("`type`")
