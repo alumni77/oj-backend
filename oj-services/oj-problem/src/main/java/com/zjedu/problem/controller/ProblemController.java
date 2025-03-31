@@ -6,6 +6,7 @@ import com.zjedu.common.result.CommonResult;
 import com.zjedu.pojo.dto.ExportProblemParamsDTO;
 import com.zjedu.pojo.dto.PidListDTO;
 import com.zjedu.pojo.dto.ProblemDTO;
+import com.zjedu.pojo.entity.problem.Problem;
 import com.zjedu.pojo.vo.*;
 import com.zjedu.problem.dao.ProblemEntityService;
 import com.zjedu.problem.service.ProblemService;
@@ -133,6 +134,12 @@ public class ProblemController
                 params.getProblemCaseList(),
                 params.getLanguageMap(),
                 params.getTagMap());
+    }
+
+    @GetMapping("/get-problem-by-pid")
+    public Problem getProblemByPid(@RequestParam("id") Long pid)
+    {
+        return problemEntityService.getById(pid);
     }
 
 
