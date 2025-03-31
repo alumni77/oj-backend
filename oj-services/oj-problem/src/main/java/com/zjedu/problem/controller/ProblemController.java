@@ -3,6 +3,7 @@ package com.zjedu.problem.controller;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.zjedu.annotation.AnonApi;
 import com.zjedu.common.result.CommonResult;
+import com.zjedu.pojo.dto.ExportProblemParamsDTO;
 import com.zjedu.pojo.dto.PidListDTO;
 import com.zjedu.pojo.dto.ProblemDTO;
 import com.zjedu.pojo.vo.*;
@@ -122,6 +123,16 @@ public class ProblemController
     public boolean adminAddProblem(@RequestBody ProblemDTO problemDto)
     {
         return problemEntityService.adminAddProblem(problemDto);
+    }
+
+    @PostMapping("/build-export-problem")
+    public ImportProblemVO buildExportProblem(@RequestParam("pid") Long pid,
+                                              @RequestBody ExportProblemParamsDTO params)
+    {
+        return problemEntityService.buildExportProblem(pid,
+                params.getProblemCaseList(),
+                params.getLanguageMap(),
+                params.getTagMap());
     }
 
 

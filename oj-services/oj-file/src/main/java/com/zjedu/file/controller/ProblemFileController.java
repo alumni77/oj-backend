@@ -3,11 +3,14 @@ package com.zjedu.file.controller;
 import com.zjedu.common.result.CommonResult;
 import com.zjedu.file.service.ProblemFileService;
 import jakarta.annotation.Resource;
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 /**
  * @Author Zhong
@@ -33,5 +36,12 @@ public class ProblemFileController
     {
         return problemFileService.importProblem(file);
     }
+
+    @GetMapping("/export-problem")
+    public void exportProblem(@RequestParam("pid") List<Long> pidList, HttpServletResponse response)
+    {
+        problemFileService.exportProblem(pidList, response);
+    }
+
 
 }

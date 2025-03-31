@@ -1,5 +1,6 @@
 package com.zjedu.problem.dao.impl;
 
+import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.file.FileReader;
 import cn.hutool.core.io.file.FileWriter;
@@ -16,6 +17,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zjedu.common.exception.ProblemIDRepeatException;
 import com.zjedu.pojo.dto.ProblemDTO;
 import com.zjedu.pojo.entity.problem.*;
+import com.zjedu.pojo.vo.ImportProblemVO;
 import com.zjedu.pojo.vo.ProblemCountVO;
 import com.zjedu.pojo.vo.ProblemVO;
 import com.zjedu.problem.dao.*;
@@ -37,6 +39,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -286,6 +289,65 @@ public class ProblemEntityServiceImpl extends ServiceImpl<ProblemMapper, Problem
         {
             return false;
         }
+    }
+
+    @Override
+    @SuppressWarnings("All")
+    public ImportProblemVO buildExportProblem(Long pid, List<HashMap<String, Object>> problemCaseList,
+                                              HashMap<Long, String> languageMap, HashMap<Long, String> tagMap)
+    {
+        // 导出相当于导入
+        ImportProblemVO importProblemVo = new ImportProblemVO();
+        Problem problem = problemMapper.selectById(pid);
+        problem.setCaseVersion(null)
+                .setGmtCreate(null)
+                .setId(null)
+                .setAuth(1)
+                .setIsUploadCase(true)
+                .setAuthor(null)
+                .setGmtModified(null);
+        HashMap<String, Object> problemMap = new HashMap<>();
+        BeanUtil.beanToMap(problem, problemMap, false, true);
+        importProblemVo.setProblem(problemMap);
+        QueryWrapper<CodeTemplate> codeTemplateQueryWrapper = new QueryWrapper<>();
+        codeTemplateQueryWrapper.eq("pid", pid).eq("status", true);
+        List<CodeTemplate> codeTemplates = codeTemplateEntityService.list(codeTemplateQueryWrapper);
+        List<HashMap<String, String>> codeTemplateList = new LinkedList<>();
+        for (CodeTemplate codeTemplate : codeTemplates)
+        {
+            HashMap<String, String> tmp = new HashMap<>();
+            tmp.put("language", languageMap.get(codeTemplate.getLid()));
+            tmp.put("code", codeTemplate.getCode());
+            codeTemplateList.add(tmp);
+        }
+        importProblemVo.setCodeTemplates(codeTemplateList);
+        importProblemVo.setJudgeMode(problem.getJudgeMode());
+        importProblemVo.setSamples(problemCaseList);
+
+        if (!StringUtils.isEmpty(problem.getUserExtraFile()))
+        {
+            HashMap<String, String> userExtraFileMap = (HashMap<String, String>) JSONUtil.toBean(problem.getUserExtraFile(), Map.class);
+            importProblemVo.setUserExtraFile(userExtraFileMap);
+        }
+
+        if (!StringUtils.isEmpty(problem.getJudgeExtraFile()))
+        {
+            HashMap<String, String> judgeExtraFileMap = (HashMap<String, String>) JSONUtil.toBean(problem.getJudgeExtraFile(), Map.class);
+            importProblemVo.setUserExtraFile(judgeExtraFileMap);
+        }
+
+        QueryWrapper<ProblemTag> problemTagQueryWrapper = new QueryWrapper<>();
+        problemTagQueryWrapper.eq("pid", pid);
+        List<ProblemTag> problemTags = problemTagEntityService.list(problemTagQueryWrapper);
+        importProblemVo.setTags(problemTags.stream().map(problemTag -> tagMap.get(problemTag.getTid())).collect(Collectors.toList()));
+
+        QueryWrapper<ProblemLanguage> problemLanguageQueryWrapper = new QueryWrapper<>();
+        problemLanguageQueryWrapper.eq("pid", pid);
+        List<ProblemLanguage> problemLanguages = problemLanguageEntityService.list(problemLanguageQueryWrapper);
+        importProblemVo.setLanguages(problemLanguages.stream().map(problemLanguage -> languageMap.get(problemLanguage.getLid())).collect(Collectors.toList()));
+
+
+        return importProblemVo;
     }
 
     private Integer calProblemTotalScore(String judgeCaseMode, List<ProblemCase> problemCaseList)

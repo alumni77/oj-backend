@@ -7,8 +7,11 @@ import com.zjedu.common.result.ResultStatus;
 import com.zjedu.file.manager.ProblemFileManager;
 import com.zjedu.file.service.ProblemFileService;
 import jakarta.annotation.Resource;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 /**
  * @Author Zhong
@@ -37,5 +40,11 @@ public class ProblemFileServiceImpl implements ProblemFileService
         {
             return CommonResult.errorResponse(e.getMessage(), ResultStatus.SYSTEM_ERROR);
         }
+    }
+
+    @Override
+    public void exportProblem(List<Long> pidList, HttpServletResponse response)
+    {
+        problemFileManager.exportProblem(pidList, response);
     }
 }
