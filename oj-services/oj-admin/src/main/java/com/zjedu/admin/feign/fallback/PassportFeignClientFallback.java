@@ -1,6 +1,6 @@
-package com.zjedu.file.feign.fallback;
+package com.zjedu.admin.feign.fallback;
 
-import com.zjedu.file.feign.PassportFeignClient;
+import com.zjedu.admin.feign.PassportFeignClient;
 import com.zjedu.pojo.entity.user.UserInfo;
 import com.zjedu.pojo.vo.UserRolesVO;
 import lombok.extern.slf4j.Slf4j;
@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 
 /**
  * @Author Zhong
- * @Create 2025/3/30 20:14
+ * @Create 2025/3/31 15:54
  * @Version 1.0
  * @Description
  */
@@ -32,9 +32,4 @@ public class PassportFeignClientFallback implements PassportFeignClient
         return null;
     }
 
-    @Override
-    public void updateUserAvatar(String avatar, String uid)
-    {
-        log.error("调用passport-updateUserAvatar服务失败——兜底回调");
-    }
 }

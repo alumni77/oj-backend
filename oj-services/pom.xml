@@ -20,6 +20,7 @@
         <module>oj-common</module>
         <module>oj-training</module>
         <module>oj-file</module>
+        <module>oj-admin</module>
     </modules>
 
     <properties>

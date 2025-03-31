@@ -64,7 +64,7 @@ public class PassportFeignClientFallback implements PassportFeignClient
     }
 
     @Override
-    public UserRolesVO getUserRoles(String uid)
+    public UserRolesVO getUserRoles(String uid, String username)
     {
         log.error("调用passport-getUserRoles服务失败——兜底回调");
 

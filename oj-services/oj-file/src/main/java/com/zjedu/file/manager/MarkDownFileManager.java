@@ -49,7 +49,7 @@ public class MarkDownFileManager
         String userId = request.getHeader("X-User-Id");
         UserInfo userRolesVo = passportFeignClient.getByUid(userId);
 
-        UserRolesVO userRoles = passportFeignClient.getUserRoles(userId);
+        UserRolesVO userRoles = passportFeignClient.getUserRoles(userId, null);
         // 是否为超级管理员
         boolean isRoot = userRoles.getRoles().stream()
                 .anyMatch(role -> "root".equals(role.getRole()));
@@ -129,7 +129,7 @@ public class MarkDownFileManager
         String userId = request.getHeader("X-User-Id");
         UserInfo userRolesVo = passportFeignClient.getByUid(userId);
 
-        UserRolesVO userRoles = passportFeignClient.getUserRoles(userId);
+        UserRolesVO userRoles = passportFeignClient.getUserRoles(userId, null);
         // 是否为超级管理员
         boolean isRoot = userRoles.getRoles().stream()
                 .anyMatch(role -> "root".equals(role.getRole()));
@@ -158,7 +158,7 @@ public class MarkDownFileManager
         //从请求头获取用户ID
         String userId = request.getHeader("X-User-Id");
 
-        UserRolesVO userRoles = passportFeignClient.getUserRoles(userId);
+        UserRolesVO userRoles = passportFeignClient.getUserRoles(userId, null);
         // 是否为超级管理员
         boolean isRoot = userRoles.getRoles().stream()
                 .anyMatch(role -> "root".equals(role.getRole()));

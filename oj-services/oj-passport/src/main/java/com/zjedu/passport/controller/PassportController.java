@@ -204,9 +204,9 @@ public class PassportController
     private UserRoleEntityService userRoleEntityService;
 
     @GetMapping("/get-user-role")
-    public UserRolesVO getUserRoles(@RequestParam("uid") String uid)
+    public UserRolesVO getUserRoles(@RequestParam("uid") String uid, @RequestParam("username") String username)
     {
-        return userRoleEntityService.getUserRoles(uid, null);
+        return userRoleEntityService.getUserRoles(uid, username);
     }
 
     @GetMapping("/get-roles-by-uid")

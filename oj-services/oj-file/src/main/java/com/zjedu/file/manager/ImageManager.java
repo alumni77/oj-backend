@@ -96,7 +96,7 @@ public class ImageManager
         // 更新session
         accountProfile.setAvatar(Constants.File.IMG_API.getPath() + filename);
 
-        UserRolesVO userRolesVo = passportFeignClient.getUserRoles(accountProfile.getUuid());
+        UserRolesVO userRolesVo = passportFeignClient.getUserRoles(accountProfile.getUuid(), null);
 
         return MapUtil.builder()
                 .put("uid", userRolesVo.getUid())
@@ -125,7 +125,7 @@ public class ImageManager
         String userId = request.getHeader("X-User-Id");
         UserInfo userInfo = passportFeignClient.getByUid(userId);
         // 是否为超级管理员
-        UserRolesVO userRolesVo = passportFeignClient.getUserRoles(userId);
+        UserRolesVO userRolesVo = passportFeignClient.getUserRoles(userId, null);
         boolean isRoot = userRolesVo.getRoles().stream()
                 .anyMatch(role -> "root".equals(role.getRole()));
         if (!isRoot)

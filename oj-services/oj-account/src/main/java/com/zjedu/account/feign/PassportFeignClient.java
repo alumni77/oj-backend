@@ -40,7 +40,7 @@ public interface PassportFeignClient
     boolean updateUserInfo(@RequestBody UserInfoVO userInfoVo, @RequestParam("userId") String userId) throws StatusFailException;
 
     @GetMapping("/get-user-role")
-    UserRolesVO getUserRoles(@RequestParam("uid") String uid);
+    UserRolesVO getUserRoles(@RequestParam("uid") String uid, @RequestParam("username") String username);
 
     @GetMapping("/get-roles-by-uid")
     List<Role> getRolesByUid(@RequestParam("uid") String uid);

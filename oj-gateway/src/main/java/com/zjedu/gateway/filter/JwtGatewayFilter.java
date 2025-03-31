@@ -82,6 +82,8 @@ public class JwtGatewayFilter implements GlobalFilter, Ordered
             "/api/training/get-training-list",
             // File服务的匿名接口
 
+            // Admin服务的匿名接口
+            "/api/admin/login",
 
 
             // Passport服务的Swagger配置
@@ -115,7 +117,11 @@ public class JwtGatewayFilter implements GlobalFilter, Ordered
             // File服务的Swagger配置
             "/api/file/v3/api-docs/**",
             "/api/file/swagger-ui/**",
-            "/api/file/doc.html"
+            "/api/file/doc.html",
+            // Admin服务的Swagger配置
+            "/api/admin/v3/api-docs/**",
+            "/api/admin/swagger-ui/**",
+            "/api/admin/doc.html"
 
 
     );

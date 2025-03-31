@@ -28,7 +28,7 @@ public interface PassportFeignClient
     UserInfo getByUid(@RequestParam("uid") String uid);
 
     @GetMapping("/get-user-role")
-    UserRolesVO getUserRoles(@RequestParam("uid") String uid);
+    UserRolesVO getUserRoles(@RequestParam("uid") String uid, @RequestParam("username") String username);
 
     @PostMapping("get-oi-rank-list")
     Page<OIRankVO> getOIRankList(@RequestBody Page<OIRankVO> page, @RequestParam(required = false) List<String> uidList);

@@ -258,7 +258,7 @@ public class ProblemManager
     {
 
         //如果不是超管或题目管理员，需要检查网站是否开启隐藏代码功能
-        UserRolesVO userRolesVo = passportFeignClient.getUserRoles(uid);
+        UserRolesVO userRolesVo = passportFeignClient.getUserRoles(uid, null);
         // 是否为超级管理员
         boolean isRoot = userRolesVo.getRoles().stream()
                 .anyMatch(role -> "root".equals(role.getRole()));
