@@ -3,6 +3,7 @@ package com.zjedu.judgeserve.controller;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.zjedu.annotation.AnonApi;
 import com.zjedu.common.result.CommonResult;
+import com.zjedu.judgeserve.judge.self.JudgeDispatcher;
 import com.zjedu.judgeserve.service.JudgeService;
 import com.zjedu.pojo.dto.SubmitIdListDTO;
 import com.zjedu.pojo.dto.SubmitJudgeDTO;
@@ -132,14 +133,27 @@ public class JudgeController
 
     /**
      * 获得指定提交id的测试样例结果，暂不支持查看测试数据，只可看测试点结果，时间，空间，或者IO得分
+     *
      * @param submitId
      * @return
      */
     @GetMapping("/get-all-case-result")
     @AnonApi
-    public CommonResult<JudgeCaseVO> getALLCaseResult(@RequestParam(value = "submitId", required = true) Long submitId) {
+    public CommonResult<JudgeCaseVO> getALLCaseResult(@RequestParam(value = "submitId", required = true) Long submitId)
+    {
         return judgeService.getALLCaseResult(submitId);
     }
 
+    //外露接口给openFeign调用
+    @Resource
+    private JudgeDispatcher judgeDispatcher;
+
+    @PostMapping(value = "/send-task")
+    public void sendTask(@RequestParam("judgeId") Long judgeId,
+                         @RequestParam("pid") Long pid,
+                         @RequestParam("isContest") Boolean isContest)
+    {
+        judgeDispatcher.sendTask(judgeId, pid, isContest);
+    }
 
 }

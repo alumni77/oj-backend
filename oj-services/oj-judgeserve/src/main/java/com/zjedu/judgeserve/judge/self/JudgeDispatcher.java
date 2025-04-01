@@ -10,7 +10,6 @@ import com.zjedu.utils.Constants;
 import com.zjedu.utils.RedisUtils;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.stereotype.Component;
@@ -27,8 +26,7 @@ import org.springframework.stereotype.Component;
 @RefreshScope
 public class JudgeDispatcher
 {
-
-    @Autowired
+    @Resource
     private RedisUtils redisUtils;
 
     @Resource

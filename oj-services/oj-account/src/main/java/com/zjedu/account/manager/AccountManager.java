@@ -314,7 +314,7 @@ public class AccountManager
 
         if (isOk)
         {
-            UserRolesVO userRoles = passportFeignClient.getUserRoles(userRolesVo.getUuid());
+            UserRolesVO userRoles = passportFeignClient.getUserRoles(userRolesVo.getUuid(),"");
             // 更新session
             BeanUtil.copyProperties(userRoles, userRolesVo);
             UserInfoVO userInfoVO = new UserInfoVO();

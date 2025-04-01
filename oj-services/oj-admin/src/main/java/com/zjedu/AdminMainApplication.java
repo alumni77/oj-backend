@@ -1,4 +1,4 @@
-package com.zjedu.judgeserve;
+package com.zjedu;
 
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
@@ -8,20 +8,21 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.annotation.ComponentScan;
 
 /**
-* @Author Zhong
-* @Create 2025/3/25 22:10
-* @Version 1.0
-* @Description 
-*/
+ * @Author Zhong
+ * @Create 2025/3/31 15:41
+ * @Version 1.0
+ * @Description
+ */
 
 @EnableDiscoveryClient
 @EnableFeignClients
 @SpringBootApplication
-@ComponentScan(basePackages = {"com.zjedu"})
-@MapperScan(basePackages = {"com.zjedu.judgeserve.mapper"})
-public class JudgeServeMainApplication {
+@ComponentScan(basePackages = "com.zjedu")
+@MapperScan(basePackages = {"com.zjedu.admin.mapper"})
+public class AdminMainApplication
+{
     public static void main(String[] args)
     {
-        SpringApplication.run(JudgeServeMainApplication.class, args);
+        SpringApplication.run(AdminMainApplication.class, args);
     }
 }
