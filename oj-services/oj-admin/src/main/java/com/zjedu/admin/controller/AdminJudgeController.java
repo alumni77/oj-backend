@@ -29,5 +29,19 @@ public class AdminJudgeController
         return rejudgeService.rejudge(submitId);
     }
 
+    @GetMapping("/manual-judge")
+    public CommonResult<Judge> manualJudge(@RequestParam("submitId") Long submitId,
+                                           @RequestParam("status") Integer status,
+                                           @RequestParam(value = "score", required = false) Integer score)
+    {
+        return rejudgeService.manualJudge(submitId, status, score);
+    }
+
+    @GetMapping("/cancel-judge")
+    public CommonResult<Judge> cancelJudge(@RequestParam("submitId") Long submitId)
+    {
+        return rejudgeService.cancelJudge(submitId);
+    }
+
 
 }

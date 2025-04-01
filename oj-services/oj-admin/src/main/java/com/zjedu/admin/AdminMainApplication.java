@@ -1,4 +1,4 @@
-package com.zjedu;
+package com.zjedu.admin;
 
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
