@@ -1,0 +1,6 @@
+mybatis-plus:
+  global-config:
+    db-config:
+      id-type: auto  # ID 生成策略
+  configuration:
+    map-underscore-to-camel-case: true  # 开启驼峰命名匹配
