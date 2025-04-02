@@ -3,8 +3,10 @@ package com.zjedu.judgeserve.controller;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.zjedu.annotation.AnonApi;
 import com.zjedu.common.result.CommonResult;
+import com.zjedu.judgeserve.judge.Dispatcher;
 import com.zjedu.judgeserve.judge.self.JudgeDispatcher;
 import com.zjedu.judgeserve.service.JudgeService;
+import com.zjedu.pojo.dto.CompileDTO;
 import com.zjedu.pojo.dto.SubmitIdListDTO;
 import com.zjedu.pojo.dto.SubmitJudgeDTO;
 import com.zjedu.pojo.dto.TestJudgeDTO;
@@ -13,6 +15,7 @@ import com.zjedu.pojo.vo.JudgeCaseVO;
 import com.zjedu.pojo.vo.JudgeVO;
 import com.zjedu.pojo.vo.SubmissionInfoVO;
 import com.zjedu.pojo.vo.TestJudgeVO;
+import com.zjedu.utils.Constants;
 import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.*;
 
@@ -154,6 +157,21 @@ public class JudgeController
                          @RequestParam("isContest") Boolean isContest)
     {
         judgeDispatcher.sendTask(judgeId, pid, isContest);
+    }
+
+    @Resource
+    private Dispatcher dispatcher;
+
+    @PostMapping("/compile-spj")
+    public void compileSpj(@RequestBody CompileDTO compileDTO)
+    {
+        dispatcher.dispatch(Constants.TaskType.COMPILE_INTERACTIVE, compileDTO);
+    }
+
+    @PostMapping("/compile-interactive")
+    public void compileInteractive(@RequestBody CompileDTO compileDTO)
+    {
+        dispatcher.dispatch(Constants.TaskType.COMPILE_INTERACTIVE, compileDTO);
     }
 
 }

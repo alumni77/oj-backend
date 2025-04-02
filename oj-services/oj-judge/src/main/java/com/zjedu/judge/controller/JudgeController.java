@@ -262,6 +262,7 @@ public class JudgeController
         return Math.toIntExact(judgeEntityService.count(judgeQueryWrapper));
     }
 
+    // 外露接口给openFeign调用
     @Resource
     private ProblemEntityService problemEntityService;
 

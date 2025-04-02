@@ -1,8 +1,10 @@
 package com.zjedu.admin.feign;
 
 import com.zjedu.admin.feign.fallback.JudgeServeFeignClientFallback;
+import com.zjedu.pojo.dto.CompileDTO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
 /**
@@ -19,4 +21,10 @@ public interface JudgeServeFeignClient
     void sendTask(@RequestParam("judgeId") Long judgeId,
                   @RequestParam("pid") Long pid,
                   @RequestParam("isContest") Boolean isContest);
+
+    @PostMapping("/compile-spj")
+    void compileSpj(@RequestBody CompileDTO compileDTO);
+
+    @PostMapping("/compile-interactive")
+    void compileInteractive(@RequestBody CompileDTO compileDTO);
 }

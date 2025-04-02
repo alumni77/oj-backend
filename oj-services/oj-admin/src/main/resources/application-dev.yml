@@ -25,3 +25,7 @@ REDIS_PASSWORD: 123456
 
 # JWT 配置
 JWT_SECRET: SmMUX4cbYjmr5sMkTS7DaQ7NYhEBerWJtNPehhJ/1PxzEJOBEV6IbUYwV/PKb+uiooDtdgIBLxjzpV6Oq0OIyQ==
+
+oj:
+  judge:
+    token: judge_token

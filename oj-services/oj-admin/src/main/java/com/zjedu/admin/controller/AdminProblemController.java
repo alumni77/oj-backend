@@ -4,12 +4,14 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.zjedu.admin.service.AdminProblemService;
 import com.zjedu.common.exception.StatusFailException;
 import com.zjedu.common.result.CommonResult;
+import com.zjedu.pojo.dto.CompileDTO;
+import com.zjedu.pojo.dto.ProblemDTO;
 import com.zjedu.pojo.entity.problem.Problem;
+import com.zjedu.pojo.entity.problem.ProblemCase;
 import jakarta.annotation.Resource;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * @Author Zhong
@@ -34,5 +36,55 @@ public class AdminProblemController
     {
         return adminProblemService.getProblemList(limit, currentPage, keyword, auth, oj);
     }
+
+    @GetMapping("/")
+    public CommonResult<Problem> getProblem(@RequestParam("pid") Long pid)
+    {
+        return adminProblemService.getProblem(pid);
+    }
+
+    @DeleteMapping("/")
+    public CommonResult<Void> deleteProblem(@RequestParam("pid") Long pid)
+    {
+        return adminProblemService.deleteProblem(pid);
+    }
+
+    @PostMapping("/")
+    public CommonResult<Void> addProblem(@RequestBody ProblemDTO problemDto)
+    {
+        return adminProblemService.addProblem(problemDto);
+    }
+
+    @PutMapping("/")
+    public CommonResult<Void> updateProblem(@RequestBody ProblemDTO problemDto)
+    {
+        return adminProblemService.updateProblem(problemDto);
+    }
+
+    @GetMapping("/get-problem-cases")
+    public CommonResult<List<ProblemCase>> getProblemCases(@RequestParam("pid") Long pid,
+                                                           @RequestParam(value = "isUpload", defaultValue = "true") Boolean isUpload)
+    {
+        return adminProblemService.getProblemCases(pid, isUpload);
+    }
+
+    @PostMapping("/compile-spj")
+    public CommonResult compileSpj(@RequestBody CompileDTO compileDTO)
+    {
+        return adminProblemService.compileSpj(compileDTO);
+    }
+
+    @PostMapping("/compile-interactive")
+    public CommonResult compileInteractive(@RequestBody CompileDTO compileDTO)
+    {
+        return adminProblemService.compileInteractive(compileDTO);
+    }
+
+    @PutMapping("/change-problem-auth")
+    public CommonResult<Void> changeProblemAuth(@RequestBody Problem problem)
+    {
+        return adminProblemService.changeProblemAuth(problem);
+    }
+
 
 }

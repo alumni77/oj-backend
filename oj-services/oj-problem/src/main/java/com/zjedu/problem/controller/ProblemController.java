@@ -142,5 +142,11 @@ public class ProblemController
         return problemEntityService.getById(pid);
     }
 
+    @PostMapping("/admin-update-problem")
+    public boolean adminUpdateProblem(@RequestBody ProblemDTO problemDto)
+    {
+        return problemEntityService.adminUpdateProblem(problemDto);
+    }
+
 
 }

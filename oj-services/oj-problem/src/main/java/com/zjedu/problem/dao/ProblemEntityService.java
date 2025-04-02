@@ -25,4 +25,7 @@ public interface ProblemEntityService extends IService<Problem>
     boolean adminAddProblem(ProblemDTO problemDto);
 
     ImportProblemVO buildExportProblem(Long pid, List<HashMap<String, Object>> problemCaseList, HashMap<Long, String> languageMap, HashMap<Long, String> tagMap);
+
+    boolean adminUpdateProblem(ProblemDTO problemDto);
+
 }
