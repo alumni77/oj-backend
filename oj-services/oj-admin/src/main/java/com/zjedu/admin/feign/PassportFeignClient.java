@@ -1,11 +1,14 @@
 package com.zjedu.admin.feign;
 
 import com.zjedu.admin.feign.fallback.PassportFeignClientFallback;
+import com.zjedu.pojo.entity.user.Role;
 import com.zjedu.pojo.entity.user.UserInfo;
 import com.zjedu.pojo.vo.UserRolesVO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+
+import java.util.List;
 
 /**
  * @Author Zhong
@@ -22,5 +25,8 @@ public interface PassportFeignClient
 
     @GetMapping("/get-user-role")
     UserRolesVO getUserRoles(@RequestParam("uid") String uid, @RequestParam("username") String username);
+
+    @GetMapping("/get-roles-by-uid")
+    List<Role> getRolesByUid(@RequestParam("uid") String uid);
 
 }
