@@ -39,8 +39,8 @@ public class TrainingCategory implements Serializable
     @Schema(description = "训练题单专用分类背景颜色")
     private String color;
 
-    @Schema(description = "团队ID")
-    private Long gid;
+//    @Schema(description = "团队ID")
+//    private Long gid;
 
     @TableField(fill = FieldFill.INSERT)
     private Date gmtCreate;
