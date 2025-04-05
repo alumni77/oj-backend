@@ -1,5 +1,6 @@
 package com.zjedu.admin.feign.fallback;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.zjedu.admin.feign.PassportFeignClient;
 import com.zjedu.pojo.entity.user.Role;
 import com.zjedu.pojo.entity.user.UserInfo;
@@ -41,5 +42,20 @@ public class PassportFeignClientFallback implements PassportFeignClient
         log.error("调用passport-getRolesByUid服务失败——兜底回调");
 
         return List.of();
+    }
+
+    @Override
+    public Page<UserRolesVO> getUserList(int limit, int currentPage, String keyword, Boolean onlyAdmin)
+    {
+        log.error("调用passport-getUserList服务失败——兜底回调");
+
+        return null;
+    }
+
+    @Override
+    public void deleteCache(String uid, boolean isRemoveSession)
+    {
+        log.error("调用passport-deleteCache服务失败——兜底回调");
+
     }
 }

@@ -215,4 +215,19 @@ public class PassportController
         return userRoleEntityService.getRolesByUid(uid);
     }
 
+    @GetMapping("/get-user-list")
+    public Page<UserRolesVO> getUserList(@RequestParam(value = "limit", required = false) int limit,
+                                         @RequestParam(value = "currentPage", required = false) int currentPage,
+                                         @RequestParam(value = "keyword", required = false) String keyword,
+                                         @RequestParam(value = "onlyAdmin", defaultValue = "false") Boolean onlyAdmin)
+    {
+        return (Page<UserRolesVO>) userRoleEntityService.getUserList(limit, currentPage, keyword, onlyAdmin);
+    }
+
+    @DeleteMapping("/delete-cache")
+    public void deleteCache(@RequestParam("uid") String uid, @RequestParam("isRemoveSession") boolean isRemoveSession)
+    {
+        userRoleEntityService.deleteCache(uid, isRemoveSession);
+    }
+
 }
