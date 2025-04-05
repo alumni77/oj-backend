@@ -5,9 +5,13 @@ import com.zjedu.admin.service.AdminTrainingProblemService;
 import com.zjedu.admin.service.AdminTrainingService;
 import com.zjedu.common.result.CommonResult;
 import com.zjedu.pojo.dto.TrainingDTO;
+import com.zjedu.pojo.dto.TrainingProblemDTO;
 import com.zjedu.pojo.entity.training.Training;
+import com.zjedu.pojo.entity.training.TrainingProblem;
 import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.HashMap;
 
 /**
  * @Author Zhong
@@ -65,5 +69,37 @@ public class AdminTrainingController
     {
         return adminTrainingService.changeTrainingStatus(tid, author, status);
     }
+
+    @GetMapping("/get-problem-list")
+    public CommonResult<HashMap<String, Object>> getProblemList(@RequestParam(value = "limit", required = false) Integer limit,
+                                                                @RequestParam(value = "currentPage", required = false) Integer currentPage,
+                                                                @RequestParam(value = "keyword", required = false) String keyword,
+                                                                @RequestParam(value = "queryExisted", defaultValue = "false") Boolean queryExisted,
+                                                                @RequestParam(value = "tid", required = true) Long tid)
+    {
+        return adminTrainingProblemService.getProblemList(limit, currentPage, keyword, queryExisted, tid);
+    }
+
+    //TODO: 为测试下面的接口
+    @PutMapping("/problem")
+    public CommonResult<Void> updateProblem(@RequestBody TrainingProblem trainingProblem)
+    {
+        return adminTrainingProblemService.updateProblem(trainingProblem);
+    }
+
+    @DeleteMapping("/problem")
+    public CommonResult<Void> deleteProblem(@RequestParam("pid") Long pid,
+                                            @RequestParam(value = "tid", required = false) Long tid)
+    {
+
+        return adminTrainingProblemService.deleteProblem(pid, tid);
+    }
+
+    @PostMapping("/add-problem-from-public")
+    public CommonResult<Void> addProblemFromPublic(@RequestBody TrainingProblemDTO trainingProblemDto)
+    {
+        return adminTrainingProblemService.addProblemFromPublic(trainingProblemDto);
+    }
+
 
 }

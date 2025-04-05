@@ -1,10 +1,7 @@
 package com.zjedu.admin.manager;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.zjedu.admin.dao.JudgeEntityService;
-import com.zjedu.admin.dao.TrainingProblemEntityService;
-import com.zjedu.admin.dao.TrainingRecordEntityService;
-import com.zjedu.admin.dao.TrainingRegisterEntityService;
+import com.zjedu.admin.dao.*;
 import com.zjedu.pojo.entity.judge.Judge;
 import com.zjedu.pojo.entity.training.Training;
 import com.zjedu.pojo.entity.training.TrainingProblem;
@@ -40,6 +37,9 @@ public class AdminTrainingRecordManager
 
     @Resource
     private TrainingRegisterEntityService trainingRegisterEntityService;
+
+    @Resource
+    private TrainingEntityService trainingEntityService;
 
     @Async
     public void checkSyncRecord(Training training)
@@ -113,5 +113,32 @@ public class AdminTrainingRecordManager
             trainingRecordEntityService.saveBatch(trainingRecordList);
         }
     }
+
+    @Async
+    public void syncAlreadyRegisterUserRecord(Long tid, Long pid, Long tpId)
+    {
+        Training training = trainingEntityService.getById(tid);
+        if (!Constants.Training.AUTH_PRIVATE.getValue().equals(training.getAuth()))
+        {
+            return;
+        }
+        List<String> uidList = trainingRegisterEntityService.getAlreadyRegisterUidList(tid);
+        syncNewProblemUserSubmissionToRecord(pid, tpId, tid, uidList);
+    }
+
+    private void syncNewProblemUserSubmissionToRecord(Long pid, Long tpId, Long tid, List<String> uidList)
+    {
+        if (!CollectionUtils.isEmpty(uidList))
+        {
+            QueryWrapper<Judge> judgeQueryWrapper = new QueryWrapper<>();
+            judgeQueryWrapper.eq("pid", pid)
+                    .eq("cid", 0)
+                    .eq("status", Constants.Judge.STATUS_ACCEPTED.getStatus()) // 只同步ac的提交
+                    .in("uid", uidList);
+            List<Judge> judgeList = judgeEntityService.list(judgeQueryWrapper);
+            saveBatchNewRecordByJudgeList(judgeList, tid, tpId, null);
+        }
+    }
+
 
 }
