@@ -473,8 +473,11 @@ public class ConfigManager
         // 是否为admin
         boolean isAdmin = userRoles.getRoles().stream()
                 .anyMatch(role -> "admin".equals(role.getRole()));
+        // 是否为problem_admin
+        boolean isProblemAdmin = userRoles.getRoles().stream()
+                .anyMatch(role -> "problem_admin".equals(role.getRole()));
 
-        return isRoot || isAdmin;
+        return isRoot || isAdmin || isProblemAdmin;
     }
 
 }

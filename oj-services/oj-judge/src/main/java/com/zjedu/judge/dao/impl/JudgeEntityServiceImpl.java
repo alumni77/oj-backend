@@ -111,4 +111,10 @@ public class JudgeEntityServiceImpl extends ServiceImpl<JudgeMapper, Judge> impl
         return judgeMapper.getProblemCount(pid);
 
     }
+
+    @Override
+    public int getTodayJudgeNum()
+    {
+        return judgeMapper.getTodayJudgeNum();
+    }
 }

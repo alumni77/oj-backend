@@ -68,5 +68,9 @@
         </where>
     </select>
 
+    <select id="getTodayJudgeNum" resultType="int">
+        SELECT count(*) FROM judge WHERE DATE(gmt_create) = CURDATE();
+    </select>
+
 
 </mapper>

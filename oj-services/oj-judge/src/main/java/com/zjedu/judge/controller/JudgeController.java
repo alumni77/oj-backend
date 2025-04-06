@@ -262,6 +262,12 @@ public class JudgeController
         return Math.toIntExact(judgeEntityService.count(judgeQueryWrapper));
     }
 
+    @GetMapping("/get-today-judge-num")
+    public Integer getTodayJudgeNum()
+    {
+        return judgeEntityService.getTodayJudgeNum();
+    }
+
     // 外露接口给openFeign调用
     @Resource
     private ProblemEntityService problemEntityService;

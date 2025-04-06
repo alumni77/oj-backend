@@ -31,4 +31,5 @@ public interface JudgeEntityService extends IService<Judge>
 
     ProblemCountVO getProblemCount(Long pid);
 
+    int getTodayJudgeNum();
 }

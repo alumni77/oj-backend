@@ -30,5 +30,5 @@ public interface JudgeMapper extends BaseMapper<Judge>
 
     ProblemCountVO getProblemCount(@Param("pid") Long pid);
 
-
+    int getTodayJudgeNum();
 }
