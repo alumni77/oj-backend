@@ -29,3 +29,5 @@ JWT_SECRET: SmMUX4cbYjmr5sMkTS7DaQ7NYhEBerWJtNPehhJ/1PxzEJOBEV6IbUYwV/PKb+uiooDt
 oj:
   judge:
     token: judge_token
+
+SERVICE_NAME: oj-judge

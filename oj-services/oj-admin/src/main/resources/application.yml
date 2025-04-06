@@ -36,6 +36,11 @@ spring:
         password: ${NACOS_CONFIG_PASSWORD}
         group: ${NACOS_CONFIG_GROUP}
         enabled: true
+      config:
+        type: yaml
+        file-extension: yaml
+        prefix: oj
+
   servlet:
     multipart:
       max-file-size: 128MB
@@ -89,3 +94,6 @@ oj:
     expire: 86500
     check-refresh-expire: 43200
     header: Authorization
+
+service-url:
+  name: ${SERVICE_NAME}
