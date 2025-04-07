@@ -17,45 +17,44 @@ import org.springframework.stereotype.Component;
 @Component
 public class ConfigVO
 {
-    //TODO: 这里的配置项需要根据实际情况进行修改
     // 数据库配置
-    @Value("${MYSQL_USERNAME:root}")
+    @Value("${MYSQL_USERNAME}")
     private String mysqlUsername;
 
-    @Value("${MYSQL_PASSWORD:123456}")
+    @Value("${MYSQL_PASSWORD}")
     private String mysqlPassword;
 
-    @Value("${MYSQL_DATABASE:hoj}")
+    @Value("${MYSQL_DATABASE}")
     private String mysqlDBName;
 
-    @Value("${MYSQL_HOST:localhost}")
+    @Value("${MYSQL_HOST}")
     private String mysqlHost;
 
     @Value("${hoj.db.public-host:172.20.0.3}")
     private String mysqlPublicHost;
 
-    @Value("${MYSQL_PORT:3306}")
+    @Value("${MYSQL_PORT}")
     private Integer mysqlPort;
 
-    @Value("${MYSQL_PORT:3306}")
+    @Value("${MYSQL_PORT}")
     private Integer mysqlPublicPort;
 
     // 判题服务token
-    @Value("${hoj.judge.token:no_judge_token}")
+    @Value("${hoj.judge.token:judge_token}")
     private String judgeToken;
 
     // 缓存配置
-    @Value("${REDIS_HOST:localhost}")
+    @Value("${REDIS_HOST}")
     private String redisHost;
 
-    @Value("${REDIS_PORT:6379}")
+    @Value("${REDIS_PORT}")
     private Integer redisPort;
 
-    @Value("${REDIS_PASSWORD:123456}")
+    @Value("${REDIS_PASSWORD}")
     private String redisPassword;
 
     // jwt配置
-    @Value("${JWT_SECRET:SmMUX4cbYjmr5sMkTS7DaQ7NYhEBerWJtNPehhJ/1PxzEJOBEV6IbUYwV/PKb+uiooDtdgIBLxjzpV6Oq0OIyQ==\n}")
+    @Value("${JWT_SECRET")
     private String tokenSecret;
 
     @Value("${hoj.jwt.expire:86500}")
