@@ -72,4 +72,8 @@ oj:
 
 logging:
   level:
-    com.zjedu.gateway: DEBUG
+    com.zjedu: debug
+  pattern:
+    dateformat: yyyy-MM-dd'T'HH:mm:ss.SSS
+  file:
+    path: "logs/${spring.application.name}"
