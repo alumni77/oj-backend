@@ -1,10 +1,13 @@
 package com.zjedu.problem.manager;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.zjedu.common.exception.StatusFailException;
+import com.zjedu.pojo.entity.user.UserInfo;
 import com.zjedu.pojo.vo.ACMRankVO;
 import com.zjedu.pojo.vo.OIRankVO;
+import com.zjedu.problem.dao.UserInfoEntityService;
 import com.zjedu.problem.feign.PassportFeignClient;
 import com.zjedu.utils.Constants;
 import com.zjedu.utils.RedisUtils;
@@ -13,6 +16,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @Author Zhong
@@ -29,6 +33,9 @@ public class RankManager
 
     @Resource
     private PassportFeignClient passportFeignClient;
+
+    @Resource
+    private UserInfoEntityService userInfoEntityService;
 
     // 排行榜缓存时间 60s
     private static final long cacheRankSecond = 60;
@@ -53,7 +60,19 @@ public class RankManager
         List<String> uidList = null;
         if (StringUtils.hasText(searchUser))
         {
-            uidList = passportFeignClient.searchUserUidList(searchUser);
+            QueryWrapper<UserInfo> queryWrapper = new QueryWrapper<>();
+            queryWrapper.select("uuid");
+            queryWrapper.and(wrapper -> wrapper
+                    .like("username", searchUser)
+                    .or()
+                    .like("nickname", searchUser)
+                    .or()
+                    .like("realname", searchUser));
+            queryWrapper.eq("status", 0);
+            uidList = userInfoEntityService.list(queryWrapper)
+                    .stream()
+                    .map(UserInfo::getUuid)
+                    .collect(Collectors.toList());
         }
 
         IPage rankList = null;

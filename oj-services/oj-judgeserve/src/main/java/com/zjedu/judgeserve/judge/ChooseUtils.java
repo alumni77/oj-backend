@@ -4,7 +4,8 @@ import com.alibaba.cloud.nacos.NacosDiscoveryProperties;
 import com.alibaba.nacos.api.exception.NacosException;
 import com.alibaba.nacos.api.naming.NamingService;
 import com.alibaba.nacos.api.naming.pojo.Instance;
-import com.zjedu.judgeserve.feign.JudgeFeignClient;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.zjedu.judgeserve.dao.judge.JudgeServerEntityService;
 import com.zjedu.pojo.entity.judge.JudgeServer;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -35,7 +36,7 @@ public class ChooseUtils
     private String JudgeServiceName;
 
     @Resource
-    private JudgeFeignClient judgeFeignClient;
+    private JudgeServerEntityService judgeServerEntityService;
 
     /**
      * @MethodName chooseServer
@@ -65,7 +66,14 @@ public class ChooseUtils
           在MySQL Server过滤条件，发现不满足后，会调用unlock_row方法，
           把不满足条件的记录释放锁 (违背了二段锁协议的约束)。
          */
-        List<JudgeServer> judgeServerList = judgeFeignClient.getJudgeServerList(keyList, isRemote);
+        boolean isRemoteBool = isRemote != null && isRemote; //避免空值
+        int isRemoteInt = isRemoteBool ? 1 : 0; //MySQL tinyint类型 只能用0或1
+        QueryWrapper<JudgeServer> queryWrapper = new QueryWrapper<>();
+        queryWrapper.in("url", keyList)
+                .eq("is_remote", isRemoteInt)
+                .orderByDesc("task_number")
+                .last("for update"); //开启悲观锁
+        List<JudgeServer> judgeServerList = judgeServerEntityService.list(queryWrapper);
 
         // 获取可用判题机
         for (JudgeServer judgeServer : judgeServerList)
@@ -73,7 +81,7 @@ public class ChooseUtils
             if (judgeServer.getTaskNumber() < judgeServer.getMaxTaskNumber())
             {
                 judgeServer.setTaskNumber(judgeServer.getTaskNumber() + 1);
-                boolean isOk = judgeFeignClient.updateJudgeServerById(judgeServer);
+                boolean isOk = judgeServerEntityService.updateById(judgeServer);
                 if (isOk)
                 {
                     return judgeServer;
@@ -101,7 +109,7 @@ public class ChooseUtils
             return namingService.selectInstances(serviceId, true);
         } catch (NacosException e)
         {
-            log.error("获取微服务健康实例发生异常---------> {}", e);
+            log.error("获取微服务健康实例发生异常---------> {}", e.getMessage());
             return Collections.emptyList();
         }
     }

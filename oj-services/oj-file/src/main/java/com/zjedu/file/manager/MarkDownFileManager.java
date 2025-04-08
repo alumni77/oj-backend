@@ -3,10 +3,12 @@ package com.zjedu.file.manager;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.IdUtil;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.zjedu.common.exception.StatusFailException;
 import com.zjedu.common.exception.StatusForbiddenException;
 import com.zjedu.common.exception.StatusSystemErrorException;
 import com.zjedu.file.dao.FileEntityService;
+import com.zjedu.file.dao.UserInfoEntityService;
 import com.zjedu.file.feign.PassportFeignClient;
 import com.zjedu.pojo.entity.user.UserInfo;
 import com.zjedu.pojo.vo.UserRolesVO;
@@ -41,29 +43,20 @@ public class MarkDownFileManager
     @Resource
     private PassportFeignClient passportFeignClient;
 
+    @Resource
+    private UserInfoEntityService userInfoEntityService;
+
 
     public Map<Object, Object> uploadMDImg(MultipartFile image) throws StatusFailException, StatusSystemErrorException, StatusForbiddenException
     {
-        // 需要获取一下该token对应用户的数据
-        //从请求头获取用户ID
-        String userId = request.getHeader("X-User-Id");
-        UserInfo userRolesVo = passportFeignClient.getByUid(userId);
-
-        UserRolesVO userRoles = passportFeignClient.getUserRoles(userId, null);
-        // 是否为超级管理员
-        boolean isRoot = userRoles.getRoles().stream()
-                .anyMatch(role -> "root".equals(role.getRole()));
-        // 是否为admin
-        boolean isAdmin = userRoles.getRoles().stream()
-                .anyMatch(role -> "admin".equals(role.getRole()));
-        // 是否为problem_admin
-        boolean isProblemAdmin = userRoles.getRoles().stream()
-                .anyMatch(role -> "problem_admin".equals(role.getRole()));
-
-        if (!isRoot && !isProblemAdmin && !isAdmin)
+        boolean b = checkAuthority();
+        if (!b)
         {
             throw new StatusForbiddenException("对不起，您无权限操作！");
         }
+        // 需要获取一下该token对应用户的数据
+        //从请求头获取用户ID
+        String userId = request.getHeader("X-User-Id");
 
         if (image == null)
         {
@@ -101,7 +94,7 @@ public class MarkDownFileManager
                 .setFilePath(Constants.File.MARKDOWN_FILE_FOLDER.getPath() + File.separator + filename)
                 .setSuffix(suffix)
                 .setType("md")
-                .setUid(userRolesVo.getUuid());
+                .setUid(userId);
         fileEntityService.save(file);
 
         return MapUtil.builder()
@@ -112,6 +105,14 @@ public class MarkDownFileManager
 
     public void deleteMDImg(Long fileId) throws StatusFailException, StatusForbiddenException
     {
+        // 需要获取一下该token对应用户的数据
+        //从请求头获取用户ID
+        String userId = request.getHeader("X-User-Id");
+        QueryWrapper<UserInfo> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("uuid", userId);
+        UserInfo userRolesVo = userInfoEntityService.getOne(queryWrapper);
+
+        boolean b = checkAuthority();
         com.zjedu.pojo.entity.common.File file = fileEntityService.getById(fileId);
 
         if (file == null)
@@ -119,27 +120,14 @@ public class MarkDownFileManager
             throw new StatusFailException("错误：文件不存在！");
         }
 
+        if (!file.getUid().equals(userRolesVo.getUuid()) && !b)
+        {
+            throw new StatusForbiddenException("对不起，您无权限操作！");
+        }
+
         if (!file.getType().equals("md"))
         {
             throw new StatusForbiddenException("错误：不支持删除！");
-        }
-
-        // 需要获取一下该token对应用户的数据
-        //从请求头获取用户ID
-        String userId = request.getHeader("X-User-Id");
-        UserInfo userRolesVo = passportFeignClient.getByUid(userId);
-
-        UserRolesVO userRoles = passportFeignClient.getUserRoles(userId, null);
-        // 是否为超级管理员
-        boolean isRoot = userRoles.getRoles().stream()
-                .anyMatch(role -> "root".equals(role.getRole()));
-        // 是否为problem_admin
-        boolean isProblemAdmin = userRoles.getRoles().stream()
-                .anyMatch(role -> "problem_admin".equals(role.getRole()));
-
-        if (!file.getUid().equals(userRolesVo.getUuid()) && !isRoot && !isProblemAdmin)
-        {
-            throw new StatusForbiddenException("对不起，您无权限操作！");
         }
 
         boolean isOk = FileUtil.del(file.getFilePath());
@@ -154,23 +142,8 @@ public class MarkDownFileManager
 
     public Map<Object, Object> uploadMd(MultipartFile file) throws StatusFailException, StatusSystemErrorException, StatusForbiddenException
     {
-        // 需要获取一下该token对应用户的数据
-        //从请求头获取用户ID
-        String userId = request.getHeader("X-User-Id");
-
-        UserRolesVO userRoles = passportFeignClient.getUserRoles(userId, null);
-        // 是否为超级管理员
-        boolean isRoot = userRoles.getRoles().stream()
-                .anyMatch(role -> "root".equals(role.getRole()));
-        // 是否为admin
-        boolean isAdmin = userRoles.getRoles().stream()
-                .anyMatch(role -> "admin".equals(role.getRole()));
-        // 是否为problem_admin
-        boolean isProblemAdmin = userRoles.getRoles().stream()
-                .anyMatch(role -> "problem_admin".equals(role.getRole()));
-
-
-        if (!isRoot && !isProblemAdmin && !isAdmin)
+        boolean b = checkAuthority();
+        if (!b)
         {
             throw new StatusForbiddenException("对不起，您无权限操作！");
         }
@@ -211,6 +184,25 @@ public class MarkDownFileManager
         return MapUtil.builder()
                 .put("link", Constants.File.FILE_API.getPath() + filename)
                 .map();
+    }
+
+    private boolean checkAuthority()
+    {
+        // 需要获取一下该token对应用户的数据
+        //从请求头获取用户ID
+        String userId = request.getHeader("X-User-Id");
+        UserRolesVO userRoles = passportFeignClient.getUserRoles(userId, null);
+        // 是否为超级管理员
+        boolean isRoot = userRoles.getRoles().stream()
+                .anyMatch(role -> "root".equals(role.getRole()));
+        // 是否为admin
+        boolean isAdmin = userRoles.getRoles().stream()
+                .anyMatch(role -> "admin".equals(role.getRole()));
+        // 是否为problem_admin
+        boolean isProblemAdmin = userRoles.getRoles().stream()
+                .anyMatch(role -> "problem_admin".equals(role.getRole()));
+
+        return isRoot || isAdmin || isProblemAdmin;
     }
 
 }

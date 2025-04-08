@@ -3,7 +3,6 @@ package com.zjedu.file.feign.fallback;
 import com.zjedu.file.feign.ProblemFeignClient;
 import com.zjedu.pojo.dto.ExportProblemParamsDTO;
 import com.zjedu.pojo.dto.ProblemDTO;
-import com.zjedu.pojo.entity.problem.Problem;
 import com.zjedu.pojo.vo.ImportProblemVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -30,14 +29,6 @@ public class ProblemFeignClientFallback implements ProblemFeignClient
     public ImportProblemVO buildExportProblem(Long pid, ExportProblemParamsDTO params)
     {
         log.error("调用passport-buildExportProblem服务失败——兜底回调");
-
-        return null;
-    }
-
-    @Override
-    public Problem getProblemByPid(Long pid)
-    {
-        log.error("调用passport-getProblemByPid服务失败——兜底回调");
 
         return null;
     }

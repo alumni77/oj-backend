@@ -3,7 +3,6 @@ package com.zjedu.account.feign.fallback;
 import com.zjedu.account.feign.PassportFeignClient;
 import com.zjedu.common.exception.StatusFailException;
 import com.zjedu.pojo.entity.user.Role;
-import com.zjedu.pojo.entity.user.UserInfo;
 import com.zjedu.pojo.vo.ACMRankVO;
 import com.zjedu.pojo.vo.UserHomeVO;
 import com.zjedu.pojo.vo.UserInfoVO;
@@ -25,34 +24,10 @@ import java.util.List;
 public class PassportFeignClientFallback implements PassportFeignClient
 {
     @Override
-    public UserInfo getByUsername(String username)
-    {
-        log.error("调用passport-getByUsername服务失败——兜底回调");
-        UserInfo userInfo = new UserInfo();
-        userInfo.setUsername("未知用户");
-        return userInfo;
-    }
-
-    @Override
     public UserHomeVO getUserHomeInfo(String uid, String username)
     {
         log.error("调用passport-getUserHomeInfo服务失败——兜底回调");
         return null;
-    }
-
-    @Override
-    public UserInfo getByUid(String uid)
-    {
-        log.error("调用passport-getByUid服务失败——兜底回调");
-        return null;
-    }
-
-    @Override
-    public boolean updatePassword(String uid, String newPassword)
-    {
-        log.error("调用passport-updatePassword服务失败——兜底回调");
-
-        return false;
     }
 
     @Override

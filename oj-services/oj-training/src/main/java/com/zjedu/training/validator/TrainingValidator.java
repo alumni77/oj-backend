@@ -9,6 +9,7 @@ import com.zjedu.pojo.entity.training.TrainingRegister;
 import com.zjedu.pojo.entity.user.Role;
 import com.zjedu.pojo.entity.user.UserInfo;
 import com.zjedu.training.dao.TrainingRegisterEntityService;
+import com.zjedu.training.dao.UserInfoEntityService;
 import com.zjedu.training.feign.PassportFeignClient;
 import com.zjedu.utils.Constants;
 import com.zjedu.validator.CommonValidator;
@@ -42,6 +43,9 @@ public class TrainingValidator
     @Resource
     private PassportFeignClient passportFeignClient;
 
+    @Resource
+    private UserInfoEntityService userInfoEntityService;
+
     /**
      * 验证训练数据合法性
      *
@@ -71,7 +75,9 @@ public class TrainingValidator
         // 获取当前登录的用户
         //从请求头获取用户ID
         String userId = request.getHeader("X-User-Id");
-        UserInfo userRolesVo = passportFeignClient.getByUid(userId);
+        QueryWrapper<UserInfo> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("uuid", userId);
+        UserInfo userRolesVo = userInfoEntityService.getOne(queryWrapper, false);
         validateTrainingAuth(training, userRolesVo);
     }
 

@@ -16,7 +16,7 @@ import com.zjedu.common.result.ResultStatus;
 import com.zjedu.file.dao.LanguageEntityService;
 import com.zjedu.file.dao.ProblemCaseEntityService;
 import com.zjedu.file.dao.TagEntityService;
-import com.zjedu.file.feign.PassportFeignClient;
+import com.zjedu.file.dao.UserInfoEntityService;
 import com.zjedu.file.feign.ProblemFeignClient;
 import com.zjedu.pojo.dto.ExportProblemParamsDTO;
 import com.zjedu.pojo.dto.ProblemDTO;
@@ -60,10 +60,10 @@ public class ProblemFileManager
     private HttpServletRequest request;
 
     @Resource
-    private PassportFeignClient passportFeignClient;
+    private ProblemFeignClient problemFeignClient;
 
     @Resource
-    private ProblemFeignClient problemFeignClient;
+    private UserInfoEntityService userInfoEntityService;
 
     /**
      * zip文件导入题目 仅超级管理员可操作
@@ -167,7 +167,9 @@ public class ProblemFileManager
         // 需要获取一下该token对应用户的数据
         //从请求头获取用户ID
         String userId = request.getHeader("X-User-Id");
-        UserInfo userRolesVo = passportFeignClient.getByUid(userId);
+        QueryWrapper<UserInfo> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("uuid", userId);
+        UserInfo userRolesVo = userInfoEntityService.getOne(queryWrapper, false);
 
         List<ProblemDTO> problemDTOS = new LinkedList<>();
         List<Tag> tagList = tagEntityService.list(new QueryWrapper<Tag>().eq("oj", "ME"));

@@ -1,12 +1,12 @@
 package com.zjedu.common.service.impl;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.zjedu.common.manager.CommonManager;
 import com.zjedu.common.result.CommonResult;
 import com.zjedu.common.service.CommonService;
 import com.zjedu.pojo.entity.problem.CodeTemplate;
 import com.zjedu.pojo.entity.problem.Language;
 import com.zjedu.pojo.entity.problem.Tag;
+import com.zjedu.pojo.entity.training.TrainingCategory;
 import com.zjedu.pojo.vo.CaptchaVO;
 import com.zjedu.pojo.vo.ProblemTagVO;
 import jakarta.annotation.Resource;
@@ -69,5 +69,11 @@ public class CommonServiceImpl implements CommonService
     public CommonResult<List<CodeTemplate>> getProblemCodeTemplate(Long pid)
     {
         return CommonResult.successResponse(commonManager.getProblemCodeTemplate(pid));
+    }
+
+    @Override
+    public CommonResult<List<TrainingCategory>> getTrainingCategory()
+    {
+        return CommonResult.successResponse(commonManager.getTrainingCategory());
     }
 }

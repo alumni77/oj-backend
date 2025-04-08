@@ -21,5 +21,5 @@ import java.util.List;
 public interface TrainingRecordMapper extends BaseMapper<TrainingRecord>
 {
 
-    public List<TrainingRecordVO> getTrainingRecord(@Param("tid") Long tid);
+    List<TrainingRecordVO> getTrainingRecord(@Param("tid") Long tid);
 }

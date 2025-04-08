@@ -13,8 +13,9 @@ import com.zjedu.common.exception.StatusForbiddenException;
 import com.zjedu.common.exception.StatusSystemErrorException;
 import com.zjedu.common.result.ResultStatus;
 import com.zjedu.file.dao.ProblemCaseEntityService;
+import com.zjedu.file.dao.ProblemEntityService;
+import com.zjedu.file.dao.UserInfoEntityService;
 import com.zjedu.file.feign.PassportFeignClient;
-import com.zjedu.file.feign.ProblemFeignClient;
 import com.zjedu.pojo.entity.problem.Problem;
 import com.zjedu.pojo.entity.problem.ProblemCase;
 import com.zjedu.pojo.entity.user.UserInfo;
@@ -51,30 +52,18 @@ public class TestCaseManager
     private PassportFeignClient passportFeignClient;
 
     @Resource
-    private ProblemFeignClient problemFeignClient;
+    private ProblemCaseEntityService problemCaseEntityService;
 
     @Resource
-    private ProblemCaseEntityService problemCaseEntityService;
+    private ProblemEntityService problemEntityService;
+
+    @Resource
+    private UserInfoEntityService userInfoEntityService;
 
     public Map<Object, Object> uploadTestcaseZip(MultipartFile file, String mode) throws StatusFailException, StatusSystemErrorException, StatusForbiddenException
     {
-        // 需要获取一下该token对应用户的数据
-        //从请求头获取用户ID
-        String userId = request.getHeader("X-User-Id");
-
-        UserRolesVO userRoles = passportFeignClient.getUserRoles(userId, null);
-        // 是否为超级管理员
-        boolean isRoot = userRoles.getRoles().stream()
-                .anyMatch(role -> "root".equals(role.getRole()));
-        // 是否为admin
-        boolean isAdmin = userRoles.getRoles().stream()
-                .anyMatch(role -> "admin".equals(role.getRole()));
-        // 是否为problem_admin
-        boolean isProblemAdmin = userRoles.getRoles().stream()
-                .anyMatch(role -> "problem_admin".equals(role.getRole()));
-
-
-        if (!isRoot && !isProblemAdmin && !isAdmin)
+        boolean isAuthority = checkAuthority();
+        if (!isAuthority)
         {
             throw new StatusForbiddenException("对不起，您无权限操作！");
         }
@@ -203,19 +192,13 @@ public class TestCaseManager
         // 需要获取一下该token对应用户的数据
         //从请求头获取用户ID
         String userId = request.getHeader("X-User-Id");
-        UserInfo userRolesVo = passportFeignClient.getByUid(userId);
+        QueryWrapper<UserInfo> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("uuid", userId);
+        UserInfo userRolesVo = userInfoEntityService.getOne(queryWrapper, false);
 
-        UserRolesVO userRoles = passportFeignClient.getUserRoles(userId, null);
-        // 是否为超级管理员
-        boolean isRoot = userRoles.getRoles().stream()
-                .anyMatch(role -> "root".equals(role.getRole()));
-        // 是否为problem_admin
-        boolean isProblemAdmin = userRoles.getRoles().stream()
-                .anyMatch(role -> "problem_admin".equals(role.getRole()));
-
-        Problem problem = problemFeignClient.getProblemByPid(pid);
-
-        if (!isRoot && !isProblemAdmin && !problem.getAuthor().equals(userRolesVo.getUsername()))
+        Problem problem = problemEntityService.getById(pid);
+        boolean b = checkAuthority();
+        if (!b && !problem.getAuthor().equals(userRolesVo.getUsername()))
         {
             throw new StatusForbiddenException("对不起，您无权限操作！");
         }
@@ -315,5 +298,25 @@ public class TestCaseManager
             log.info("[{}],[{}],pid:[{}],operatorUid:[{}],operatorUsername:[{}]",
                     "Test_Case", "Download", pid, userRolesVo.getUuid(), userRolesVo.getUsername());
         }
+    }
+
+    private boolean checkAuthority()
+    {
+        // 需要获取一下该token对应用户的数据
+        //从请求头获取用户ID
+        String userId = request.getHeader("X-User-Id");
+
+        UserRolesVO userRoles = passportFeignClient.getUserRoles(userId, null);
+        // 是否为超级管理员
+        boolean isRoot = userRoles.getRoles().stream()
+                .anyMatch(role -> "root".equals(role.getRole()));
+        // 是否为admin
+        boolean isAdmin = userRoles.getRoles().stream()
+                .anyMatch(role -> "admin".equals(role.getRole()));
+        // 是否为problem_admin
+        boolean isProblemAdmin = userRoles.getRoles().stream()
+                .anyMatch(role -> "problem_admin".equals(role.getRole()));
+
+        return isRoot || isAdmin || isProblemAdmin;
     }
 }

@@ -8,15 +8,11 @@ import com.zjedu.pojo.dto.CompileDTO;
 import com.zjedu.pojo.dto.TestJudgeReq;
 import com.zjedu.pojo.dto.TestJudgeRes;
 import com.zjedu.pojo.dto.ToJudgeDTO;
-import com.zjedu.pojo.entity.judge.Judge;
 import com.zjedu.pojo.entity.judge.JudgeServer;
-import com.zjedu.pojo.entity.problem.Problem;
 import com.zjedu.pojo.vo.JudgeVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestParam;
-
-import java.util.List;
 
 /**
  * @Author Zhong
@@ -40,63 +36,6 @@ public class JudgeFeignClientFallback implements JudgeFeignClient
     {
         log.error("调用judge-getCommonJudgeList服务失败——兜底回调");
         return null;
-    }
-
-    @Override
-    public Judge getJudgeById(Long submitId)
-    {
-        log.error("调用judge-getJudgeById服务失败——兜底回调");
-        return null;
-    }
-
-    @Override
-    public Problem getProblemById(Long id)
-    {
-        log.error("调用judge-getProblemById服务失败——兜底回调");
-        return null;
-    }
-
-    @Override
-    public Problem queryProblemByPId(String problemId)
-    {
-        log.error("调用judge-queryProblemByPId服务失败——兜底回调");
-        return null;
-    }
-
-
-    @Override
-    public Judge saveJudge(Judge judge)
-    {
-        log.error("调用judge-saveJudge服务失败——兜底回调");
-        return null;
-    }
-
-    @Override
-    public List<JudgeServer> getJudgeServerList(List<String> urls, Boolean isRemote)
-    {
-        log.error("调用judge-getJudgeServerList服务失败——兜底回调");
-        return List.of();
-    }
-
-    @Override
-    public boolean updateJudgeServerById(JudgeServer judgeServer)
-    {
-        log.error("调用judge-updateJudgeServerById服务失败——兜底回调");
-        return false;
-    }
-
-    @Override
-    public boolean updateJudgeServerByWrapper(UpdateWrapper<JudgeServer> updateWrapper)
-    {
-        log.error("调用judge-updateJudgeServerByWrapper服务失败——兜底回调");
-        return false;
-    }
-
-    @Override
-    public boolean updateJudgeById(Judge judge)
-    {
-        log.error("调用judge-updateJudgeById服务失败——兜底回调");
-        return false;
     }
 
     @Override
@@ -138,27 +77,4 @@ public class JudgeFeignClientFallback implements JudgeFeignClient
         return null;
     }
 
-    @Override
-    public boolean updateJudgeShare(Long submitId, Boolean share)
-    {
-        log.error("调用judge-updateJudgeShare服务失败——兜底回调");
-
-        return false;
-    }
-
-    @Override
-    public Judge getJudgeInfo(Long submitId)
-    {
-        log.error("调用judge-getJudgeInfo服务失败——兜底回调");
-
-        return null;
-    }
-
-    @Override
-    public List<Judge> getJudgeListByIds(List<Long> submitIds)
-    {
-        log.error("调用judge-getJudgeListByIds服务失败——兜底回调");
-
-        return List.of();
-    }
 }

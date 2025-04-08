@@ -6,6 +6,8 @@ import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.zjedu.common.result.CommonResult;
 import com.zjedu.common.result.ResultStatus;
+import com.zjedu.judgeserve.dao.judge.JudgeEntityService;
+import com.zjedu.judgeserve.dao.judge.JudgeServerEntityService;
 import com.zjedu.judgeserve.feign.JudgeFeignClient;
 import com.zjedu.pojo.dto.CompileDTO;
 import com.zjedu.pojo.dto.TestJudgeReq;
@@ -17,6 +19,7 @@ import com.zjedu.utils.Constants;
 import com.zjedu.utils.RedisUtils;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
@@ -42,6 +45,9 @@ public class Dispatcher
     private JudgeFeignClient judgeFeignClient;
 
     @Resource
+    private JudgeServerEntityService judgeServerEntityService;
+
+    @Resource
     private ChooseUtils chooseUtils;
 
     @Resource
@@ -53,6 +59,8 @@ public class Dispatcher
 
     // 每个提交任务尝试300次失败则判为提交失败
     protected final static Integer maxTryNum = 300;
+    @Autowired
+    private JudgeEntityService judgeEntityService;
 
     public void dispatch(Constants.TaskType taskType, Object data)
     {
@@ -232,8 +240,7 @@ public class Dispatcher
             judge.setSubmitId(submitId);
             judge.setStatus(Constants.Judge.STATUS_SUBMITTED_FAILED.getStatus());
             judge.setErrorMessage("Failed to connect the judgeServer. Please resubmit this submission again!");
-
-            judgeFeignClient.updateJudgeById(judge);
+            judgeEntityService.updateById(judge);
         } else
         {
             if (result.getCode() != ResultStatus.SUCCESS.getStatus())
@@ -242,7 +249,7 @@ public class Dispatcher
                 // 判为系统错误
                 judge.setStatus(Constants.Judge.STATUS_SYSTEM_ERROR.getStatus())
                         .setErrorMessage(result.getMsg());
-                judgeFeignClient.updateJudgeById(judge);
+                judgeEntityService.updateById(judge);
             }
         }
     }
@@ -275,7 +282,7 @@ public class Dispatcher
         UpdateWrapper<JudgeServer> judgeServerUpdateWrapper = new UpdateWrapper<>();
         judgeServerUpdateWrapper.setSql("task_number = task_number-1")
                 .eq("id", judgeServerId);
-        boolean isOk = judgeFeignClient.updateJudgeServerByWrapper(judgeServerUpdateWrapper);
+        boolean isOk = judgeServerEntityService.update(judgeServerUpdateWrapper);
         if (!isOk)
         { // 重试八次
             tryAgainUpdateJudge(judgeServerUpdateWrapper);
@@ -288,7 +295,7 @@ public class Dispatcher
         int attemptNumber = 0;
         do
         {
-            boolean success = judgeFeignClient.updateJudgeServerByWrapper(updateWrapper);
+            boolean success = judgeServerEntityService.update(updateWrapper);
             if (success)
             {
                 return;

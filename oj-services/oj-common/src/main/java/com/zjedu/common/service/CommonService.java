@@ -4,6 +4,7 @@ import com.zjedu.common.result.CommonResult;
 import com.zjedu.pojo.entity.problem.CodeTemplate;
 import com.zjedu.pojo.entity.problem.Language;
 import com.zjedu.pojo.entity.problem.Tag;
+import com.zjedu.pojo.entity.training.TrainingCategory;
 import com.zjedu.pojo.vo.CaptchaVO;
 import com.zjedu.pojo.vo.ProblemTagVO;
 
@@ -32,4 +33,6 @@ public interface CommonService
     CommonResult<Collection<Language>> getProblemLanguages(Long pid);
 
     CommonResult<List<CodeTemplate>> getProblemCodeTemplate(Long pid);
+
+    CommonResult<List<TrainingCategory>> getTrainingCategory();
 }

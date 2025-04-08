@@ -80,6 +80,7 @@ public class JwtGatewayFilter implements GlobalFilter, Ordered
             "/api/common/**",
             // Training服务的匿名接口
             "/api/training/get-training-list",
+            "/api/training/get-training-category",
             // File服务的匿名接口
 
             // Admin服务的匿名接口

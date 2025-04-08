@@ -1,7 +1,6 @@
 package com.zjedu.problem.feign;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.zjedu.pojo.entity.user.UserInfo;
 import com.zjedu.pojo.vo.ACMRankVO;
 import com.zjedu.pojo.vo.OIRankVO;
 import com.zjedu.pojo.vo.UserRolesVO;
@@ -24,9 +23,6 @@ import java.util.List;
 @FeignClient(value = "oj-passport", path = "/api/passport", fallback = PassportFeignClientFallback.class)
 public interface PassportFeignClient
 {
-    @GetMapping("/get-user-by-uid")
-    UserInfo getByUid(@RequestParam("uid") String uid);
-
     @GetMapping("/get-user-role")
     UserRolesVO getUserRoles(@RequestParam("uid") String uid, @RequestParam("username") String username);
 
@@ -35,7 +31,4 @@ public interface PassportFeignClient
 
     @PostMapping("/get-acm-rank-list")
     Page<ACMRankVO> getACMRankList(@RequestBody Page<ACMRankVO> page, @RequestParam(required = false) List<String> uidList);
-
-    @GetMapping("/search-user-uid-list")
-    List<String> searchUserUidList(@RequestParam String keyword);
 }

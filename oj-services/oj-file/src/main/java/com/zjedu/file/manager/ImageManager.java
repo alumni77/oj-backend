@@ -3,9 +3,12 @@ package com.zjedu.file.manager;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.IdUtil;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.zjedu.common.exception.StatusFailException;
 import com.zjedu.common.exception.StatusSystemErrorException;
 import com.zjedu.file.dao.FileEntityService;
+import com.zjedu.file.dao.UserInfoEntityService;
 import com.zjedu.file.feign.PassportFeignClient;
 import com.zjedu.pojo.entity.user.Role;
 import com.zjedu.pojo.entity.user.UserInfo;
@@ -38,6 +41,9 @@ public class ImageManager
 
     @Resource
     private PassportFeignClient passportFeignClient;
+
+    @Resource
+    private UserInfoEntityService userInfoEntityService;
 
     @Resource
     private FileEntityService fileEntityService;
@@ -77,13 +83,18 @@ public class ImageManager
         // 获取当前登录用户
         //从请求头获取用户ID
         String userId = request.getHeader("X-User-Id");
-        UserInfo accountProfile = passportFeignClient.getByUid(userId);
+        QueryWrapper<UserInfo> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("uuid", userId);
+        UserInfo accountProfile = userInfoEntityService.getOne(queryWrapper);
 
         // 将当前用户所属的file表中avatar类型的实体的delete设置为1；
         fileEntityService.updateFileToDeleteByUidAndType(accountProfile.getUuid(), "avatar");
 
         //更新user_info里面的avatar
-        passportFeignClient.updateUserAvatar(Constants.File.IMG_API.getPath() + filename, accountProfile.getUuid());
+        UpdateWrapper<UserInfo> userInfoUpdateWrapper = new UpdateWrapper<>();
+        userInfoUpdateWrapper.set("avatar", Constants.File.IMG_API.getPath() + filename)
+                .eq("uuid", accountProfile.getUuid());
+        userInfoEntityService.update(userInfoUpdateWrapper);
 
         // 插入file表记录
         com.zjedu.pojo.entity.common.File imgFile = new com.zjedu.pojo.entity.common.File();
@@ -96,7 +107,7 @@ public class ImageManager
         // 更新session
         accountProfile.setAvatar(Constants.File.IMG_API.getPath() + filename);
 
-        UserRolesVO userRolesVo = passportFeignClient.getUserRoles(accountProfile.getUuid(), null);
+        UserRolesVO userRolesVo = passportFeignClient.getUserRoles(accountProfile.getUuid(), "");
 
         return MapUtil.builder()
                 .put("uid", userRolesVo.getUid())
@@ -123,9 +134,11 @@ public class ImageManager
         //从请求头获取用户ID
         // 获取当前登录用户
         String userId = request.getHeader("X-User-Id");
-        UserInfo userInfo = passportFeignClient.getByUid(userId);
+        QueryWrapper<UserInfo> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("uuid", userId);
+        UserInfo userInfo = userInfoEntityService.getOne(queryWrapper);
         // 是否为超级管理员
-        UserRolesVO userRolesVo = passportFeignClient.getUserRoles(userId, null);
+        UserRolesVO userRolesVo = passportFeignClient.getUserRoles(userId, "");
         boolean isRoot = userRolesVo.getRoles().stream()
                 .anyMatch(role -> "root".equals(role.getRole()));
         if (!isRoot)

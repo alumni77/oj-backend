@@ -2,6 +2,7 @@ package com.zjedu.training.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.zjedu.pojo.entity.training.TrainingProblem;
+import com.zjedu.pojo.vo.ProblemFullScreenListVO;
 import com.zjedu.pojo.vo.ProblemVO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -26,4 +27,6 @@ public interface TrainingProblemMapper extends BaseMapper<TrainingProblem>
     List<Long> getTrainingProblemCount(@Param("tid") Long tid);
 
     List<ProblemVO> getTrainingProblemList(@Param("tid") Long tid);
+
+    List<ProblemFullScreenListVO> getTrainingFullScreenProblemList(Long tid);
 }

@@ -2,7 +2,7 @@ package com.zjedu.judgeserve.judge.self;
 
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
-import com.zjedu.judgeserve.feign.JudgeFeignClient;
+import com.zjedu.judgeserve.dao.judge.JudgeEntityService;
 import com.zjedu.judgeserve.judge.AbstractReceiver;
 import com.zjedu.judgeserve.judge.Dispatcher;
 import com.zjedu.pojo.dto.TestJudgeReq;
@@ -36,7 +36,7 @@ public class JudgeReceiver extends AbstractReceiver
     private RedisUtils redisUtils;
 
     @Resource
-    private JudgeFeignClient judgeFeignClient;
+    private JudgeEntityService judgeEntityService;
 
 
     @Async("judgeTaskAsyncPool")
@@ -74,7 +74,7 @@ public class JudgeReceiver extends AbstractReceiver
         {
             JSONObject task = JSONUtil.parseObj(taskStr);
             Long judgeId = task.getLong("judgeId");
-            Judge judge = judgeFeignClient.getJudgeById(judgeId);
+            Judge judge = judgeEntityService.getById(judgeId);
             if (judge != null)
             {
                 // 调度评测时发现该评测任务被取消，则结束评测

@@ -8,18 +8,14 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.zjedu.common.exception.StatusAccessDeniedException;
 import com.zjedu.common.exception.StatusFailException;
 import com.zjedu.common.exception.StatusForbiddenException;
+import com.zjedu.pojo.entity.judge.Judge;
 import com.zjedu.pojo.entity.training.Training;
 import com.zjedu.pojo.entity.training.TrainingCategory;
 import com.zjedu.pojo.entity.training.TrainingProblem;
 import com.zjedu.pojo.entity.user.UserInfo;
-import com.zjedu.pojo.vo.ProblemVO;
-import com.zjedu.pojo.vo.TrainingRankVO;
-import com.zjedu.pojo.vo.TrainingRecordVO;
-import com.zjedu.pojo.vo.TrainingVO;
-import com.zjedu.training.dao.TrainingCategoryEntityService;
-import com.zjedu.training.dao.TrainingEntityService;
-import com.zjedu.training.dao.TrainingProblemEntityService;
-import com.zjedu.training.dao.TrainingRecordEntityService;
+import com.zjedu.pojo.vo.*;
+import com.zjedu.training.dao.*;
+import com.zjedu.training.entity.Pair_;
 import com.zjedu.training.feign.PassportFeignClient;
 import com.zjedu.training.validator.TrainingValidator;
 import com.zjedu.utils.Constants;
@@ -61,6 +57,12 @@ public class TrainingManager
     @Resource
     private TrainingRecordEntityService trainingRecordEntityService;
 
+    @Resource
+    private UserInfoEntityService userInfoEntityService;
+
+    @Resource
+    private JudgeEntityService judgeEntityService;
+
 
     /**
      * 获取训练题单列表，可根据关键词、类别、权限、类型过滤
@@ -86,7 +88,9 @@ public class TrainingManager
         // 获取当前登录的用户
         //从请求头获取用户ID
         String userId = request.getHeader("X-User-Id");
-        UserInfo userRolesVo = passportFeignClient.getByUid(userId);
+        QueryWrapper<UserInfo> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("uuid", userId);
+        UserInfo userRolesVo = userInfoEntityService.getOne(queryWrapper);
 
         String currentUid = null;
         if (userRolesVo != null)
@@ -108,7 +112,9 @@ public class TrainingManager
         // 获取当前登录的用户
         //从请求头获取用户ID
         String userId = request.getHeader("X-User-Id");
-        UserInfo userRolesVo = passportFeignClient.getByUid(userId);
+        QueryWrapper<UserInfo> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("uuid", userId);
+        UserInfo userRolesVo = userInfoEntityService.getOne(queryWrapper);
 
         Training training = trainingEntityService.getById(tid);
         if (training == null || !training.getStatus())
@@ -321,5 +327,65 @@ public class TrainingManager
         return trainingProblemList.stream().collect(Collectors.toMap(TrainingProblem::getId, TrainingProblem::getDisplayId));
     }
 
+    public List<ProblemFullScreenListVO> getProblemFullScreenList(Long tid)
+            throws StatusFailException, StatusForbiddenException, StatusAccessDeniedException
+    {
+        Training training = trainingEntityService.getById(tid);
+        if (training == null || !training.getStatus())
+        {
+            throw new StatusFailException("该训练不存在或不允许显示！");
+        }
+        trainingValidator.validateTrainingAuth(training);
+        List<ProblemFullScreenListVO> problemList = trainingProblemEntityService.getTrainingFullScreenProblemList(tid);
+
+        List<Long> pidList = problemList.stream().map(ProblemFullScreenListVO::getPid).collect(Collectors.toList());
+
+        // 获取当前登录的用户
+        //从请求头获取用户ID
+        String userId = request.getHeader("X-User-Id");
+        QueryWrapper<UserInfo> userInfoQueryWrapper = new QueryWrapper<>();
+        userInfoQueryWrapper.eq("uuid", userId);
+        UserInfo userRolesVo = userInfoEntityService.getOne(userInfoQueryWrapper);
+
+
+        QueryWrapper<Judge> queryWrapper = new QueryWrapper<>();
+        queryWrapper.select("distinct pid,status,score,submit_time")
+                .in("pid", pidList)
+                .eq("uid", userRolesVo.getUuid())
+                .orderByDesc("submit_time");
+
+        queryWrapper.eq("cid", 0);
+
+        List<Judge> judges = judgeEntityService.list(queryWrapper);
+        HashMap<Long, Pair_<Integer, Integer>> pidMap = new HashMap<>();
+        for (Judge judge : judges)
+        {
+            if (Objects.equals(judge.getStatus(), Constants.Judge.STATUS_PENDING.getStatus())
+                    || Objects.equals(judge.getStatus(), Constants.Judge.STATUS_COMPILING.getStatus())
+                    || Objects.equals(judge.getStatus(), Constants.Judge.STATUS_JUDGING.getStatus()))
+            {
+                continue;
+            }
+            if (judge.getStatus().intValue() == Constants.Judge.STATUS_ACCEPTED.getStatus())
+            {
+                // 如果该题目已通过，则强制写为通过（0）
+                pidMap.put(judge.getPid(), new Pair_<>(judge.getStatus(), judge.getScore()));
+            } else if (!pidMap.containsKey(judge.getPid()))
+            {
+                // 还未写入，则使用最新一次提交的结果
+                pidMap.put(judge.getPid(), new Pair_<>(judge.getStatus(), judge.getScore()));
+            }
+        }
+        for (ProblemFullScreenListVO problemVO : problemList)
+        {
+            Pair_<Integer, Integer> pair_ = pidMap.get(problemVO.getPid());
+            if (pair_ != null)
+            {
+                problemVO.setStatus(pair_.getKey());
+                problemVO.setScore(pair_.getValue());
+            }
+        }
+        return problemList;
+    }
 
 }

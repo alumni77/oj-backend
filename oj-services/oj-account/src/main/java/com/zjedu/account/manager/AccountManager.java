@@ -4,9 +4,11 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.crypto.SecureUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.zjedu.account.dao.problem.ProblemEntityService;
 import com.zjedu.account.dao.user.SessionEntityService;
 import com.zjedu.account.dao.user.UserAcproblemEntityService;
+import com.zjedu.account.dao.user.UserInfoEntityService;
 import com.zjedu.account.feign.PassportFeignClient;
 import com.zjedu.account.mapper.JudgeMapper;
 import com.zjedu.common.exception.StatusFailException;
@@ -58,6 +60,9 @@ public class AccountManager
     private SessionEntityService sessionEntityService;
 
     @Resource
+    private UserInfoEntityService userInfoEntityService;
+
+    @Resource
     private JudgeMapper judgeMapper;
 
     @Resource
@@ -81,7 +86,9 @@ public class AccountManager
         if (StringUtils.hasText(username))
         {
             username = username.trim();
-            UserInfo user = passportFeignClient.getByUsername(username);
+            QueryWrapper<UserInfo> queryWrapper = new QueryWrapper<>();
+            queryWrapper.eq("username", username);
+            UserInfo user = userInfoEntityService.getOne(queryWrapper);
             rightUsername = user != null;
         }
 
@@ -265,12 +272,18 @@ public class AccountManager
             return resp;
         }
 
-        UserInfo userInfo = passportFeignClient.getByUid(userId);
+        QueryWrapper<UserInfo> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("uuid", userId);
+        UserInfo userInfo = userInfoEntityService.getOne(queryWrapper);
+
         // 与当前登录用户的密码进行比较判断
         if (userInfo.getPassword().equals(SecureUtil.md5(oldPassword)))
         {
             // 如果相同，则进行修改密码操作
-            boolean isOk = passportFeignClient.updatePassword(userId, newPassword);
+            UpdateWrapper<UserInfo> updateWrapper = new UpdateWrapper<>();
+            updateWrapper.set("password", SecureUtil.md5(newPassword))
+                    .eq("uuid", userId);
+            boolean isOk = userInfoEntityService.update(updateWrapper);
             if (isOk)
             {
                 resp.setCode(200);
@@ -310,11 +323,13 @@ public class AccountManager
         //从请求头获取用户ID
         String userId = request.getHeader("X-User-Id");
         boolean isOk = passportFeignClient.updateUserInfo(userInfoVo, userId);
-        UserInfo userRolesVo = passportFeignClient.getByUid(userId);
+        QueryWrapper<UserInfo> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("uuid", userId);
+        UserInfo userRolesVo = userInfoEntityService.getOne(queryWrapper);
 
         if (isOk)
         {
-            UserRolesVO userRoles = passportFeignClient.getUserRoles(userRolesVo.getUuid(),"");
+            UserRolesVO userRoles = passportFeignClient.getUserRoles(userRolesVo.getUuid(), "");
             // 更新session
             BeanUtil.copyProperties(userRoles, userRolesVo);
             UserInfoVO userInfoVO = new UserInfoVO();
@@ -332,7 +347,9 @@ public class AccountManager
         // 获取当前登录的用户
         //从请求头获取用户ID
         String userId = request.getHeader("X-User-Id");
-        UserInfo userRolesVo = passportFeignClient.getByUid(userId);
+        QueryWrapper<UserInfo> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("uuid", userId);
+        UserInfo userRolesVo = userInfoEntityService.getOne(queryWrapper);
         //获取该用户角色所有的权限
         List<Role> roles = passportFeignClient.getRolesByUid(userRolesVo.getUuid());
         UserAuthInfoVO authInfoVO = new UserAuthInfoVO();

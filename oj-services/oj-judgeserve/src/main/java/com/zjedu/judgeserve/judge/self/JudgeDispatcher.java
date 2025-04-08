@@ -3,6 +3,7 @@ package com.zjedu.judgeserve.judge.self;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.zjedu.common.exception.StatusSystemErrorException;
+import com.zjedu.judgeserve.dao.judge.JudgeEntityService;
 import com.zjedu.judgeserve.feign.JudgeFeignClient;
 import com.zjedu.pojo.dto.TestJudgeReq;
 import com.zjedu.pojo.entity.judge.Judge;
@@ -35,6 +36,9 @@ public class JudgeDispatcher
     @Resource
     private JudgeReceiver judgeReceiver;
 
+    @Resource
+    private JudgeEntityService judgeEntityService;
+
     @Value("${oj.judge.token}")
     private String judgeToken;
 
@@ -56,10 +60,10 @@ public class JudgeDispatcher
             }
             if (!isOk)
             {
-                judgeFeignClient.updateJudgeById(new Judge()
-                        .setSubmitId(judgeId)
-                        .setStatus(Constants.Judge.STATUS_SUBMITTED_FAILED.getStatus())
-                        .setErrorMessage("Call Redis to push task error. Please try to submit again!"));
+                judgeEntityService.updateById(new Judge()
+                                .setSubmitId(judgeId)
+                                .setStatus(Constants.Judge.STATUS_SUBMITTED_FAILED.getStatus())
+                                .setErrorMessage("Call Redis to push task error. Please try to submit again!"));
             }
             // 调用判题任务处理
             judgeReceiver.processWaitingTask();

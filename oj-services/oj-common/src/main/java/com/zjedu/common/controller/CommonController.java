@@ -6,6 +6,7 @@ import com.zjedu.common.service.CommonService;
 import com.zjedu.pojo.entity.problem.CodeTemplate;
 import com.zjedu.pojo.entity.problem.Language;
 import com.zjedu.pojo.entity.problem.Tag;
+import com.zjedu.pojo.entity.training.TrainingCategory;
 import com.zjedu.pojo.vo.CaptchaVO;
 import com.zjedu.pojo.vo.ProblemTagVO;
 import jakarta.annotation.Resource;
@@ -37,12 +38,12 @@ public class CommonController
         return commonService.getCaptcha();
     }
 
-    //TODO 需要训练模块相关服务
-//    @GetMapping("/get-training-category")
-//    @AnonApi
-//    public CommonResult<List<TrainingCategory>> getTrainingCategory() {
-//        return commonService.getTrainingCategory();
-//    }
+    @GetMapping("/get-training-category")
+    @AnonApi
+    public CommonResult<List<TrainingCategory>> getTrainingCategory()
+    {
+        return commonService.getTrainingCategory();
+    }
 
     @GetMapping("/get-all-problem-tags")
     @AnonApi

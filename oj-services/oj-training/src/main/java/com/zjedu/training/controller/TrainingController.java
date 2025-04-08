@@ -2,10 +2,15 @@ package com.zjedu.training.controller;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.zjedu.annotation.AnonApi;
+import com.zjedu.common.exception.StatusAccessDeniedException;
+import com.zjedu.common.exception.StatusFailException;
+import com.zjedu.common.exception.StatusForbiddenException;
 import com.zjedu.common.result.CommonResult;
+import com.zjedu.pojo.vo.ProblemFullScreenListVO;
 import com.zjedu.pojo.vo.ProblemVO;
 import com.zjedu.pojo.vo.TrainingRankVO;
 import com.zjedu.pojo.vo.TrainingVO;
+import com.zjedu.training.manager.TrainingManager;
 import com.zjedu.training.service.TrainingService;
 import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -90,6 +95,16 @@ public class TrainingController
                                                                @RequestParam(value = "keyword", required = false) String keyword)
     {
         return trainingService.getTrainingRank(tid, limit, currentPage, keyword);
+    }
+
+    // 外露接口给openFeign调用
+    @Resource
+    private TrainingManager trainingManager;
+
+    @GetMapping("/get-training-problem-full-screen-list")
+    public List<ProblemFullScreenListVO> getProblemFullScreenList (@RequestParam(value = "tid") Long tid) throws StatusForbiddenException, StatusFailException, StatusAccessDeniedException
+    {
+        return trainingManager.getProblemFullScreenList(tid);
     }
 
 }

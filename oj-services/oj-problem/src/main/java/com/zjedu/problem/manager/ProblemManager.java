@@ -14,6 +14,7 @@ import com.zjedu.pojo.vo.*;
 import com.zjedu.problem.dao.*;
 import com.zjedu.problem.feign.JudgeFeignClient;
 import com.zjedu.problem.feign.PassportFeignClient;
+import com.zjedu.problem.feign.TrainingFeignClient;
 import com.zjedu.utils.Constants;
 import com.zjedu.validator.AccessValidator;
 import jakarta.annotation.Resource;
@@ -51,6 +52,15 @@ public class ProblemManager
 
     @Resource
     private CodeTemplateEntityService codeTemplateEntityService;
+
+    @Resource
+    private UserInfoEntityService userInfoEntityService;
+
+    @Resource
+    private JudgeEntityService judgeEntityService;
+
+    @Resource
+    private TrainingFeignClient trainingFeignClient;
 
     @Resource
     private AccessValidator accessValidator;
@@ -113,12 +123,20 @@ public class ProblemManager
         // 需要获取一下该token对应用户的数据
         //从请求头获取用户ID
         String userId = request.getHeader("X-User-Id");
-        UserInfo userRolesVo = passportFeignClient.getByUid(userId);
+        QueryWrapper<UserInfo> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("uuid", userId);
+        UserInfo userRolesVo = userInfoEntityService.getOne(queryWrapper, false);
+
 
         HashMap<Long, Object> result = new HashMap<>();
 
         // 先查询判断该用户对于这些题是否已经通过，若已通过，则无论后续再提交结果如何，该题都标记为通过
-        List<Judge> judges = judgeFeignClient.getJudgeListByPids(pidListDto.getPidList(), userRolesVo.getUuid());
+        QueryWrapper<Judge> judgeQueryWrapper = new QueryWrapper<>();
+        judgeQueryWrapper.select("distinct pid,status,submit_time,score")
+                .in("pid", pidListDto.getPidList())
+                .eq("uid", userRolesVo.getUuid())
+                .orderByDesc("submit_time");
+        List<Judge> judges = judgeEntityService.list(judgeQueryWrapper);
 
         for (Judge judge : judges)
         {
@@ -237,9 +255,19 @@ public class ProblemManager
         // 需要获取一下该token对应用户的数据
         //从请求头获取用户ID
         String userId = request.getHeader("X-User-Id");
-        UserInfo userRolesVo = passportFeignClient.getByUid(userId);
+        QueryWrapper<UserInfo> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("uuid", userId);
+        UserInfo userRolesVo = userInfoEntityService.getOne(queryWrapper, false);
 
-        List<Judge> judgeList = judgeFeignClient.queryJudgeListByWrapper(pid, userId, 0);
+        QueryWrapper<Judge> judgeQueryWrapper = new QueryWrapper<>();
+        judgeQueryWrapper.select("submit_id", "code", "username", "submit_time", "language")
+                .eq("uid", userRolesVo.getUuid())
+                .eq("pid", pid)
+                .eq("status", 0)
+                .orderByDesc("submit_id")
+                .last("limit 1");
+        List<Judge> judgeList = judgeEntityService.list(judgeQueryWrapper);
+
         LastAcceptedCodeVO lastAcceptedCodeVO = new LastAcceptedCodeVO();
         if (CollectionUtil.isNotEmpty(judgeList))
         {
@@ -308,13 +336,12 @@ public class ProblemManager
         }
     }
 
-    //TODO: 该方法需要用到trainingManager
+    //TODO: 该方法不一定调通
     public List<ProblemFullScreenListVO> getFullScreenProblemList(Long tid) throws StatusFailException, StatusForbiddenException, StatusAccessDeniedException
     {
         if (tid != null)
         {
-            return null;
-//            return trainingManager.getProblemFullScreenList(tid);
+            return trainingFeignClient.getProblemFullScreenList(tid);
         } else
         {
             throw new StatusFailException("请求参数错误：tid不能为空");

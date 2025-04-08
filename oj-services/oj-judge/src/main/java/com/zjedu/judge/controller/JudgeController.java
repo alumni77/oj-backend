@@ -1,22 +1,17 @@
 package com.zjedu.judge.controller;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.zjedu.common.result.CommonResult;
 import com.zjedu.common.result.ResultStatus;
 import com.zjedu.judge.common.exception.SystemError;
 import com.zjedu.judge.dao.JudgeEntityService;
 import com.zjedu.judge.dao.JudgeServerEntityService;
-import com.zjedu.judge.dao.ProblemEntityService;
 import com.zjedu.judge.service.JudgeService;
 import com.zjedu.pojo.dto.CompileDTO;
 import com.zjedu.pojo.dto.TestJudgeReq;
 import com.zjedu.pojo.dto.TestJudgeRes;
 import com.zjedu.pojo.dto.ToJudgeDTO;
 import com.zjedu.pojo.entity.judge.Judge;
-import com.zjedu.pojo.entity.judge.JudgeServer;
-import com.zjedu.pojo.entity.problem.Problem;
 import com.zjedu.pojo.vo.JudgeVO;
 import com.zjedu.pojo.vo.ProblemCountVO;
 import jakarta.annotation.Resource;
@@ -153,46 +148,6 @@ public class JudgeController
     }
 
 
-    @GetMapping("/get-judge-by-id")
-    public Judge getJudgeById(@RequestParam("submitId") Long submitId)
-    {
-        return judgeEntityService.getById(submitId);
-    }
-
-    @GetMapping("/get-judge-info")
-    public Judge getJudgeInfo(@RequestParam("submitId") Long submitId)
-    {
-        QueryWrapper<Judge> queryWrapper = new QueryWrapper<>();
-        queryWrapper.select("submit_id", "uid")
-                .eq("submit_id", submitId);
-        return judgeEntityService.getOne(queryWrapper, false);
-    }
-
-    @PostMapping("/update-judge-share")
-    public boolean updateJudgeShare(@RequestParam("submitId") Long submitId, @RequestParam("share") Boolean share)
-    {
-        boolean shareBool = share != null && share; // 避免空值
-        int shareInt = shareBool ? 1 : 0; // MySQL tinyint 只能用 0 或 1
-        UpdateWrapper<Judge> judgeUpdateWrapper = new UpdateWrapper<>();
-        judgeUpdateWrapper.set("share", shareInt)
-                .eq("submit_id", submitId);
-        return judgeEntityService.update(judgeUpdateWrapper);
-    }
-
-    @PostMapping("/save-judge")
-    public Judge saveJudge(@RequestBody Judge judge)
-    {
-        judgeEntityService.save(judge);
-        log.info("submitId: {}", judge.getSubmitId());
-        return judge;
-    }
-
-    @PostMapping("/update-judge-by-id")
-    public boolean updateJudgeById(@RequestBody Judge judge)
-    {
-        return judgeEntityService.updateById(judge);
-    }
-
     @PostMapping("/fail-to-use-redis-publish-judge")
     public boolean failToUseRedisPublishJudge(
             @RequestParam("submitId") Long submitId,
@@ -210,56 +165,10 @@ public class JudgeController
         return judgeEntityService.getProblemListCount(pidList);
     }
 
-    @GetMapping("/get-judge-list-by-pids")
-    public List<Judge> getJudgeListByPids(@RequestParam List<Long> pidList, @RequestParam String uid)
-    {
-        QueryWrapper<Judge> queryWrapper = new QueryWrapper<>();
-        queryWrapper.select("distinct pid,status,submit_time,score")
-                .in("pid", pidList)
-                .eq("uid", uid)
-                .orderByDesc("submit_time");
-        return judgeEntityService.list(queryWrapper);
-    }
-
-
-    @GetMapping("/get-judge-list-by-ids")
-    public List<Judge> getJudgeListByIds(@RequestParam List<Long> submitIds)
-    {
-        QueryWrapper<Judge> queryWrapper = new QueryWrapper<>();
-        // lambada表达式过滤掉code
-        queryWrapper.select(Judge.class, info -> !info.getColumn().equals("code"))
-                .in("submit_id", submitIds);
-        return judgeEntityService.list(queryWrapper);
-    }
-
-    @GetMapping
-    public List<Judge> queryJudgeListByWrapper(@RequestParam("pid") Long pid, @RequestParam("uid") String uid, @RequestParam("status") Integer status)
-    {
-        QueryWrapper<Judge> judgeQueryWrapper = new QueryWrapper<>();
-        judgeQueryWrapper.select("submit_id", "code", "username", "submit_time", "language")
-                .eq("uid", uid)
-                .eq("pid", pid)
-                .eq("status", 0)
-                .orderByDesc("submit_id")
-                .last("limit 1");
-        return judgeEntityService.list(judgeQueryWrapper);
-    }
-
     @GetMapping("/get-problem-count-by-pid")
     public ProblemCountVO getProblemCountByPid(@RequestParam("pid") Long pid)
     {
         return judgeEntityService.getProblemCount(pid);
-    }
-
-    @GetMapping("/get-ac-problem-count")
-    public Integer getACProblemCount(@RequestParam List<Long> pidList, @RequestParam("uid") String uid, @RequestParam("status") Integer status)
-    {
-        QueryWrapper<Judge> judgeQueryWrapper = new QueryWrapper<>();
-        judgeQueryWrapper.select("DISTINCT pid")
-                .in("pid", pidList)
-                .eq("uid", uid)
-                .eq("status", 0);
-        return Math.toIntExact(judgeEntityService.count(judgeQueryWrapper));
     }
 
     @GetMapping("/get-today-judge-num")
@@ -267,54 +176,5 @@ public class JudgeController
     {
         return judgeEntityService.getTodayJudgeNum();
     }
-
-    // 外露接口给openFeign调用
-    @Resource
-    private ProblemEntityService problemEntityService;
-
-    @GetMapping("/get-problem-by-id")
-    public Problem getProblemById(@RequestParam("id") Long id)
-    {
-        return problemEntityService.getById(id);
-    }
-
-    @GetMapping("/query-problem-by-problemId")
-    public Problem queryProblemByPId(@RequestParam("problemId") String problemId)
-    {
-        QueryWrapper<Problem> problemQueryWrapper = new QueryWrapper<>();
-        problemQueryWrapper.select("id", "problem_id", "auth");
-        problemQueryWrapper.eq("problem_id", problemId);
-        return problemEntityService.getOne(problemQueryWrapper, false);
-    }
-
-
-    @GetMapping("/query-judge-server-by-urls")
-    public List<JudgeServer> getJudgeServerList(@RequestParam List<String> urls, @RequestParam Boolean isRemote)
-    {
-
-        boolean isRemoteBool = isRemote != null && isRemote; // 避免空值
-        int isRemoteInt = isRemoteBool ? 1 : 0; // MySQL tinyint 只能用 0 或 1
-
-        QueryWrapper<JudgeServer> queryWrapper = new QueryWrapper<>();
-        queryWrapper.in("url", urls)
-                .eq("is_remote", isRemoteInt) // 这里传 int
-                .orderByAsc("task_number")
-                .last("for update"); // 开启悲观锁
-
-        return judgeServerEntityService.list(queryWrapper);
-    }
-
-    @PostMapping("/update-judge-server-by-id")
-    public boolean updateJudgeServerById(@RequestBody JudgeServer judgeServer)
-    {
-        return judgeServerEntityService.updateById(judgeServer);
-    }
-
-    @PostMapping("/update-judge-server-by-wrapper")
-    public boolean updateJudgeServerByWrapper(@RequestBody UpdateWrapper<JudgeServer> updateWrapper)
-    {
-        return judgeServerEntityService.update(updateWrapper);
-    }
-
 
 }

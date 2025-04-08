@@ -3,13 +3,17 @@ package com.zjedu.judgeserve.manager;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.zjedu.annotation.HOJAccessEnum;
 import com.zjedu.common.exception.*;
 import com.zjedu.config.NacosSwitchConfig;
 import com.zjedu.config.SwitchConfig;
 import com.zjedu.judgeserve.dao.judge.JudgeCaseEntityService;
+import com.zjedu.judgeserve.dao.judge.JudgeEntityService;
+import com.zjedu.judgeserve.dao.problem.ProblemEntityService;
 import com.zjedu.judgeserve.dao.user.UserAcproblemEntityService;
+import com.zjedu.judgeserve.dao.user.UserInfoEntityService;
 import com.zjedu.judgeserve.feign.JudgeFeignClient;
 import com.zjedu.judgeserve.feign.PassportFeignClient;
 import com.zjedu.judgeserve.judge.self.JudgeDispatcher;
@@ -80,6 +84,15 @@ public class JudgeManager
     @Resource
     private JudgeDispatcher judgeDispatcher;
 
+    @Resource
+    private UserInfoEntityService userInfoEntityService;
+
+    @Resource
+    private JudgeEntityService judgeEntityService;
+
+    @Resource
+    private ProblemEntityService problemEntityService;
+
     /**
      * 通用查询判题记录列表
      *
@@ -106,7 +119,9 @@ public class JudgeManager
             // 需要获取一下该token对应用户的数据（有token便能获取到）
             //从请求头获取用户ID
             String userId = request.getHeader("X-User-Id");
-            UserInfo userRolesVo = passportFeignClient.getByUid(userId);
+            QueryWrapper<UserInfo> queryWrapper = new QueryWrapper<>();
+            queryWrapper.eq("uuid", userId);
+            UserInfo userRolesVo = userInfoEntityService.getOne(queryWrapper, false);
 
             if (userRolesVo == null)
             {
@@ -140,7 +155,7 @@ public class JudgeManager
      */
     public SubmissionInfoVO getSubmission(Long submitId) throws StatusNotFoundException, StatusAccessDeniedException
     {
-        Judge judge = judgeFeignClient.getJudgeById(submitId);
+        Judge judge = judgeEntityService.getById(submitId);
         if (judge == null)
         {
             throw new StatusNotFoundException("此提交数据不存在！");
@@ -201,7 +216,7 @@ public class JudgeManager
             }
         }
 
-        Problem problem = judgeFeignClient.getProblemById(judge.getPid());
+        Problem problem = problemEntityService.getById(judge.getPid());
 
         // 只允许查看ce错误、sf错误、se错误信息提示
         if (judge.getStatus().intValue() != Constants.Judge.STATUS_COMPILE_ERROR.getStatus() &&
@@ -224,7 +239,9 @@ public class JudgeManager
         // 需要获取一下该token对应用户的数据
         //从请求头获取用户ID
         String userId = request.getHeader("X-User-Id");
-        UserInfo userRolesVo = passportFeignClient.getByUid(userId);
+        QueryWrapper<UserInfo> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("uuid", userId);
+        UserInfo userRolesVo = userInfoEntityService.getOne(queryWrapper, false);
 
         boolean isTrainingSubmission = judgeDto.getTid() != null && judgeDto.getTid() != 0;
         boolean isContestSubmission = false;
@@ -278,7 +295,10 @@ public class JudgeManager
         // 需要获取一下该token对应用户的数据
         //从请求头获取用户ID
         String userId = request.getHeader("X-User-Id");
-        UserInfo userRolesVo = passportFeignClient.getByUid(userId);
+        QueryWrapper<UserInfo> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("uuid", userId);
+        UserInfo userRolesVo = userInfoEntityService.getOne(queryWrapper, false);
+
 
         String lockKey = Constants.Account.TEST_JUDGE_LOCK.getCode() + userRolesVo.getUuid();
         SwitchConfig switchConfig = nacosSwitchConfig.getSwitchConfig();
@@ -289,8 +309,8 @@ public class JudgeManager
                 throw new StatusForbiddenException("对不起，您使用在线调试过于频繁，请稍后再尝试！");
             }
         }
+        Problem problem = problemEntityService.getById(testJudgeDto.getPid());
 
-        Problem problem = judgeFeignClient.getProblemById(testJudgeDto.getPid());
         if (problem == null)
         {
             throw new StatusFailException("当前题目不存在！不支持在线调试！");
@@ -358,7 +378,7 @@ public class JudgeManager
     public Judge resubmit(Long submitId) throws StatusNotFoundException
     {
 
-        Judge judge = judgeFeignClient.getJudgeById(submitId);
+        Judge judge = judgeEntityService.getById(submitId);
         if (judge == null)
         {
             throw new StatusNotFoundException("此提交数据不存在！");
@@ -382,7 +402,7 @@ public class JudgeManager
                 .setTime(null)
                 .setJudger("")
                 .setMemory(null);
-        judgeFeignClient.updateJudgeById(judge);
+        judgeEntityService.updateById(judge);
 
         // 将提交加入任务队列
         judgeDispatcher.sendTask(judge.getSubmitId(),
@@ -404,19 +424,32 @@ public class JudgeManager
             throw new StatusFailException("修改失败，请求参数错误！");
         }
 
-        Judge judgeInfo = judgeFeignClient.getJudgeInfo(judge.getSubmitId());
+        QueryWrapper<Judge> judgeQueryWrapper = new QueryWrapper<>();
+        judgeQueryWrapper.eq("submit_id", "uid")
+                .eq("submit_id", judge.getSubmitId());
+        Judge judgeInfo = judgeEntityService.getOne(judgeQueryWrapper, false);
 
         // 需要获取一下该token对应用户的数据
         //从请求头获取用户ID
         String userId = request.getHeader("X-User-Id");
-        UserInfo userRolesVo = passportFeignClient.getByUid(userId);
+        QueryWrapper<UserInfo> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("uuid", userId);
+        UserInfo userRolesVo = userInfoEntityService.getOne(queryWrapper, false);
+
 
         if (!userRolesVo.getUuid().equals(judgeInfo.getUid()))
         { // 判断该提交是否为当前用户的
             throw new StatusForbiddenException("对不起，您不能修改他人的代码分享权限！");
         }
 
-        boolean isOk = judgeFeignClient.updateJudgeShare(judge.getSubmitId(), judge.getShare());
+        boolean shareBool = judge.getShare() != null && judge.getShare(); // 避免空值
+        int shareInt = shareBool ? 1 : 0; // MySQL tinyint 只能用0或1
+        UpdateWrapper<Judge> updateWrapper = new UpdateWrapper<>();
+        updateWrapper.set("share", shareInt)
+                .eq("submit_id", judge.getSubmitId());
+        boolean isOk = judgeEntityService.update(judgeQueryWrapper);
+
+
         if (!isOk)
         {
             throw new StatusFailException("修改代码权限失败！");
@@ -440,7 +473,11 @@ public class JudgeManager
             return new HashMap<>();
         }
 
-        List<Judge> judgeList = judgeFeignClient.getJudgeListByIds(submitIds);
+        QueryWrapper<Judge> queryWrapper = new QueryWrapper<>();
+        // lambada表达式过滤掉code和错误信息
+        queryWrapper.select(Judge.class, info -> !info.getColumn().equals("code"))
+                .in("submit_id", submitIds);
+        List<Judge> judgeList = judgeEntityService.list(queryWrapper);
         HashMap<Long, Object> result = new HashMap<>();
         for (Judge judge : judgeList)
         {
@@ -457,14 +494,14 @@ public class JudgeManager
     public JudgeCaseVO getALLCaseResult(Long submitId) throws StatusNotFoundException, StatusForbiddenException
     {
 
-        Judge judge = judgeFeignClient.getJudgeById(submitId);
+        Judge judge = judgeEntityService.getById(submitId);
 
         if (judge == null)
         {
             throw new StatusNotFoundException("此提交数据不存在！");
         }
 
-        Problem problem = judgeFeignClient.getProblemById(judge.getPid());
+        Problem problem = problemEntityService.getById(judge.getPid());
 
         // 如果该题不支持开放测试点结果查看
         if (!problem.getOpenCaseResult())
@@ -475,7 +512,10 @@ public class JudgeManager
         // 需要获取一下该token对应用户的数据
         //从请求头获取用户ID
         String userId = request.getHeader("X-User-Id");
-        UserInfo userRolesVo = passportFeignClient.getByUid(userId);
+        QueryWrapper<UserInfo> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("uuid", userId);
+        UserInfo userRolesVo = userInfoEntityService.getOne(queryWrapper, false);
+
 
         QueryWrapper<JudgeCase> wrapper = new QueryWrapper<>();
         if (userRolesVo == null)

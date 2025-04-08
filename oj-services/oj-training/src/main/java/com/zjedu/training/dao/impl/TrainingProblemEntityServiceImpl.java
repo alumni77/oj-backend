@@ -1,10 +1,13 @@
 package com.zjedu.training.dao.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.zjedu.pojo.entity.judge.Judge;
 import com.zjedu.pojo.entity.training.TrainingProblem;
+import com.zjedu.pojo.vo.ProblemFullScreenListVO;
 import com.zjedu.pojo.vo.ProblemVO;
+import com.zjedu.training.dao.JudgeEntityService;
 import com.zjedu.training.dao.TrainingProblemEntityService;
-import com.zjedu.training.feign.JudgeFeignClient;
 import com.zjedu.training.mapper.TrainingProblemMapper;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
@@ -31,7 +34,7 @@ public class TrainingProblemEntityServiceImpl extends ServiceImpl<TrainingProble
     private TrainingProblemMapper trainingProblemMapper;
 
     @Resource
-    private JudgeFeignClient judgeFeignClient;
+    private JudgeEntityService judgeEntityService;
 
     @Override
     public List<TrainingProblem> getTrainingListAcceptedCountByUid(List<Long> tidList, String uid)
@@ -52,8 +55,13 @@ public class TrainingProblemEntityServiceImpl extends ServiceImpl<TrainingProble
         {
             return 0;
         }
+        QueryWrapper<Judge> queryWrapper = new QueryWrapper<>();
+        queryWrapper.select("DISTINCT pid")
+                .eq("uid", uid)
+                .eq("status", 0)
+                .in("pid", pidList);
+        return Math.toIntExact(judgeEntityService.count(queryWrapper));
 
-        return judgeFeignClient.getACProblemCount(pidList, uid, 0);
     }
 
     @Override
@@ -61,6 +69,12 @@ public class TrainingProblemEntityServiceImpl extends ServiceImpl<TrainingProble
     {
         List<ProblemVO> trainingProblemList = trainingProblemMapper.getTrainingProblemList(tid);
         return trainingProblemList.stream().filter(distinctByKey(ProblemVO::getPid)).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<ProblemFullScreenListVO> getTrainingFullScreenProblemList(Long tid)
+    {
+        return trainingProblemMapper.getTrainingFullScreenProblemList(tid);
     }
 
     static <T> Predicate<T> distinctByKey(Function<? super T, ?> keyExtractor)

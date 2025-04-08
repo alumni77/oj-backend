@@ -20,5 +20,5 @@ public interface ProblemFeignClient
     boolean adminAddProblem(@RequestBody ProblemDTO problemDto);
 
     @PostMapping("/admin-update-problem")
-    public boolean adminUpdateProblem(@RequestBody ProblemDTO problemDto);
+    boolean adminUpdateProblem(@RequestBody ProblemDTO problemDto);
 }

@@ -2,6 +2,7 @@ package com.zjedu.admin.validator;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.zjedu.admin.dao.TrainingRegisterEntityService;
+import com.zjedu.admin.dao.UserInfoEntityService;
 import com.zjedu.admin.feign.PassportFeignClient;
 import com.zjedu.common.exception.StatusAccessDeniedException;
 import com.zjedu.common.exception.StatusFailException;
@@ -42,6 +43,9 @@ public class TrainingValidator
     @Resource
     private PassportFeignClient passportFeignClient;
 
+    @Resource
+    private UserInfoEntityService userInfoEntityService;
+
     /**
      * 验证训练数据合法性
      *
@@ -71,7 +75,9 @@ public class TrainingValidator
         // 获取当前登录的用户
         //从请求头获取用户ID
         String userId = request.getHeader("X-User-Id");
-        UserInfo userRolesVo = passportFeignClient.getByUid(userId);
+        QueryWrapper<UserInfo> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("uuid", userId);
+        UserInfo userRolesVo = userInfoEntityService.getOne(queryWrapper, false);
         validateTrainingAuth(training, userRolesVo);
     }
 

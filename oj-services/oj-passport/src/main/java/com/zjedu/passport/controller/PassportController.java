@@ -1,7 +1,6 @@
 package com.zjedu.passport.controller;
 
 import cn.hutool.crypto.SecureUtil;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.zjedu.annotation.AnonApi;
@@ -24,7 +23,6 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * @Author Zhong
@@ -106,22 +104,7 @@ public class PassportController
     @Resource
     private UserInfoEntityService userInfoEntityService;
 
-    @GetMapping("/get-user")
-    public UserInfo getByUsername(String username)
-    {
-        QueryWrapper<UserInfo> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("username", username);
-        return userInfoEntityService.getOne(queryWrapper);
-    }
-
-    @GetMapping("/get-user-by-uid")
-    public UserInfo getByUid(String uid)
-    {
-        QueryWrapper<UserInfo> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("uuid", uid);
-        return userInfoEntityService.getOne(queryWrapper);
-    }
-
+    //TODO 不知这个接口是否有存在的必要
     @PutMapping("/update-password")
     public boolean updatePassword(String uid, String newPassword)
     {
@@ -131,40 +114,10 @@ public class PassportController
         return userInfoEntityService.update(updateWrapper);
     }
 
-    @GetMapping("/search-user-uid-list")
-    public List<String> searchUserUidList(@RequestParam String keyword)
-    {
-        QueryWrapper<UserInfo> userInfoQueryWrapper = new QueryWrapper<>();
-        userInfoQueryWrapper.select("uuid");
-
-        userInfoQueryWrapper.and(wrapper -> wrapper
-                .like("username", keyword)
-                .or()
-                .like("nickname", keyword)
-                .or()
-                .like("realname", keyword));
-
-        userInfoQueryWrapper.eq("status", 0);
-
-        return userInfoEntityService.list(userInfoQueryWrapper)
-                .stream()
-                .map(UserInfo::getUuid)
-                .collect(Collectors.toList());
-    }
-
     @GetMapping("/get-user-uid-list")
     public List<String> getSuperAdminUidList()
     {
         return userInfoEntityService.getSuperAdminUidList();
-    }
-
-    @PostMapping("/update-avatar")
-    public void updateUserAvatar(@RequestParam("avatar") String avatar, @RequestParam("uid") String uid)
-    {
-        UpdateWrapper<UserInfo> userInfoUpdateWrapper = new UpdateWrapper<>();
-        userInfoUpdateWrapper.set("avatar", avatar)
-                .eq("uuid", uid);
-        userInfoEntityService.update(userInfoUpdateWrapper);
     }
 
     @PostMapping("/change-user-info")

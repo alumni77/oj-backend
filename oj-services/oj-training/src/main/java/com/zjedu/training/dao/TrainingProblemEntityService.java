@@ -2,6 +2,7 @@ package com.zjedu.training.dao;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.zjedu.pojo.entity.training.TrainingProblem;
+import com.zjedu.pojo.vo.ProblemFullScreenListVO;
 import com.zjedu.pojo.vo.ProblemVO;
 
 import java.util.List;
@@ -22,4 +23,6 @@ public interface TrainingProblemEntityService extends IService<TrainingProblem>
     Integer getUserTrainingACProblemCount(String uuid, List<Long> trainingProblemIdList);
 
     List<ProblemVO> getTrainingProblemList(Long tid);
+
+    List<ProblemFullScreenListVO> getTrainingFullScreenProblemList(Long tid);
 }

@@ -6,6 +6,7 @@ import com.wf.captcha.ArithmeticCaptcha;
 import com.wf.captcha.base.Captcha;
 import com.zjedu.common.dao.*;
 import com.zjedu.pojo.entity.problem.*;
+import com.zjedu.pojo.entity.training.TrainingCategory;
 import com.zjedu.pojo.vo.CaptchaVO;
 import com.zjedu.pojo.vo.ProblemTagVO;
 import com.zjedu.utils.RedisUtils;
@@ -49,6 +50,9 @@ public class CommonManager
 
     @Resource
     private CodeTemplateEntityService codeTemplateEntityService;
+
+    @Resource
+    private TrainingCategoryEntityService trainingCategoryEntityService;
 
     public CaptchaVO getCaptcha()
     {
@@ -245,5 +249,12 @@ public class CommonManager
         QueryWrapper<CodeTemplate> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("pid", pid);
         return codeTemplateEntityService.list(queryWrapper);
+    }
+
+    public List<TrainingCategory> getTrainingCategory()
+    {
+        QueryWrapper<TrainingCategory> trainingCategoryQueryWrapper = new QueryWrapper<>();
+        trainingCategoryQueryWrapper.isNull("gid");
+        return trainingCategoryEntityService.list(trainingCategoryQueryWrapper);
     }
 }
