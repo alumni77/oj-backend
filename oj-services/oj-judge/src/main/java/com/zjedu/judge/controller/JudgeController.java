@@ -1,6 +1,6 @@
 package com.zjedu.judge.controller;
 
-import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.zjedu.common.result.CommonResult;
 import com.zjedu.common.result.ResultStatus;
 import com.zjedu.judge.common.exception.SystemError;
@@ -134,7 +134,7 @@ public class JudgeController
     private JudgeEntityService judgeEntityService;
 
     @GetMapping("/common-judge-list")
-    public IPage<JudgeVO> getCommonJudgeList(
+    public Page<JudgeVO> getCommonJudgeList(
             @RequestParam(value = "limit", required = false, defaultValue = "10") Integer limit,
             @RequestParam(value = "currentPage", required = false, defaultValue = "1") Integer currentPage,
             @RequestParam(value = "searchPid", required = false) String searchPid,
@@ -143,7 +143,7 @@ public class JudgeController
             @RequestParam(value = "uid", required = false) String uid,
             @RequestParam(value = "completeProblemID", defaultValue = "false") Boolean completeProblemID)
     {
-        return judgeEntityService.getCommonJudgeList(
+        return (Page<JudgeVO>) judgeEntityService.getCommonJudgeList(
                 limit, currentPage, searchPid, status, username, uid, completeProblemID);
     }
 

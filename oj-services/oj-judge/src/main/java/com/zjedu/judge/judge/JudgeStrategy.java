@@ -25,6 +25,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import java.io.File;
+import java.nio.file.Paths;
 import java.util.*;
 
 /**
@@ -74,7 +75,9 @@ public class JudgeStrategy
             }
 
             // 测试数据文件所在文件夹
-            String testCasesDir = Constants.JudgeDir.TEST_CASE_DIR.getContent() + File.separator + "problem_" + problem.getId();
+            String testCasesDir = Paths.get(Constants.JudgeDir.TEST_CASE_DIR.getContent(), "problem_" + problem.getId())
+                    .toString().replace("\\", "/");
+//            String testCasesDir = Constants.JudgeDir.TEST_CASE_DIR.getContent() + File.separator + "problem_" + problem.getId();
             // 从文件中加载测试数据json
             JSONObject testCasesInfo = problemTestCaseUtils.loadTestCaseInfo(problem.getId(),
                     testCasesDir,
@@ -121,7 +124,7 @@ public class JudgeStrategy
             result.put("errMsg", "Oops, something has gone wrong with the judgeServer. Please report this to administrator.");
             result.put("time", 0);
             result.put("memory", 0);
-            log.error("[Judge] [System Error] Submit Id:[{}] Problem Id:[{}], Error:[{}]", judge.getSubmitId(), problem.getId(), systemError);
+            log.error("[Judge] [System Error] Submit Id:[{}] Problem Id:[{}], Error:[{}]", judge.getSubmitId(), problem.getId(), systemError.toString());
         } catch (CompileError compileError)
         {
             result.put("code", Constants.Judge.STATUS_COMPILE_ERROR.getStatus());
@@ -134,7 +137,7 @@ public class JudgeStrategy
             result.put("errMsg", "Oops, something has gone wrong with the judgeServer. Please report this to administrator.");
             result.put("time", 0);
             result.put("memory", 0);
-            log.error("[Judge] [System Runtime Error] Submit Id:[{}] Problem Id:[{}], Error:[{}]", judge.getSubmitId(), problem.getId(), e);
+            log.error("[Judge] [System Runtime Error] Submit Id:[{}] Problem Id:[{}], Error:[{}]", judge.getSubmitId(), problem.getId(), e.getMessage());
         } finally
         {
 

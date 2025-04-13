@@ -1,8 +1,9 @@
 package com.zjedu.passport.manager;
 
+import cn.hutool.captcha.CaptchaUtil;
+import cn.hutool.captcha.LineCaptcha;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.IdUtil;
-import cn.hutool.core.util.RandomUtil;
 import cn.hutool.crypto.SecureUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
@@ -13,7 +14,6 @@ import com.zjedu.config.WebConfig;
 import com.zjedu.passport.dao.user.UserInfoEntityService;
 import com.zjedu.passport.dao.user.UserRecordEntityService;
 import com.zjedu.passport.dao.user.UserRoleEntityService;
-import com.zjedu.validator.CommonValidator;
 import com.zjedu.pojo.dto.LoginDTO;
 import com.zjedu.pojo.dto.RegisterDTO;
 import com.zjedu.pojo.dto.ResetPasswordDTO;
@@ -28,6 +28,7 @@ import com.zjedu.utils.Constants;
 import com.zjedu.utils.IpUtils;
 import com.zjedu.utils.JwtUtils;
 import com.zjedu.utils.RedisUtils;
+import com.zjedu.validator.CommonValidator;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -167,8 +168,13 @@ public class PassportManager
             throw new StatusFailException("对不起,您的操作频率过快,请在" + redisUtils.getExpire(lockKey) + "秒后再次获取验证码");
         }
 
-        // 随机生成6位数字的组合
-        String numbers = RandomUtil.randomNumbers(6);
+        // 随机生成6位的组合
+        // 创建验证码图片
+        LineCaptcha lineCaptcha = CaptchaUtil.createLineCaptcha(140, 50, 6, 10);
+        String numbers = lineCaptcha.getCode();
+        // 获取Base64编码的图片数据
+        String base64Image = lineCaptcha.getImageBase64Data();
+
         //默认验证码有效10分钟
         redisUtils.set(Constants.Email.REGISTER_KEY_PREFIX.getValue() + username, numbers, 10 * 60);
         redisUtils.set(lockKey, 0, 60);
@@ -176,6 +182,7 @@ public class PassportManager
         CodeVO registerCodeVo = new CodeVO();
         // 将验证码直接返回给前端
         registerCodeVo.setCode(numbers);
+        registerCodeVo.setBase64(base64Image);
         // 验证码有效期10分钟
         registerCodeVo.setExpire(10 * 60);
 

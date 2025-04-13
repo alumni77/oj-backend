@@ -69,26 +69,7 @@ public class JudgeServiceImpl implements JudgeService
 
         // 进行判题操作
         QueryWrapper<Problem> problemQueryWrapper = new QueryWrapper<>();
-        problemQueryWrapper.select("id",
-                        "type",
-                        "io_score",
-                        "difficulty",
-                        "judge_mode",
-                        "judge_case_mode",
-                        "time_limit",
-                        "memory_limit",
-                        "stack_limit",
-                        "user_extra_file",
-                        "judge_extra_file",
-                        "case_version",
-                        "spj_code",
-                        "spj_language",
-                        "problem_id",
-                        "is_remove_end_blank",
-                        "is_file_io",
-                        "io_read_file_name",
-                        "io_write_file_name")
-                .eq("id", judge.getPid());
+        problemQueryWrapper.eq("id", judge.getPid());
         Problem problem = problemEntityService.getOne(problemQueryWrapper);
         Judge finalJudgeRes = judgeContext.Judge(problem, judge);
 

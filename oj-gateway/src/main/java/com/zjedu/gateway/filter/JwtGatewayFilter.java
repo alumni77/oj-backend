@@ -53,15 +53,12 @@ public class JwtGatewayFilter implements GlobalFilter, Ordered
             "/api/passport/get-code",
             "/api/passport/register",
             "/api/passport/reset-password",
-            "/api/passport/get-user",
-            "/api/passport/get-user-home-info",
-            "/api/passport/get-user-by-uid",
-            "/api/passport/get-recent7-ac-rank",
             // Account服务的匿名接口
             "/api/account/check-username",
             "/api/account/home-carousel",
             "/api/account/get-recent-seven-ac-rank",
             "/api/account/get-recent-updated-problem",
+            "/api/account/get-last-week-submission-statistics",
             // Judge服务的匿名接口
             "/api/judge/common-judge-list",
             "/api/judge/get-judge-by-id",

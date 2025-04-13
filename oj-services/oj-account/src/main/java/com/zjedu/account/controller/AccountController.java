@@ -58,7 +58,6 @@ public class AccountController
      * @return
      */
     @GetMapping("/get-user-calendar-heatmap")
-    @AnonApi
     public CommonResult<UserCalendarHeatmapVO> getUserCalendarHeatmap(@RequestParam(value = "uid", required = false) String uid,
                                                                       @RequestParam(value = "username", required = false) String username)
     {

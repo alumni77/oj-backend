@@ -1,8 +1,6 @@
 package com.zjedu.judgeserve.judge;
 
 import cn.hutool.core.lang.UUID;
-import cn.hutool.json.JSONObject;
-import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.zjedu.common.result.CommonResult;
 import com.zjedu.common.result.ResultStatus;
@@ -114,7 +112,7 @@ public class Dispatcher
 //                    result = restTemplate.postForObject("http://" + judgeServer.getUrl() + path, data, CommonResult.class);
                 } catch (Exception e)
                 {
-                    log.error("[Self Judge] Request the judge server [{}] error -------------->", judgeServer.getUrl(), e);
+                    log.error("[Self Judge] Request the judge server [{}] error -------------->{}", judgeServer.getUrl(), e.getMessage());
                 } finally
                 {
                     checkResult(result, submitId);
@@ -141,26 +139,23 @@ public class Dispatcher
         Runnable getResultTask = () ->
         {
             if (count.get() > maxTryNum)
-            { // 300次失败则判为提交失败
+            {
                 releaseTaskThread(taskKey);
                 return;
             }
             count.getAndIncrement();
             JudgeServer judgeServer = chooseUtils.chooseServer(false);
             if (judgeServer != null)
-            { // 获取到判题机资源
+            {
                 try
                 {
-                    CommonResult<TestJudgeRes> testJudgeResCommonResult = judgeFeignClient.submitProblemTestJudge(testJudgeReq);
-                    JSONObject resultJson = JSONUtil.parseObj(testJudgeResCommonResult);
+                    CommonResult<TestJudgeRes> result = judgeFeignClient.submitProblemTestJudge(testJudgeReq);
 
-//                    String url = "http://" + judgeServer.getUrl() + path;
-//                    JSONObject resultJson = restTemplate.postForObject(url, testJudgeReq, JSONObject.class);
-                    if (resultJson != null)
+                    if (result != null)
                     {
-                        if (resultJson.getInt("status") == ResultStatus.SUCCESS.getStatus())
+                        if (result.getCode() == ResultStatus.SUCCESS.getStatus())
                         {
-                            TestJudgeRes testJudgeRes = resultJson.getBean("data", TestJudgeRes.class);
+                            TestJudgeRes testJudgeRes = result.getData();
                             testJudgeRes.setInput(testJudgeReq.getTestCaseInput());
                             testJudgeRes.setExpectedOutput(testJudgeReq.getExpectedOutput());
                             testJudgeRes.setProblemJudgeMode(testJudgeReq.getProblemJudgeMode());
@@ -171,14 +166,15 @@ public class Dispatcher
                                     .status(Constants.Judge.STATUS_SYSTEM_ERROR.getStatus())
                                     .time(0L)
                                     .memory(0L)
-                                    .stderr(resultJson.getStr("msg"))
+                                    .stderr(result.getMsg())
                                     .build();
                             redisUtils.set(testJudgeReq.getUniqueKey(), testJudgeRes, 60);
                         }
                     }
                 } catch (Exception e)
                 {
-                    log.error("[Self Judge] Request the judge server [" + judgeServer.getUrl() + "] error -------------->", e);
+                    log.error("[Self Judge] Request the judge server [{}] error -------------->{}",
+                            judgeServer.getUrl(), e.getMessage());
                     TestJudgeRes testJudgeRes = TestJudgeRes.builder()
                             .status(Constants.Judge.STATUS_SYSTEM_ERROR.getStatus())
                             .time(0L)

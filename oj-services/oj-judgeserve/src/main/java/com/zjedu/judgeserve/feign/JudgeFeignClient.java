@@ -1,6 +1,6 @@
 package com.zjedu.judgeserve.feign;
 
-import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.zjedu.common.result.CommonResult;
 import com.zjedu.judgeserve.feign.fallback.JudgeFeignClientFallback;
 import com.zjedu.pojo.dto.CompileDTO;
@@ -38,7 +38,7 @@ public interface JudgeFeignClient
     CommonResult<Void> compileInteractive(@RequestBody CompileDTO compileDTO);
 
     @GetMapping("/common-judge-list")
-    IPage<JudgeVO> getCommonJudgeList(
+    Page<JudgeVO> getCommonJudgeList(
             @RequestParam(value = "limit", required = false, defaultValue = "10") Integer limit,
             @RequestParam(value = "currentPage", required = false, defaultValue = "1") Integer currentPage,
             @RequestParam(value = "searchPid", required = false) String searchPid,

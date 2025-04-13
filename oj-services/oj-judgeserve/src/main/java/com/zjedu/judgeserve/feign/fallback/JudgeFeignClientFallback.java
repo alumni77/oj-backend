@@ -1,14 +1,12 @@
 package com.zjedu.judgeserve.feign.fallback;
 
-import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
-import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.zjedu.common.result.CommonResult;
 import com.zjedu.judgeserve.feign.JudgeFeignClient;
 import com.zjedu.pojo.dto.CompileDTO;
 import com.zjedu.pojo.dto.TestJudgeReq;
 import com.zjedu.pojo.dto.TestJudgeRes;
 import com.zjedu.pojo.dto.ToJudgeDTO;
-import com.zjedu.pojo.entity.judge.JudgeServer;
 import com.zjedu.pojo.vo.JudgeVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -25,7 +23,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 public class JudgeFeignClientFallback implements JudgeFeignClient
 {
     @Override
-    public IPage<JudgeVO> getCommonJudgeList(
+    public Page<JudgeVO> getCommonJudgeList(
             @RequestParam(value = "limit", required = false, defaultValue = "10") Integer limit,
             @RequestParam(value = "currentPage", required = false, defaultValue = "1") Integer currentPage,
             @RequestParam(value = "searchPid", required = false) String searchPid,

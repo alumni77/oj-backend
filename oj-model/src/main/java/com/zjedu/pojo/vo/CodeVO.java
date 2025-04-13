@@ -18,4 +18,7 @@ public class CodeVO
 
     @Schema(description = "验证码有效时间,单位秒")
     private Integer expire;
+
+    @Schema(description = "base64编码的验证码图片")
+    private String base64;
 }

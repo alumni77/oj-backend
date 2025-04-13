@@ -1,7 +1,5 @@
 package com.zjedu.passport.controller;
 
-import cn.hutool.crypto.SecureUtil;
-import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.zjedu.annotation.AnonApi;
 import com.zjedu.common.exception.StatusFailException;
@@ -14,7 +12,6 @@ import com.zjedu.pojo.dto.LoginDTO;
 import com.zjedu.pojo.dto.RegisterDTO;
 import com.zjedu.pojo.dto.ResetPasswordDTO;
 import com.zjedu.pojo.entity.user.Role;
-import com.zjedu.pojo.entity.user.UserInfo;
 import com.zjedu.pojo.vo.*;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
@@ -104,16 +101,6 @@ public class PassportController
     @Resource
     private UserInfoEntityService userInfoEntityService;
 
-    //TODO 不知这个接口是否有存在的必要
-    @PutMapping("/update-password")
-    public boolean updatePassword(String uid, String newPassword)
-    {
-        UpdateWrapper<UserInfo> updateWrapper = new UpdateWrapper<>();
-        updateWrapper.set("password", SecureUtil.md5(newPassword))
-                .eq("uuid", uid);
-        return userInfoEntityService.update(updateWrapper);
-    }
-
     @GetMapping("/get-user-uid-list")
     public List<String> getSuperAdminUidList()
     {
@@ -169,8 +156,8 @@ public class PassportController
     }
 
     @GetMapping("/get-user-list")
-    public Page<UserRolesVO> getUserList(@RequestParam(value = "limit", required = false) int limit,
-                                         @RequestParam(value = "currentPage", required = false) int currentPage,
+    public Page<UserRolesVO> getUserList(@RequestParam(value = "limit", required = false,defaultValue = "10") int limit,
+                                         @RequestParam(value = "currentPage", required = false,defaultValue = "1") int currentPage,
                                          @RequestParam(value = "keyword", required = false) String keyword,
                                          @RequestParam(value = "onlyAdmin", defaultValue = "false") Boolean onlyAdmin)
     {

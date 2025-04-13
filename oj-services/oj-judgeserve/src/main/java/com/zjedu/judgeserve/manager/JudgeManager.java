@@ -161,7 +161,6 @@ public class JudgeManager
             throw new StatusNotFoundException("此提交数据不存在！");
         }
 
-        //TODO:剩下的代码未测试调通
         String userId = request.getHeader("X-User-Id");
         UserRolesVO userRolesVo = null;
         boolean isRoot = false;
@@ -425,9 +424,13 @@ public class JudgeManager
         }
 
         QueryWrapper<Judge> judgeQueryWrapper = new QueryWrapper<>();
-        judgeQueryWrapper.eq("submit_id", "uid")
+        judgeQueryWrapper.select("submit_id", "uid")
                 .eq("submit_id", judge.getSubmitId());
         Judge judgeInfo = judgeEntityService.getOne(judgeQueryWrapper, false);
+        if (judgeInfo == null)
+        {
+            throw new StatusFailException("您未提交过该代码");
+        }
 
         // 需要获取一下该token对应用户的数据
         //从请求头获取用户ID
@@ -442,12 +445,10 @@ public class JudgeManager
             throw new StatusForbiddenException("对不起，您不能修改他人的代码分享权限！");
         }
 
-        boolean shareBool = judge.getShare() != null && judge.getShare(); // 避免空值
-        int shareInt = shareBool ? 1 : 0; // MySQL tinyint 只能用0或1
         UpdateWrapper<Judge> updateWrapper = new UpdateWrapper<>();
-        updateWrapper.set("share", shareInt)
+        updateWrapper.set("share", judge.getShare())
                 .eq("submit_id", judge.getSubmitId());
-        boolean isOk = judgeEntityService.update(judgeQueryWrapper);
+        boolean isOk = judgeEntityService.update(updateWrapper);
 
 
         if (!isOk)

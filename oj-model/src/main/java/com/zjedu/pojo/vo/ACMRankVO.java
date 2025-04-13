@@ -44,6 +44,4 @@ public class ACMRankVO implements Serializable
     @Schema(description = "总通过数")
     private Integer ac;
 
-    @Schema(description = "cf得分")
-    private Integer rating;
 }
