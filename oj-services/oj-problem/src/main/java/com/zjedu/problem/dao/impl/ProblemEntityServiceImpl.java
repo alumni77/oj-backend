@@ -85,7 +85,7 @@ public class ProblemEntityServiceImpl extends ServiceImpl<ProblemMapper, Problem
                                           List<Long> tid, String oj)
     {
         //新建分页
-        Page<ProblemVO> page = new Page<>(currentPage, limit);
+        Page<ProblemVO> page = new Page<>(currentPage, limit,true);
         Integer tagListSize = null;
         if (tid != null)
         {
