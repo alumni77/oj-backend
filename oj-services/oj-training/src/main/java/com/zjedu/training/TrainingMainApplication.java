@@ -4,6 +4,7 @@ import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
+import org.springframework.context.annotation.ComponentScan;
 
 /**
  * @Author Zhong
@@ -16,6 +17,7 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 //@EnableFeignClients
 @SpringBootApplication
 @MapperScan(basePackages = {"com.zjedu.training.mapper"})
+@ComponentScan(basePackages = "com.zjedu")
 public class TrainingMainApplication
 {
     public static void main(String[] args)

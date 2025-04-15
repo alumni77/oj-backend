@@ -64,7 +64,6 @@ public class JwtGatewayFilter implements GlobalFilter, Ordered
             "/api/judge/get-judge-by-id",
             "/api/judge/get-problem-by-id",
             // JudgeServe服务的匿名接口
-            "/api/judgeserve/get-submission-list",
             "/api/judgeserve/get-submission-detail",
             "/api/judgeserve/check-submissions-status",
             "/api/judgeserve/get-all-case-result",

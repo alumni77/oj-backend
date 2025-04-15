@@ -254,7 +254,6 @@ public class CommonManager
     public List<TrainingCategory> getTrainingCategory()
     {
         QueryWrapper<TrainingCategory> trainingCategoryQueryWrapper = new QueryWrapper<>();
-        trainingCategoryQueryWrapper.isNull("gid");
         return trainingCategoryEntityService.list(trainingCategoryQueryWrapper);
     }
 }
