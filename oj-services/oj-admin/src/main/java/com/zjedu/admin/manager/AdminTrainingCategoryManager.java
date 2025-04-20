@@ -12,6 +12,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 /**
  * @Author Zhong
  * @Create 2025/4/2 20:52
@@ -93,6 +95,21 @@ public class AdminTrainingCategoryManager
         UserRolesVO userRolesVo = passportFeignClient.getUserRoles(userId, "");
         log.info("[{}],[{}],categoryId:[{}],operatorUid:[{}],operatorUsername:[{}]",
                 "Admin_Training", "Delete_Category", id, userRolesVo.getUid(), userRolesVo.getUsername());
+    }
+
+    public List<TrainingCategory> getTrainingCategoryList() throws StatusForbiddenException, StatusFailException
+    {
+        boolean b = checkAuthority();
+        if (!b)
+        {
+            throw new StatusForbiddenException("没有权限查看分类");
+        }
+        List<TrainingCategory> trainingCategories = trainingCategoryEntityService.getBaseMapper().selectList(null);
+        if (trainingCategories == null)
+        {
+            throw new StatusFailException("获取分类列表失败！");
+        }
+        return trainingCategories;
     }
 
     private boolean checkAuthority()

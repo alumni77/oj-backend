@@ -10,6 +10,8 @@ import com.zjedu.pojo.entity.training.TrainingCategory;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 /**
  * @Author Zhong
  * @Create 2025/4/2 20:52
@@ -61,6 +63,21 @@ public class AdminTrainingCategoryServiceImpl implements AdminTrainingCategorySe
         {
             adminTrainingCategoryManager.deleteTrainingCategory(id);
             return CommonResult.successResponse();
+        } catch (StatusFailException e)
+        {
+            return CommonResult.errorResponse(e.getMessage());
+        } catch (StatusForbiddenException e)
+        {
+            return CommonResult.errorResponse(e.getMessage(), ResultStatus.FORBIDDEN);
+        }
+    }
+
+    @Override
+    public CommonResult<List<TrainingCategory>> getTrainingCategoryList()
+    {
+        try
+        {
+            return CommonResult.successResponse(adminTrainingCategoryManager.getTrainingCategoryList());
         } catch (StatusFailException e)
         {
             return CommonResult.errorResponse(e.getMessage());

@@ -6,6 +6,8 @@ import com.zjedu.pojo.entity.training.TrainingCategory;
 import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 /**
  * @Author Zhong
  * @Create 2025/4/2 20:50
@@ -19,6 +21,12 @@ public class AdminTrainingCategoryController
 {
     @Resource
     private AdminTrainingCategoryService adminTrainingCategoryService;
+
+    @GetMapping
+    private  CommonResult<List<TrainingCategory>> getTrainingCategoryList()
+    {
+        return adminTrainingCategoryService.getTrainingCategoryList();
+    }
 
     @PostMapping
     public CommonResult<TrainingCategory> addTrainingCategory(@RequestBody TrainingCategory trainingCategory)

@@ -1,13 +1,10 @@
 package com.zjedu.pojo.dto;
 
-import com.zjedu.pojo.entity.problem.CodeTemplate;
-import com.zjedu.pojo.entity.problem.Language;
-import com.zjedu.pojo.entity.problem.Problem;
-import com.zjedu.pojo.entity.problem.Tag;
-import com.zjedu.pojo.entity.problem.ProblemCase;
+import com.zjedu.pojo.entity.problem.*;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -41,5 +38,26 @@ public class ProblemDTO
     private List<Tag> tags;
 
     private List<CodeTemplate> codeTemplates;
+
+    public List<Tag> getTags() {
+        if (tags == null) {
+            tags = new ArrayList<>();
+        }
+        return tags;
+    }
+
+    public List<Language> getLanguages() {
+        if (languages == null) {
+            languages = new ArrayList<>();
+        }
+        return languages;
+    }
+
+    public List<CodeTemplate> getCodeTemplates() {
+        if (codeTemplates == null) {
+            codeTemplates = new ArrayList<>();
+        }
+        return codeTemplates;
+    }
 
 }

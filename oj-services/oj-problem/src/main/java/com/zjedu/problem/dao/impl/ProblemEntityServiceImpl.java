@@ -483,13 +483,37 @@ public class ProblemEntityServiceImpl extends ServiceImpl<ProblemMapper, Problem
         /**
          * 处理code_template表
          */
+        // 处理code_template表
         boolean deleteTemplate = true;
         boolean saveOrUpdateCodeTemplate = true;
-        for (CodeTemplate codeTemplate : problemDto.getCodeTemplates())
-        {
-            if (codeTemplate.getId() != null)
-            {
-                mapOldPCT.put(codeTemplate.getId(), 1);
+
+        List<CodeTemplate> codeTemplates = problemDto.getCodeTemplates();
+        if (codeTemplates != null) {
+            for (CodeTemplate codeTemplate : codeTemplates) {
+                if (codeTemplate.getId() != null) {
+                    mapOldPCT.put(codeTemplate.getId(), 1);
+                }
+            }
+
+            // 需要删除的模板
+            List<Integer> needDeleteCTs = new LinkedList<>();
+            for (Integer key : mapOldPCT.keySet()) {
+                if (mapOldPCT.get(key) == 0) {
+                    needDeleteCTs.add(key);
+                }
+            }
+
+            if (needDeleteCTs.size() > 0) {
+                deleteTemplate = codeTemplateEntityService.removeByIds(needDeleteCTs);
+            }
+
+            if (codeTemplates.size() > 0) {
+                saveOrUpdateCodeTemplate = codeTemplateEntityService.saveOrUpdateBatch(codeTemplates);
+            }
+        } else {
+            // 如果代码模板为空，可能需要清空所有现有模板
+            if (!mapOldPCT.isEmpty()) {
+                deleteTemplate = codeTemplateEntityService.removeByIds(new ArrayList<>(mapOldPCT.keySet()));
             }
         }
         // 需要删除的模板

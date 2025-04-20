@@ -32,6 +32,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -202,6 +203,11 @@ public class AdminProblemManager
             throw new StatusForbiddenException("没有权限进行更新题目操作！");
         }
 
+        // 确保所有集合不为null
+        if (problemDto.getSamples() == null) {
+            problemDto.setSamples(new ArrayList<>());
+        }
+
         problemValidator.validateProblemUpdate(problemDto.getProblem());
 
         // 获取当前登录的用户
@@ -236,7 +242,7 @@ public class AdminProblemManager
 
         } else
         {
-            throw new StatusFailException("修改失败");
+            throw new StatusFailException(" 修改失败");
         }
     }
 
