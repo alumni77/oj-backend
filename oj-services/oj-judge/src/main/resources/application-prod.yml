@@ -1,0 +1,36 @@
+# Port 配置
+SERVER_PORT: 8020
+
+# Path 配置
+CONTEXT_PATH: /api/judge
+
+# Nacos 配置文件名
+NACOS_CONFIG_URL: 120.26.120.98:8848
+NACOS_CONFIG_USERNAME: nacos
+NACOS_CONFIG_PASSWORD: nacos
+NACOS_CONFIG_GROUP: DEFAULT_GROUP
+NACOS_SWITCH_CONFIG: switch-config.yaml
+NACOS_WEB_CONFIG: web-config.yaml
+
+# MySQL 配置
+MYSQL_HOST: 120.26.120.98
+MYSQL_PORT: 3306
+MYSQL_USERNAME: root
+MYSQL_PASSWORD: 123456
+MYSQL_DATABASE: hoj
+
+# Redis 配置
+REDIS_HOST: localhost
+REDIS_PORT: 6379
+REDIS_PASSWORD: 123456
+
+# 判题服务器配置
+oj-judge-server:
+  name: "OJ-JudgeServer"  # 判题服务器名称
+  max-task-num: -1  # 最大任务数量，-1表示使用(CPU核心数+1)
+  remote-judge:
+    open: false  # 禁用远程判题功能
+    max-task-num: -1  # 远程判题最大任务数，不使用时可忽略
+oj:
+  judge:
+    token: judge_token
