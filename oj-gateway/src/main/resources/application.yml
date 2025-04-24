@@ -4,7 +4,7 @@ server:
 spring:
   profiles:
     include: route
-    active: prod
+    active: dev
   application:
     name: oj-gateway
   cloud:
