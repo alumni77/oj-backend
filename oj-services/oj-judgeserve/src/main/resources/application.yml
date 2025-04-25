@@ -2,7 +2,7 @@ spring:
   application:
     name: oj-judgeserve
   profiles:
-    active: prod
+    active: dev
   # 支持 swagger3
   mvc:
     pathmatch:
@@ -11,7 +11,7 @@ spring:
   # 数据库基础配置
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://${MYSQL_HOST}:${MYSQL_PORT}/${MYSQL_DATABASE}?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai
+    url: jdbc:mysql://${MYSQL_HOST}:${MYSQL_PORT}/hoj?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai
     username: ${MYSQL_USERNAME}
     password: ${MYSQL_PASSWORD}
     hikari:

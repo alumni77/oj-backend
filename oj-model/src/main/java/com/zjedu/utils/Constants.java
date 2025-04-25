@@ -239,29 +239,29 @@ public class Constants
     {
 
 
-        USER_AVATAR_FOLDER("/root/hoj/file/avatar"),
+        USER_AVATAR_FOLDER("D:/DeskTop/hoj/file/avatar"),
 
-        GROUP_AVATAR_FOLDER("/root/hoj/file/avatar/group"),
+        GROUP_AVATAR_FOLDER("D:/DeskTop/hoj/file/avatar/group"),
 
-        HOME_CAROUSEL_FOLDER("/root/hoj/file/carousel"),
+        HOME_CAROUSEL_FOLDER("D:/DeskTop/hoj/file/carousel"),
 
-        MARKDOWN_FILE_FOLDER("/root/hoj/file/md"),
+        MARKDOWN_FILE_FOLDER("D:/DeskTop/hoj/file/md"),
 
-        PROBLEM_FILE_FOLDER("/root/hoj/file/problem"),
+        PROBLEM_FILE_FOLDER("D:/DeskTop/hoj/file/problem"),
 
-        CONTEST_TEXT_PRINT_FOLDER("/root/hoj/file/contest_print"),
+        CONTEST_TEXT_PRINT_FOLDER("D:/DeskTop/hoj/file/contest_print"),
 
         IMG_API("/api/public/img/"),
 
         FILE_API("/api/public/file/"),
 
-        TESTCASE_TMP_FOLDER("/root/hoj/file/zip"),
+        TESTCASE_TMP_FOLDER("D:/DeskTop/hoj/file/zip"),
 
-        TESTCASE_BASE_FOLDER("/root/hoj/testcase"),
+        TESTCASE_BASE_FOLDER("D:/DeskTop/hoj/testcase"),
 
-        FILE_DOWNLOAD_TMP_FOLDER("/root/hoj/file/zip/download"),
+        FILE_DOWNLOAD_TMP_FOLDER("D:/DeskTop/hoj/file/zip/download"),
 
-        CONTEST_AC_SUBMISSION_TMP_FOLDER("/root/hoj/file/zip/contest_ac");
+        CONTEST_AC_SUBMISSION_TMP_FOLDER("D:/DeskTop/hoj/file/zip/contest_ac");
 
         private final String path;
 

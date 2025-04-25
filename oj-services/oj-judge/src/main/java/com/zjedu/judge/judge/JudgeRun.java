@@ -20,8 +20,6 @@ import jakarta.annotation.Resource;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
@@ -155,11 +153,11 @@ public class JudgeRun
             // 输出文件名
             final String outputFileName = testcase.getStr("outputName");
             // 题目数据的输入文件的路径
-            final String testCaseInputPath = Paths.get(testCasesDir+File.separator + inputFileName).toString().replace("\\", "/");
-//            final String testCaseInputPath = testCasesDir + File.separator + inputFileName;
+//            final String testCaseInputPath = Paths.get(testCasesDir+File.separator + inputFileName).toString().replace("\\", "/");
+            final String testCaseInputPath = testCasesDir + File.separator + inputFileName;
             // 题目数据的输出文件的路径
-            final String testCaseOutputPath = Paths.get(testCasesDir+File.separator + outputFileName).toString().replace("\\", "/");
-//            final String testCaseOutputPath = testCasesDir + File.separator + outputFileName;
+//            final String testCaseOutputPath = Paths.get(testCasesDir+File.separator + outputFileName).toString().replace("\\", "/");
+            final String testCaseOutputPath = testCasesDir + File.separator + outputFileName;
             // 数据库表的测试样例id
             final Long caseId = testcase.getLong("caseId", null);
             // 该测试点的满分

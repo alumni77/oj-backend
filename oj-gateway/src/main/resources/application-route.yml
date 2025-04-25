@@ -11,7 +11,7 @@ spring:
           predicates:
             - Path=/api/account/**
         - id: oj-judge
-          uri: http://47.98.112.208:8020
+          uri: lb://oj-judge
           predicates:
             - Path=/api/judge/**
         - id: oj-judgeserve
@@ -31,7 +31,7 @@ spring:
           predicates:
             - Path=/api/training/**
         - id: oj-file
-          uri: http://47.98.112.208:8070
+          uri: lb://oj-file
           predicates:
             - Path=/api/file/**
         - id: oj-admin
@@ -41,7 +41,7 @@ spring:
 
         # 添加以下API文档路由
         - id: oj-passport-docs
-          uri: http://47.98.112.208:8020
+          uri: lb://oj-passport
           predicates:
             - Path=/api/passport/v3/api-docs/**
           filters:
@@ -83,7 +83,7 @@ spring:
           filters:
             - StripPrefix=1
         - id: oj-file-docs
-          uri: http://47.98.112.208:8070
+          uri: lb://oj-file
           predicates:
             - Path=/api/file/v3/api-docs/**
           filters:
