@@ -65,8 +65,6 @@ public class JudgeServiceImpl implements JudgeService
             return;
         }
 
-        // TODO 后续的判题操作未调通,Context的相关方法为调通
-
         // 进行判题操作
         QueryWrapper<Problem> problemQueryWrapper = new QueryWrapper<>();
         problemQueryWrapper.eq("id", judge.getPid());

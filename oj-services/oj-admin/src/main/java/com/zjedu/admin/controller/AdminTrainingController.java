@@ -80,7 +80,6 @@ public class AdminTrainingController
         return adminTrainingProblemService.getProblemList(limit, currentPage, keyword, queryExisted, tid);
     }
 
-    //TODO: 为测试下面的接口
     @PutMapping("/problem")
     public CommonResult<Void> updateProblem(@RequestBody TrainingProblem trainingProblem)
     {

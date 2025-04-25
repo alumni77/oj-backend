@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam;
  * @Description
  */
 
-@FeignClient(value = "oj-problem", path = "/api/problem", fallback = ProblemFeignClientFallback.class)
+@FeignClient(value = "oj-problem",url = "http://121.40.127.160:8040", path = "/api/problem", fallback = ProblemFeignClientFallback.class)
 public interface ProblemFeignClient
 {
     @PostMapping("/admin-add-problem")

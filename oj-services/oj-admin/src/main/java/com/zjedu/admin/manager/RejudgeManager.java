@@ -51,7 +51,6 @@ public class RejudgeManager
     @Resource
     private HttpServletRequest request;
 
-    //TODO:对权限进行选择，权限介入到题目管理员还是admin
     public Judge rejudge(Long submitId) throws StatusFailException
     {
         boolean b = checkAuthority();

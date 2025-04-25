@@ -117,7 +117,7 @@ public class Dispatcher
                 {
                     checkResult(result, submitId);
                     //TODO 自定义负载均衡策略
-//                    releaseJudgeServer(judgeServer.getId());
+                    releaseJudgeServer(judgeServer.getId());
                     releaseTaskThread(taskKey);
                 }
             }

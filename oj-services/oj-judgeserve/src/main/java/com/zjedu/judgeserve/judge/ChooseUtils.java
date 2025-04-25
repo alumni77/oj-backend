@@ -101,7 +101,6 @@ public class ChooseUtils
     private List<Instance> getInstances(String serviceId)
     {
         // 获取服务发现的相关API
-        //TODO 'namingServiceInstance()' 已弃用
         NamingService namingService = discoveryProperties.namingServiceInstance();
         try
         {

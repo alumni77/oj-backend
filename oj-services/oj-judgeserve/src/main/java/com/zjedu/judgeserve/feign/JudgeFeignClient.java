@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RequestParam;
  * @Description
  */
 
-@FeignClient(value = "oj-judge", path = "/api/judge",fallback = JudgeFeignClientFallback.class)
+@FeignClient(value = "oj-judge", url = "http://47.98.112.208:8020",path = "/api/judge",fallback = JudgeFeignClientFallback.class)
 public interface JudgeFeignClient
 {
     // 判题机调用

@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
  * @Description
  */
 
-@FeignClient(value = "oj-passport", url = "https://4e05-98-98-87-173.ngrok-free.app",path = "/api/passport", fallback = PassportFeignClientFallback.class)
+@FeignClient(value = "oj-passport", url = "http://121.40.127.160:8000",path = "/api/passport", fallback = PassportFeignClientFallback.class)
 public interface PassportFeignClient
 {
     @GetMapping("/get-user-role")

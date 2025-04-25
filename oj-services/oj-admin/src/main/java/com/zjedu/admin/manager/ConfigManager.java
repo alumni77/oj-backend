@@ -195,7 +195,15 @@ public class ConfigManager
         {
             try
             {
-                String result = restTemplate.getForObject(serviceInstance.getUri() + "/api/judge/get-sys-config", String.class);
+                String uri = "http://192.168.88.101:8020";
+                String result = "";
+                if (serviceInstance.getUri().toString().equals(uri))
+                {
+                    result = restTemplate.getForObject("http://47.98.112.208:8020/api/judge/get-sys-config", String.class);
+                } else
+                {
+                    result = restTemplate.getForObject(serviceInstance.getUri() + "/api/judge/get-sys-config", String.class);
+                }
                 JSONObject jsonObject = JSONUtil.parseObj(result, false);
                 jsonObject.set("service", serviceInstance);
                 serviceInfoList.add(jsonObject);
